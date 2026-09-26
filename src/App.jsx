@@ -1,40 +1,36 @@
 import React, { useState } from 'react';
-import Welcome from './Welcome.jsx';
-import Login from './Login.jsx';
-import Home from './Home.jsx';
-import Biblia from './Biblia.jsx';
-import PlanoDeLeitura from './PlanoDeLeitura.jsx';
-import Explorar from './Explorar.jsx';
-import Configuracao from './Configuracao.jsx';
-import PainelAdministrativo from './PainelAdministrativo.jsx';
+import Home from './Home';
+import Explorar from './Explorar';
+import Biblia from './Biblia';
+import Configuracao from './Configuracao';
+import JejumDaniel from './JejumDaniel';
+import RotinaPrimeiroAmor from './RotinaPrimeiroAmor';
 
 export default function App() {
-  const [fluxo, setFluxo] = useState('login');
-  const [abaAtiva, setAbaAtiva] = useState('home');
+  const [paginaAtual, setPaginaAtual] = useState('home');
 
-  if (fluxo === 'login') {
-    return <Login onLoginSuccess={() => setFluxo('welcome')} />;
-  }
-
-  if (fluxo === 'welcome') {
-    return <Welcome onContinue={() => setFluxo('main')} />;
-  }
-
-  const renderizarTelaAtiva = () => {
-    switch (abaAtiva) {
-      case 'home': return <Home onNavigate={setAbaAtiva} />;
-      case 'biblia': return <Biblia onNavigate={setAbaAtiva} />;
-      case 'planos': return <PlanoDeLeitura onNavigate={setAbaAtiva} />;
-      case 'explorar': return <Explorar onNavigate={setAbaAtiva} />;
-      case 'config': return <Configuracao onNavigate={setAbaAtiva} />;
-      case 'admin': return <PainelAdministrativo onNavigate={setAbaAtiva} />;
-      default: return <Home onNavigate={setAbaAtiva} />;
+  const renderizarTela = () => {
+    switch (paginaAtual) {
+      case 'home':
+        return <Home onNavigate={setPaginaAtual} />;
+      case 'explorar':
+        return <Explorar onNavigate={setPaginaAtual} />;
+      case 'biblia':
+        return <Biblia onNavigate={setPaginaAtual} />;
+      case 'configuracao':
+        return <Configuracao onNavigate={setPaginaAtual} />;
+      case 'jejum':
+        return <JejumDaniel onNavigate={setPaginaAtual} />;
+      case 'rotina':
+        return <RotinaPrimeiroAmor onNavigate={setPaginaAtual} />;
+      default:
+        return <Home onNavigate={setPaginaAtual} />;
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#020617', overflowY: 'auto' }}>
-      {renderizarTelaAtiva()}
+    <div className="w-full min-h-screen bg-slate-950 font-sans">
+      {renderizarTela()}
     </div>
   );
 }

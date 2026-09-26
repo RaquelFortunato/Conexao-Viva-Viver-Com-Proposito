@@ -117,12 +117,12 @@ export default function Explorar({ onNavigate }) {
           </div>
         </div>
 
-        {/* 3. Jornadas & Hábitos Diários */}
+        {/* 3. Jornadas & Hábitos Diários (Agora com Links Funcionais!) */}
         <div className="space-y-2">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Jornadas & Hábitos Diários</h2>
           <div className="grid grid-cols-2 gap-2">
             <div 
-              onClick={() => abrirEmBreve('Jejum de Daniel')}
+              onClick={() => onNavigate && onNavigate('jejum')}
               className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition cursor-pointer"
             >
               <span className="text-amber-400 text-base">🌾</span>
@@ -131,7 +131,7 @@ export default function Explorar({ onNavigate }) {
               <p className="text-[10px] text-slate-400 leading-tight">Guia espiritual, receitas e cronograma de 21 dias.</p>
             </div>
             <div 
-              onClick={() => abrirEmBreve('Rotina Primeiro Amor')}
+              onClick={() => onNavigate && onNavigate('rotina')}
               className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition cursor-pointer"
             >
               <span className="text-amber-400 text-base">☀️</span>
