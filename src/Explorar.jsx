@@ -1,157 +1,262 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export default function ExploreScreen() {
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
-
-  const categories = ['Todos', 'Áudios & Podcasts', 'Devocionais', 'Família & Relacionamentos', 'Orações'];
-
-  const items = [
-    {
-      id: 1,
-      title: "Como ouvir a voz de Deus no dia a dia",
-      category: "Áudios & Podcasts",
-      duration: "18 min",
-      author: "Raquel Fortunato",
-      imageBg: "from-primary/20 to-primary/5",
-      icon: "headphones"
-    },
-    {
-      id: 2,
-      title: "Fortalecendo o casamento através da Palavra",
-      category: "Família & Relacionamentos",
-      duration: "12 min",
-      author: "Raquel Fortunato",
-      imageBg: "from-secondary/20 to-secondary/5",
-      icon: "favorite"
-    },
-    {
-      id: 3,
-      title: "O poder da oração de intercessão",
-      category: "Orações",
-      duration: "15 min",
-      author: "Conexão Viva",
-      imageBg: "from-tertiary/20 to-tertiary/5",
-      icon: "auto_awesome"
-    },
-    {
-      id: 4,
-      title: "Ansiedade: Encontrando paz nas promessas",
-      category: "Devocionais",
-      duration: "10 min",
-      author: "Raquel Fortunato",
-      imageBg: "from-primary-container/40 to-surface-container",
-      icon: "spa"
-    }
-  ];
-
-  const filteredItems = selectedCategory === 'Todos' 
-    ? items 
-    : items.filter(item => item.category === selectedCategory);
-
+export default function Explorar({ onNavigate }) {
   return (
-    <div className="bg-surface min-h-screen text-on-surface flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
-      {/* Header Fixo Topo */}
-      <header className="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl pt-safe border-b border-surface-container-highest/60">
-        <div className="h-16 px-margin flex items-center justify-between">
-          <div className="flex flex-col min-w-0">
-            <span className="font-label-md text-label-md text-primary uppercase tracking-wide">Descubra Conteúdos</span>
-            <h1 className="font-headline-sm text-headline-sm text-on-surface">Explorar</h1>
-          </div>
-          <div className="relative flex items-center w-40 sm:w-56">
-            <span className="absolute left-3 material-symbols-outlined text-[18px] text-on-surface-variant">search</span>
-            <input 
-              type="text" 
-              placeholder="Buscar..." 
-              className="w-full h-9 pl-9 pr-3 rounded-xl bg-surface-container text-on-surface font-caption text-caption border border-surface-container-highest focus:border-primary focus:outline-none transition-colors"
-            />
-          </div>
-        </div>
-      </header>
-
-      {/* Conteúdo Principal */}
-      <main className="flex-1 flex flex-col relative w-full pt-20 pb-28 bg-surface px-margin gap-space-md">
+    <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
+      
+      {/* Container Principal Centralizado */}
+      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
-        {/* Banner em Destaque */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-container/50 via-surface-container to-surface-container p-space-md shadow-sm border border-primary/20">
-          <div className="flex items-center gap-2 mb-2 text-primary">
-            <span className="material-symbols-outlined text-[18px]">podcasts</span>
-            <span className="font-label-md text-label-md uppercase tracking-wider font-semibold">Série Especial</span>
+        {/* Cabeçalho Padronizado */}
+        <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner">
+          <div>
+            <h1 className="text-sm font-bold text-white flex items-center gap-1.5">
+              <span>Conexão Viva</span>
+              <span className="text-amber-400 text-xs font-normal">• Viver com Propósito</span>
+            </h1>
+            <p className="text-base font-bold text-amber-400 mt-0.5">Explorar</p>
           </div>
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-2">Mulheres Segundo o Coração de Deus</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-4">
-            Ouça agora os episódios completos da conferência exclusiva com Raquel Fortunato.
-          </p>
-          <button className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-xl font-label-md text-label-md shadow-sm hover:brightness-105 transition-all">
-            <span className="material-symbols-outlined text-[18px]">play_arrow</span>
-            <span>Ouvir Episódios</span>
-          </button>
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
+            RF
+          </div>
         </div>
 
-        {/* Filtros de Categoria (Horizontal Scroll) */}
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-xl font-label-md text-label-md whitespace-nowrap transition-all shadow-sm ${selectedCategory === cat ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'}`}
-            >
-              {cat}
+        {/* 1. Caixinha de Promessas */}
+        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">✨ Diário da Fé</span>
+            <span className="text-[10px] text-slate-400">🟡 Promessa de Hoje</span>
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white">Caixinha de Promessas</h2>
+            <p className="text-[11px] text-slate-400 mt-0.5">Toque para retirar sua palavra de consolo e força para hoje.</p>
+          </div>
+          <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400 text-base">🎁</span>
+              <div>
+                <p className="text-xs font-bold text-white">Tirar Promessa</p>
+                <p className="text-[10px] text-slate-400 truncate max-w-[180px]">"O Senhor é o meu pastor..."</p>
+              </div>
+            </div>
+            <button className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer">
+              Abrir
             </button>
-          ))}
+          </div>
         </div>
 
-        {/* Grade / Lista de Conteúdos */}
-        <div className="flex flex-col gap-3">
-          {filteredItems.map((item) => (
-            <div key={item.id} className={`flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r ${item.imageBg} bg-surface-container shadow-sm border border-surface-container-highest/60 hover:border-primary/30 transition-all group`}>
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center text-primary flex-shrink-0 group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[24px]">{item.icon}</span>
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="font-caption text-caption text-primary font-semibold uppercase">{item.category}</span>
-                  <h3 className="font-label-lg text-label-lg text-on-surface truncate mt-0.5">{item.title}</h3>
-                  <span className="font-caption text-caption text-on-surface-variant flex items-center gap-2 mt-1">
-                    <span>{item.author}</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-0.5"><span className="material-symbols-outlined text-[14px]">schedule</span> {item.duration}</span>
-                  </span>
+        {/* 2. Medalhas & Conquistas */}
+        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400">⭐</span>
+              <h2 className="text-sm font-bold text-white">Medalhas & Conquistas</h2>
+            </div>
+            <span className="text-[10px] font-semibold text-amber-400">Nível 8 • Discípulo Fiel</span>
+          </div>
+          <div>
+            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Progresso da Semana</span>
+              <span className="text-white font-semibold">18 / 20 Hábitos</span>
+            </div>
+            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div className="bg-amber-400 h-full w-[90%] rounded-full"></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-2 pt-1">
+            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
+              <span className="text-xs">🔥</span>
+              <p className="text-[10px] font-bold text-white mt-1">14 Dias</p>
+              <p className="text-[9px] text-slate-400">Constância</p>
+            </div>
+            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
+              <span className="text-xs">🙏</span>
+              <p className="text-[10px] font-bold text-white mt-1">50 Preces</p>
+              <p className="text-[9px] text-slate-400">Intercessor</p>
+            </div>
+            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
+              <span className="text-xs">📖</span>
+              <p className="text-[10px] font-bold text-white mt-1">30 Cap.</p>
+              <p className="text-[9px] text-slate-400">Leitor Voraz</p>
+            </div>
+            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center opacity-60">
+              <span className="text-xs">🔒</span>
+              <p className="text-[10px] font-bold text-white mt-1">Mestre</p>
+              <p className="text-[9px] text-slate-400">Bloqueado</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Jornadas & Hábitos Diários */}
+        <div className="space-y-2">
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Jornadas & Hábitos Diários</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition">
+              <span className="text-amber-400 text-base">🌾</span>
+              <p className="text-[10px] text-slate-400 uppercase font-semibold">Desintoxicação</p>
+              <h3 className="text-xs font-bold text-white">Jejum de Daniel</h3>
+              <p className="text-[10px] text-slate-400 leading-tight">Guia espiritual, receitas e cronograma de 21 dias.</p>
+            </div>
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition">
+              <span className="text-amber-400 text-base">☀️</span>
+              <p className="text-[10px] text-slate-400 uppercase font-semibold">Devoção</p>
+              <h3 className="text-xs font-bold text-white">Rotina Primeiro Amor</h3>
+              <p className="text-[10px] text-slate-400 leading-tight">Restaure sua intimidade matinal com Deus.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Desafios */}
+        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer">
+          <div className="flex items-center gap-3">
+            <span className="text-amber-400 text-lg p-2 bg-slate-900 rounded-xl border border-slate-800">🎯</span>
+            <div>
+              <p className="text-[10px] text-slate-400 uppercase font-semibold">Desafios</p>
+              <h3 className="text-xs font-bold text-white">Desafio Celeste</h3>
+              <p className="text-[10px] text-slate-400">Metas semanais de oração e atos de bondade.</p>
+            </div>
+          </div>
+          <span className="text-slate-500">›</span>
+        </div>
+
+        {/* 5. Estudo, Louvor & Intimidade */}
+        <div className="space-y-2">
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Estudo, Louvor & Intimidade</h2>
+          
+          <div className="space-y-2">
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer">
+              <div className="flex items-center gap-3">
+                <span className="text-amber-400">🔒</span>
+                <div>
+                  <h3 className="text-xs font-bold text-white">Meu Diário Espiritual 🛡️</h3>
+                  <p className="text-[10px] text-slate-400">Reflexões protegidas com senha ou biometria.</p>
                 </div>
               </div>
-              <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface hover:bg-primary hover:text-on-primary transition-colors flex-shrink-0 ml-3 shadow-sm">
-                <span className="material-symbols-outlined text-[20px]">play_arrow</span>
-              </button>
+              <span className="text-slate-500">›</span>
             </div>
-          ))}
+
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer">
+              <div className="flex items-center gap-3">
+                <span className="text-amber-400">🔍</span>
+                <div>
+                  <h3 className="text-xs font-bold text-white">Concordância Bíblica</h3>
+                  <p className="text-[10px] text-slate-400">Busca temática por palavras, tópicos e versículos.</p>
+                </div>
+              </div>
+              <span className="text-slate-500">›</span>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer">
+              <div className="flex items-center gap-3">
+                <span className="text-amber-400">📖</span>
+                <div>
+                  <h3 className="text-xs font-bold text-white">Fábulas & Ensinamentos</h3>
+                  <p className="text-[10px] text-slate-400">Histórias alegóricas e parábolas contemporâneas.</p>
+                </div>
+              </div>
+              <span className="text-slate-500">›</span>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer">
+              <div className="flex items-center gap-3">
+                <span className="text-amber-400">🎧</span>
+                <div>
+                  <h3 className="text-xs font-bold text-white">Playlists de Músicas</h3>
+                  <p className="text-[10px] text-slate-400">Sons acústicos para oração, vigília e meditação.</p>
+                </div>
+              </div>
+              <span className="text-slate-500">›</span>
+            </div>
+          </div>
         </div>
 
-      </main>
-
-      {/* Navegação Inferior */}
-      <nav className="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-low/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.35)]">
-        <div className="flex justify-around items-center h-16 px-space-xs">
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">home</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Home</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">menu_book</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Bíblia</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">event_available</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Planos</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-primary font-semibold transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>explore</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none text-primary font-semibold">Explorar</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">settings</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Configurações</span>
-          </a>
+        {/* 6. Hinários Completos (5 Coleções Listadas) */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hinários Completos</h2>
+            <span className="text-[10px] text-amber-400 font-semibold">5 Coleções</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
+              <span className="text-amber-400 text-sm">🎶</span>
+              <h3 className="text-xs font-bold text-white">Harpa Cristã</h3>
+              <p className="text-[10px] text-slate-400">640 Hinos com Cifras</p>
+            </div>
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
+              <span className="text-amber-400 text-sm">🎵</span>
+              <h3 className="text-xs font-bold text-white">Cantor Cristão</h3>
+              <p className="text-[10px] text-slate-400">577 Canções Clássicas</p>
+            </div>
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
+              <span className="text-amber-400 text-sm">⛪</span>
+              <h3 className="text-xs font-bold text-white">Cantor para Culto</h3>
+              <p className="text-[10px] text-slate-400">Seleção Especial</p>
+            </div>
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
+              <span className="text-amber-400 text-sm">📜</span>
+              <h3 className="text-xs font-bold text-white">Hinário Evangélico</h3>
+              <p className="text-[10px] text-slate-400">Hinos Tradicionais</p>
+            </div>
+            <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer col-span-2">
+              <span className="text-amber-400 text-sm">✨</span>
+              <h3 className="text-xs font-bold text-white">Hinário Novo Cântico</h3>
+              <p className="text-[10px] text-slate-400">Louvores Contemporâneos e Clássicos</p>
+            </div>
+          </div>
         </div>
-      </nav>
+
+        {/* 7. Mural de Intercessão */}
+        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400">👥</span>
+              <h2 className="text-xs font-bold text-white uppercase tracking-wider">Mural de Intercessão</h2>
+            </div>
+            <button className="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer">
+              + Pedir Oração
+            </button>
+          </div>
+
+          {/* Pedido 1 */}
+          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
+            <div className="flex justify-between items-center text-[10px] text-slate-400">
+              <span className="font-semibold text-slate-300">MG • Maria das Graças</span>
+              <span>Há 12 min</span>
+            </div>
+            <p className="text-[11px] text-slate-300 italic">"Peço orações pela cura e restauração da saúde do meu irmão Lucas no hospital."</p>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px]">
+              <button className="text-amber-400 hover:underline">❤️ Estou Orando (42)</button>
+              <span className="text-slate-400">🔔 Notificação mútua</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Menu de Navegação Interna Consistente */}
+        <div className="pt-4 border-t border-slate-800">
+          <p className="text-[11px] text-amber-400 font-semibold mb-2 text-center tracking-wide">MENU DE NAVEGAÇÃO</p>
+          <div className="grid grid-cols-3 gap-2">
+            <button onClick={() => onNavigate && onNavigate('home')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Home
+            </button>
+            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Bíblia
+            </button>
+            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Planos
+            </button>
+            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-medium transition cursor-pointer text-center">
+              Explorar
+            </button>
+            <button onClick={() => onNavigate && onNavigate('config')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Configurações
+            </button>
+            <button onClick={() => onNavigate && onNavigate('admin')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Admin
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

@@ -1,232 +1,318 @@
 import React, { useState } from 'react';
 
-export default function AdminDashboardScreen() {
-  const [activeTab, setActiveTab] = useState('conteudos');
-  const [dailyQuote, setDailyQuote] = useState("O propósito de Deus na sua vida não depende das circunstâncias, mas da fidelidade dEle.");
-  const [dailyReflection, setDailyReflection] = useState("Caminhar com fé significa dar o primeiro passo mesmo sem ver toda a escada.");
-  const [isSaving, setIsSaving] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-
-  const handleSaveContent = (e) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      setToastMessage("Conteúdos atualizados com sucesso!");
-      setTimeout(() => setToastMessage(""), 3000);
-    }, 800);
-  };
+export default function Admin({ onNavigate }) {
+  const [citacao, setCitacao] = useState('');
+  const [fabula, setFabula] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [filtroMensagens, setFiltroMensagens] = useState('nao_lidas');
 
   return (
-    <div className="bg-surface min-h-screen text-on-surface flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
-      {/* Notificação Toast */}
-      {toastMessage && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-primary text-on-primary px-4 py-2 rounded-xl shadow-lg font-label-md text-label-md animate-bounce">
-          {toastMessage}
-        </div>
-      )}
-
-      {/* Header Fixo Topo (Painel Admin) */}
-      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe border-b border-surface-container-highest">
-        <div className="h-16 px-margin flex items-center justify-between">
-          <div className="flex items-center gap-space-sm min-w-0">
-            <div className="h-9 w-9 rounded-xl bg-primary/15 flex items-center justify-center text-primary flex-shrink-0">
-              <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-label-md text-label-md text-primary truncate leading-tight tracking-wide uppercase">Painel de Gestão</span>
-              <h1 className="font-headline-sm text-headline-sm text-on-surface truncate leading-tight">Raquel Fortunato</h1>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-space-xs flex-shrink-0">
-            <div className="flex items-center gap-2 bg-surface-container-high px-3 py-1.5 rounded-full">
-              <span className="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
-              <span className="font-caption text-caption text-on-surface font-semibold">Admin Ativo</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Conteúdo Principal */}
-      <main className="flex-1 flex flex-col relative w-full pt-20 pb-28 bg-surface px-margin gap-space-lg">
+    <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
+      
+      {/* Container Principal Centralizado */}
+      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
-        {/* Cards de Métricas Rápidas */}
-        <div className="grid grid-cols-3 gap-space-xs">
-          <div className="flex flex-col p-3 rounded-xl bg-surface-container shadow-sm border border-surface-container-highest/50">
-            <span className="font-caption text-caption text-on-surface-variant">Usuários Ativos</span>
-            <span className="font-headline-sm text-headline-sm text-primary font-bold mt-1">1.482</span>
-            <span className="font-caption text-[10px] text-secondary mt-0.5 flex items-center gap-0.5">
-              <span className="material-symbols-outlined text-[12px]">trending_up</span> +12% este mês
-            </span>
+        {/* Cabeçalho do Painel Administrativo */}
+        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner text-center space-y-1">
+          <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+            Acesso Restrito & Exclusivo
+          </span>
+          <h1 className="text-base font-bold text-white mt-1">Gestão Administrativa</h1>
+          <p className="text-xs text-slate-400">Painel de Raquel Fortunato • Conexão Viva</p>
+          
+          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-800/80 mt-3 text-center">
+            <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+              <span className="block text-xs font-bold text-white">7 Módulos</span>
+              <span className="text-[10px] text-slate-400">Ativos</span>
+            </div>
+            <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+              <span className="block text-xs font-bold text-amber-400">8</span>
+              <span className="text-[10px] text-slate-400">Pendentes</span>
+            </div>
+            <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+              <span className="block text-xs font-bold text-white">3.4k</span>
+              <span className="text-[10px] text-slate-400">Vidas</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Conteúdos Diários */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Conteúdos Diários</h2>
+            <span className="text-[10px] text-amber-400 font-semibold">Ciclo de 24h</span>
           </div>
           
-          <div className="flex flex-col p-3 rounded-xl bg-surface-container shadow-sm border border-surface-container-highest/50">
-            <span className="font-caption text-caption text-on-surface-variant">Devocionais</span>
-            <span className="font-headline-sm text-headline-sm text-tertiary font-bold mt-1">365</span>
-            <span className="font-caption text-[10px] text-on-surface-variant mt-0.5">Ano completo</span>
-          </div>
-
-          <div className="flex flex-col p-3 rounded-xl bg-surface-container shadow-sm border border-surface-container-highest/50">
-            <span className="font-caption text-caption text-on-surface-variant">Sugestões</span>
-            <span className="font-headline-sm text-headline-sm text-secondary font-bold mt-1">24</span>
-            <span className="font-caption text-[10px] text-secondary mt-0.5">Pendentes mod.</span>
-          </div>
-        </div>
-
-        {/* Abas de Navegação do Admin */}
-        <div className="flex bg-surface-container p-1 rounded-xl shadow-sm">
-          <button 
-            onClick={() => setActiveTab('conteudos')}
-            className={`flex-1 py-2.5 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 ${activeTab === 'conteudos' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
-          >
-            <span className="material-symbols-outlined text-[18px]">edit_note</span>
-            Conteúdos Diários
-          </button>
-          <button 
-            onClick={() => setActiveTab('config')}
-            className={`flex-1 py-2.5 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 ${activeTab === 'config' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
-          >
-            <span className="material-symbols-outlined text-[18px]">settings_suggest</span>
-            Marca & Ajustes
-          </button>
-        </div>
-
-        {/* Conteúdo da Aba: Gestão de Conteúdos Diários */}
-        {activeTab === 'conteudos' && (
-          <form onSubmit={handleSaveContent} className="flex flex-col gap-space-md">
-            <div className="flex items-center justify-between">
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Publicar / Atualizar Dia</h2>
-              <span className="font-caption text-caption text-primary">Data alvo: Hoje</span>
+          {/* 1. Citação do Dia (Texto) */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>💬 Citação do Dia</span>
+              </h3>
+              <span className="text-[10px] text-amber-400 font-medium">Texto Puro</span>
             </div>
-
-            {/* Citação do Dia */}
-            <div className="flex flex-col gap-1.5">
-              <label className="font-label-lg text-label-lg text-on-surface flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[18px] text-primary">format_quote</span>
-                Citação do Dia
-              </label>
-              <textarea 
-                value={dailyQuote}
-                onChange={(e) => setDailyQuote(e.target.value)}
-                rows="2"
-                className="w-full rounded-xl bg-surface-container p-3 text-on-surface font-body-md text-body-md border border-surface-container-highest focus:border-primary focus:outline-none transition-colors resize-none shadow-inner"
-                placeholder="Digite a citação inspiracional..."
-              />
-            </div>
-
-            {/* Reflexão Bíblica */}
-            <div className="flex flex-col gap-1.5">
-              <label className="font-label-lg text-label-lg text-on-surface flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[18px] text-secondary">menu_book</span>
-                Reflexão / Mensagem Principal
-              </label>
-              <textarea 
-                value={dailyReflection}
-                onChange={(e) => setDailyReflection(e.target.value)}
-                rows="4"
-                className="w-full rounded-xl bg-surface-container p-3 text-on-surface font-body-md text-body-md border border-surface-container-highest focus:border-primary focus:outline-none transition-colors resize-none shadow-inner"
-                placeholder="Digite a reflexão devocional..."
-              />
-            </div>
-
-            {/* Bloco de Módulos Extras (Áudio / Louvor) */}
-            <div className="flex flex-col rounded-xl bg-surface-container p-space-md gap-space-sm border border-surface-container-highest/60">
-              <span className="font-label-lg text-label-lg text-on-surface flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[18px] text-tertiary">library_music</span>
-                Mídia e Áudio Vinculados
-              </span>
-              <div className="flex items-center justify-between bg-surface-container-low p-3 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[20px]">headphones</span>
-                  <span className="font-label-md text-label-md text-on-surface">Playlist do Dia (Áudio Devocional)</span>
-                </div>
-                <button type="button" className="text-primary font-label-md text-label-md hover:underline">Alterar</button>
-              </div>
-            </div>
-
-            {/* Botão de Publicação */}
-            <button 
-              type="submit"
-              disabled={isSaving}
-              className="w-full h-12 flex items-center justify-center gap-space-sm rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:brightness-105 transition-all active:scale-[0.99] mt-2"
-            >
-              <span className="material-symbols-outlined text-[20px]">publish</span>
-              {isSaving ? "Salvando Alterações..." : "Publicar para a Comunidade"}
+            <p className="text-[10px] text-slate-400">Versículo chave e autor bíblico</p>
+            <textarea 
+              rows="3"
+              value={citacao}
+              onChange={(e) => setCitacao(e.target.value)}
+              placeholder="Escreva a citação do dia..."
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
+            />
+            <button className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow">
+              Publicar Citação
             </button>
-          </form>
-        )}
+          </div>
 
-        {/* Conteúdo da Aba: Configurações & Marca */}
-        {activeTab === 'config' && (
-          <div className="flex flex-col gap-space-md">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface">Personalização da Marca</h2>
+          {/* 2. Reflexão do Dia (Vídeo MP4) */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>📖 Reflexão do Dia</span>
+              </h3>
+              <span className="text-[10px] text-blue-400 font-medium">Vídeo MP4</span>
+            </div>
+            <p className="text-[10px] text-slate-400">Vídeo devocional da palavra profunda</p>
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400/60 rounded-xl p-3 bg-slate-900/50 cursor-pointer transition text-center">
+              <span className="text-amber-400 text-base mb-1">📹</span>
+              <span className="text-[11px] font-semibold text-white">Toque para selecionar MP4 do celular</span>
+              <span className="text-[9px] text-slate-400 mt-0.5">Formatos verticais 9:16 até 250MB</span>
+              <input type="file" accept="video/mp4" className="hidden" />
+            </label>
+            <button className="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+              Publicar Reflexão
+            </button>
+          </div>
 
-            <div className="flex flex-col rounded-xl bg-surface-container p-space-md gap-space-md border border-surface-container-highest/60">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="font-label-lg text-label-lg text-on-surface">Logotipo Oficial</span>
-                  <span className="font-caption text-caption text-on-surface-variant">Exibido no topo do app</span>
-                </div>
-                <button type="button" className="px-3 py-1.5 rounded-lg bg-surface-container-high font-label-md text-label-md text-primary hover:bg-surface-bright transition-colors">
-                  Trocar Imagem
-                </button>
-              </div>
+          {/* 3. Mensagem do Dia (Vídeo MP4) */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🕊️ Mensagem do Dia</span>
+              </h3>
+              <span className="text-[10px] text-blue-400 font-medium">Vídeo MP4</span>
+            </div>
+            <p className="text-[10px] text-slate-400">Palavra inspiradora e encorajamento</p>
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400/60 rounded-xl p-3 bg-slate-900/50 cursor-pointer transition text-center">
+              <span className="text-amber-400 text-base mb-1">📹</span>
+              <span className="text-[11px] font-semibold text-white">Toque para selecionar MP4 do celular</span>
+              <span className="text-[9px] text-slate-400 mt-0.5">Formatos verticais 9:16 até 250MB</span>
+              <input type="file" accept="video/mp4" className="hidden" />
+            </label>
+            <button className="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+              Publicar Mensagem
+            </button>
+          </div>
 
-              <div className="h-[1px] bg-surface-container-highest opacity-40"></div>
+          {/* 4. Oração do Dia (Vídeo MP4) */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🙏 Oração do Dia</span>
+              </h3>
+              <span className="text-[10px] text-blue-400 font-medium">Vídeo MP4</span>
+            </div>
+            <p className="text-[10px] text-slate-400">Oração guiada em vídeo com Raquel</p>
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400/60 rounded-xl p-3 bg-slate-900/50 cursor-pointer transition text-center">
+              <span className="text-amber-400 text-base mb-1">📹</span>
+              <span className="text-[11px] font-semibold text-white">Toque para selecionar MP4 do celular</span>
+              <span className="text-[9px] text-slate-400 mt-0.5">Formatos verticais 9:16 até 250MB</span>
+              <input type="file" accept="video/mp4" className="hidden" />
+            </label>
+            <button className="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+              Publicar Oração
+            </button>
+          </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="font-label-lg text-label-lg text-on-surface">Foto da Responsável</span>
-                  <span className="font-caption text-caption text-on-surface-variant">Raquel Fortunato</span>
-                </div>
-                <button type="button" className="px-3 py-1.5 rounded-lg bg-surface-container-high font-label-md text-label-md text-primary hover:bg-surface-bright transition-colors">
-                  Atualizar Foto
-                </button>
-              </div>
+          {/* 5. Louvor do Dia (Vídeo MP4) */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🎶 Louvor do Dia</span>
+              </h3>
+              <span className="text-[10px] text-blue-400 font-medium">Vídeo MP4</span>
+            </div>
+            <p className="text-[10px] text-slate-400">Clipes, hino devocional ou acústico</p>
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400/60 rounded-xl p-3 bg-slate-900/50 cursor-pointer transition text-center">
+              <span className="text-amber-400 text-base mb-1">📹</span>
+              <span className="text-[11px] font-semibold text-white">Toque para selecionar MP4 do celular</span>
+              <span className="text-[9px] text-slate-400 mt-0.5">Formatos verticais 9:16 até 250MB</span>
+              <input type="file" accept="video/mp4" className="hidden" />
+            </label>
+            <button className="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+              Publicar Louvor
+            </button>
+          </div>
 
-              <div className="h-[1px] bg-surface-container-highest opacity-40"></div>
+          {/* 6. Fábulas & Parábolas (Texto) */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>📜 Fábulas & Parábolas</span>
+              </h3>
+              <span className="text-[10px] text-amber-400 font-medium">Texto Puro</span>
+            </div>
+            <p className="text-[10px] text-slate-400">Histórias e lições espirituais com propósito</p>
+            <textarea 
+              rows="3"
+              value={fabula}
+              onChange={(e) => setFabula(e.target.value)}
+              placeholder="Escreva a parábola completa e a aplicação prática..."
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
+            />
+            <button className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow">
+              Publicar Fábula
+            </button>
+          </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="font-label-lg text-label-lg text-on-surface">Senha do Painel Admin</span>
-                  <span className="font-caption text-caption text-on-surface-variant">Segurança de acesso restrito</span>
-                </div>
-                <button type="button" className="px-3 py-1.5 rounded-lg bg-error-container text-on-error-container font-label-md text-label-md hover:brightness-95 transition-colors">
-                  Modificar Senha
-                </button>
-              </div>
+          {/* 7. Playlist de Músicas (Áudio MP3) */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🎧 Playlist de Músicas</span>
+              </h3>
+              <span className="text-[10px] text-emerald-400 font-medium">Áudio MP3</span>
+            </div>
+            <p className="text-[10px] text-slate-400">Gestão e faixas de adoração em áudio</p>
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400/60 rounded-xl p-3 bg-slate-900/50 cursor-pointer transition text-center">
+              <span className="text-amber-400 text-base mb-1">🎵</span>
+              <span className="text-[11px] font-semibold text-white">Toque para selecionar áudio MP3 / WAV</span>
+              <span className="text-[9px] text-slate-400 mt-0.5">Áudios devocionais e faixas de adoração</span>
+              <input type="file" accept="audio/mp3,audio/wav" className="hidden" />
+            </label>
+            <button className="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+              Publicar Áudio
+            </button>
+          </div>
+        </div>
+
+        {/* Configurações & Marca */}
+        <div className="space-y-2 pt-2">
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Configurações & Marca</h2>
+          
+          {/* Mudar Senha do Admin */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <h3 className="text-xs font-bold text-white">Mudar Senha do Admin</h3>
+            <p className="text-[10px] text-slate-400">Proteção e verificação em 2 etapas (2FA)</p>
+            <div className="flex gap-2">
+              <input 
+                type="password"
+                value={novaSenha}
+                onChange={(e) => setNovaSenha(e.target.value)}
+                placeholder="Nova Senha"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+              />
+              <button className="px-3 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer whitespace-nowrap">
+                Atualizar
+              </button>
             </div>
           </div>
-        )}
 
-      </main>
+          {/* Subir Logo */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-bold text-white">Subir Logo do Aplicativo</h3>
+              <p className="text-[10px] text-slate-400">SVG ou PNG alta definição</p>
+            </div>
+            <label className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white cursor-pointer transition">
+              Alterar Logo
+              <input type="file" accept="image/png,image/svg+xml" className="hidden" />
+            </label>
+          </div>
 
-      {/* Navegação Inferior (Fixando a aba Admin ativa) */}
-      <nav className="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-low/95 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.35)] border-t border-surface-container-highest">
-        <div className="flex justify-around items-center h-16 px-space-xs">
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">home</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Home</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">menu_book</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Bíblia</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">event_available</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Planos</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">explore</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Explorar</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-primary font-semibold transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>admin_panel_settings</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none text-primary font-semibold">Admin</span>
-          </a>
+          {/* Foto da Responsável */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full border border-amber-400 bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-xs">
+                RF
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-white">Foto da Responsável</h3>
+                <p className="text-[10px] text-slate-400">Foto oficial de Raquel Fortunato</p>
+              </div>
+            </div>
+            <label className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white cursor-pointer transition">
+              Nova Foto
+              <input type="file" accept="image/*" className="hidden" />
+            </label>
+          </div>
+
+          {/* Extras & Novas Funcionalidades */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-bold text-white">Extras & Novas Funcionalidades</h3>
+              <p className="text-[10px] text-slate-400">Ativar/desativar módulos e criar abas</p>
+            </div>
+            <button className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer">
+              Nova Ferramenta
+            </button>
+          </div>
         </div>
-      </nav>
+
+        {/* Mensagens & Sugestões */}
+        <div className="space-y-2 pt-2">
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Mensagens & Sugestões</h2>
+          
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-3">
+            <div className="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-center">
+              <button 
+                onClick={() => setFiltroMensagens('nao_lidas')}
+                className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'nao_lidas' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                Não Lidas
+              </button>
+              <button 
+                onClick={() => setFiltroMensagens('lidas')}
+                className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'lidas' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                Lidas
+              </button>
+              <button 
+                onClick={() => setFiltroMensagens('escondidas')}
+                className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'escondidas' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                Escondidas
+              </button>
+              <button 
+                onClick={() => setFiltroMensagens('aguardando')}
+                className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'aguardando' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                Aguardando
+              </button>
+            </div>
+
+            <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-xl text-center text-slate-400 text-xs">
+              Nenhuma mensagem pendente no momento.
+            </div>
+          </div>
+        </div>
+
+        {/* Menu de Navegação Interna Consistente */}
+        <div className="pt-4 border-t border-slate-800">
+          <p className="text-[11px] text-amber-400 font-semibold mb-2 text-center tracking-wide">MENU DE NAVEGAÇÃO</p>
+          <div className="grid grid-cols-3 gap-2">
+            <button onClick={() => onNavigate && onNavigate('home')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Home
+            </button>
+            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Bíblia
+            </button>
+            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Planos
+            </button>
+            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Explorar
+            </button>
+            <button onClick={() => onNavigate && onNavigate('config')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Configurações
+            </button>
+            <button onClick={() => onNavigate && onNavigate('admin')} className="p-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-medium transition cursor-pointer text-center">
+              Admin
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

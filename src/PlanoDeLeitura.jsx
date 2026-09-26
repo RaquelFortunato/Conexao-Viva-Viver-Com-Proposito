@@ -1,147 +1,170 @@
 import React, { useState } from 'react';
 
-export default function ReadingPlansScreen() {
-  const [activeTab, setActiveTab] = useState('meus');
-
-  const plans = [
-    {
-      id: 1,
-      title: "Viver com Propósito em 30 Dias",
-      category: "Jornada Diária",
-      progress: 68,
-      currentDay: 21,
-      totalDays: 30,
-      imageBg: "from-primary/20 to-primary/5",
-      isJoined: true
-    },
-    {
-      id: 2,
-      title: "A Armadura de Deus na Prática",
-      category: "Batalha Espiritual",
-      progress: 0,
-      currentDay: 1,
-      totalDays: 14,
-      imageBg: "from-secondary/20 to-secondary/5",
-      isJoined: false
-    },
-    {
-      id: 3,
-      title: "A Sabedoria de Provérbios",
-      category: "Sabedoria & Família",
-      progress: 15,
-      currentDay: 5,
-      totalDays: 31,
-      imageBg: "from-tertiary/20 to-tertiary/5",
-      isJoined: true
-    }
-  ];
+export default function PlanoDeLeitura({ onNavigate }) {
+  const [abaAtivaPlano, setAbaAtivaPlano] = useState('catalogo'); // 'catalogo', 'meus', 'concluidos'
 
   return (
-    <div className="bg-surface min-h-screen text-on-surface flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
-      {/* Header Fixo Topo */}
-      <header className="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl pt-safe border-b border-surface-container-highest/60">
-        <div className="h-16 px-margin flex items-center justify-between">
-          <div className="flex flex-col min-w-0">
-            <span className="font-label-md text-label-md text-primary uppercase tracking-wide">Jornadas Espirituais</span>
-            <h1 className="font-headline-sm text-headline-sm text-on-surface">Planos de Leitura</h1>
-          </div>
-          <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors">
-            <span className="material-symbols-outlined text-[20px] text-primary">search</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Conteúdo Principal */}
-      <main className="flex-1 flex flex-col relative w-full pt-20 pb-28 bg-surface px-margin gap-space-md">
+    <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
+      
+      {/* Container Principal Centralizado */}
+      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
-        {/* Abas (Meus Planos / Explorar Novos) */}
-        <div className="flex bg-surface-container p-1 rounded-xl shadow-sm">
+        {/* Cabeçalho Padronizado */}
+        <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner">
+          <div>
+            <h1 className="text-sm font-bold text-white flex items-center gap-1.5">
+              <span>Conexão Viva</span>
+              <span className="text-amber-400 text-xs font-normal">• Viver com Propósito</span>
+            </h1>
+            <p className="text-base font-bold text-amber-400 mt-0.5">Planos de Leitura</p>
+          </div>
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
+            RF
+          </div>
+        </div>
+
+        {/* Abas Superiores de Filtro (Encontrar Planos, Meus Planos, Concluídos) */}
+        <div className="grid grid-cols-3 gap-1.5 bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800 text-center">
           <button 
-            onClick={() => setActiveTab('meus')}
-            className={`flex-1 py-2.5 rounded-lg font-label-md text-label-md transition-all ${activeTab === 'meus' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
+            onClick={() => setAbaAtivaPlano('catalogo')}
+            className={`py-2 px-1 rounded-xl text-[11px] font-semibold transition cursor-pointer ${
+              abaAtivaPlano === 'catalogo' 
+                ? 'bg-amber-400 text-slate-950 shadow' 
+                : 'text-slate-400 hover:text-white'
+            }`}
           >
-            Meus Planos Ativos
+            Explorar
           </button>
           <button 
-            onClick={() => setActiveTab('novos')}
-            className={`flex-1 py-2.5 rounded-lg font-label-md text-label-md transition-all ${activeTab === 'novos' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}
+            onClick={() => setAbaAtivaPlano('meus')}
+            className={`py-2 px-1 rounded-xl text-[11px] font-semibold transition cursor-pointer ${
+              abaAtivaPlano === 'meus' 
+                ? 'bg-amber-400 text-slate-950 shadow' 
+                : 'text-slate-400 hover:text-white'
+            }`}
           >
-            Explorar Catálogo
+            Meus Planos
+          </button>
+          <button 
+            onClick={() => setAbaAtivaPlano('concluidos')}
+            className={`py-2 px-1 rounded-xl text-[11px] font-semibold transition cursor-pointer ${
+              abaAtivaPlano === 'concluidos' 
+                ? 'bg-amber-400 text-slate-950 shadow' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Concluídos
           </button>
         </div>
 
-        {/* Lista de Planos */}
-        <div className="flex flex-col gap-4">
-          {plans
-            .filter(p => activeTab === 'meus' ? p.isJoined : true)
-            .map((plan) => (
-              <div key={plan.id} className={`flex flex-col rounded-2xl bg-gradient-to-br ${plan.imageBg} bg-surface-container p-space-md shadow-sm border border-surface-container-highest/60 gap-3`}>
-                <div className="flex items-start justify-between">
-                  <div className="flex flex-col">
-                    <span className="font-caption text-caption text-primary font-semibold uppercase">{plan.category}</span>
-                    <h2 className="font-headline-sm text-headline-sm text-on-surface mt-0.5">{plan.title}</h2>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-surface-container-high font-caption text-caption text-on-surface font-medium">
-                    {plan.totalDays} Dias
-                  </span>
-                </div>
-
-                {plan.isJoined ? (
-                  <div className="flex flex-col gap-1.5 mt-2">
-                    <div className="flex justify-between items-center text-xs text-on-surface-variant font-caption">
-                      <span>Progresso: Dia {plan.currentDay} de {plan.totalDays}</span>
-                      <span>{plan.progress}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${plan.progress}%` }}></div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="font-body-md text-body-md text-on-surface-variant">
-                    Uma jornada profunda para alinhar seus passos à verdade bíblica.
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between pt-2 border-t border-surface-container-highest/60 mt-1">
-                  <span className="font-caption text-caption text-on-surface-variant flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px] text-secondary">verified</span>
-                    Raquel Fortunato
-                  </span>
-                  <button className={`px-4 py-2 rounded-xl font-label-md text-label-md transition-all shadow-sm ${plan.isJoined ? 'bg-primary text-on-primary hover:brightness-105' : 'bg-surface-container-high text-on-surface hover:bg-surface-bright'}`}>
-                    {plan.isJoined ? "Continuar Leitura" : "Participar do Plano"}
-                  </button>
-                </div>
-              </div>
-          ))}
+        {/* Lembrete Diário */}
+        <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="p-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl text-sm">🔔</span>
+            <div>
+              <p className="text-xs font-bold text-white">Lembrete de Leitura</p>
+              <p className="text-[10px] text-slate-400">Ativo diário às 07:00</p>
+            </div>
+          </div>
+          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-lg font-medium">Ligado</span>
         </div>
 
-      </main>
+        {/* Lista de Planos Disponíveis */}
+        <div className="space-y-3">
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Catálogo de Planos</h2>
 
-      {/* Navegação Inferior */}
-      <nav className="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-low/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.35)]">
-        <div className="flex justify-around items-center h-16 px-space-xs">
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">home</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Home</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">menu_book</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Bíblia</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-primary font-semibold transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>event_available</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none text-primary font-semibold">Planos</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">explore</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Explorar</span>
-          </a>
-          <a className="flex flex-col items-center justify-center flex-1 h-12 gap-0.5 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-            <span className="material-symbols-outlined text-[22px]">settings</span>
-            <span className="font-label-md text-label-md text-[11px] leading-none">Configurações</span>
-          </a>
+          {/* Plano 1 */}
+          <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2 hover:border-amber-500/40 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-semibold border border-amber-500/20">365 Dias</span>
+              <span className="text-xs text-slate-400">📖 Bíblia Completa</span>
+            </div>
+            <h3 className="text-xs font-bold text-white">Ler a Bíblia completa em um ano</h3>
+            <p className="text-[11px] text-slate-400 leading-relaxed">Leitura contínua de Gênesis a Apocalipse para edificar sua vida diariamente.</p>
+            <button className="w-full mt-2 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow">
+              Iniciar Plano
+            </button>
+          </div>
+
+          {/* Plano 2 */}
+          <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2 hover:border-amber-500/40 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-semibold border border-amber-500/20">365 Dias</span>
+              <span className="text-xs text-slate-400">⏳ Histórico</span>
+            </div>
+            <h3 className="text-xs font-bold text-white">Ler a Bíblia completa em ordem cronológica</h3>
+            <p className="text-[11px] text-slate-400 leading-relaxed">Entenda os fatos bíblicos na exata ordem em que aconteceram na história.</p>
+            <button className="w-full mt-2 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl font-bold text-xs transition cursor-pointer">
+              Ver Detalhes
+            </button>
+          </div>
+
+          {/* Plano 3 */}
+          <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2 hover:border-amber-500/40 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-semibold border border-amber-500/20">31 Dias</span>
+              <span className="text-xs text-slate-400">💡 Sabedoria</span>
+            </div>
+            <h3 className="text-xs font-bold text-white">Ler o livro de Provérbios em um mês</h3>
+            <p className="text-[11px] text-slate-400 leading-relaxed">Um capítulo por dia para guiar suas decisões e desenvolver sabedoria prática.</p>
+            <button className="w-full mt-2 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl font-bold text-xs transition cursor-pointer">
+              Ver Detalhes
+            </button>
+          </div>
+
+          {/* Plano 4 */}
+          <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2 hover:border-amber-500/40 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-semibold border border-amber-500/20">60 Dias</span>
+              <span className="text-xs text-slate-400">🕊️ Vida de Jesus</span>
+            </div>
+            <h3 className="text-xs font-bold text-white">Ler os Evangelhos em dois meses</h3>
+            <p className="text-[11px] text-slate-400 leading-relaxed">Mergulhe na vida, ensinamentos, morte e ressurreição de Cristo nos quatro evangelhos.</p>
+            <button className="w-full mt-2 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl font-bold text-xs transition cursor-pointer">
+              Ver Detalhes
+            </button>
+          </div>
+
+          {/* Plano 5 */}
+          <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2 hover:border-amber-500/40 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-md font-semibold border border-amber-500/20">30 Dias</span>
+              <span className="text-xs text-slate-400">🎵 Louvor & Poesia</span>
+            </div>
+            <h3 className="text-xs font-bold text-white">Ler o livro de Salmos em um mês</h3>
+            <p className="text-[11px] text-slate-400 leading-relaxed">Encontre consolo, gratidão e adoração profunda através dos cânticos de Davi e outros.</p>
+            <button className="w-full mt-2 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl font-bold text-xs transition cursor-pointer">
+              Ver Detalhes
+            </button>
+          </div>
         </div>
-      </nav>
+
+        {/* Menu de Navegação Interna Consistente */}
+        <div className="pt-4 border-t border-slate-800">
+          <p className="text-[11px] text-amber-400 font-semibold mb-2 text-center tracking-wide">MENU DE NAVEGAÇÃO</p>
+          <div className="grid grid-cols-3 gap-2">
+            <button onClick={() => onNavigate && onNavigate('home')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Home
+            </button>
+            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Bíblia
+            </button>
+            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-medium transition cursor-pointer text-center">
+              Planos
+            </button>
+            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Explorar
+            </button>
+            <button onClick={() => onNavigate && onNavigate('config')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Configurações
+            </button>
+            <button onClick={() => onNavigate && onNavigate('admin')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+              Admin
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
