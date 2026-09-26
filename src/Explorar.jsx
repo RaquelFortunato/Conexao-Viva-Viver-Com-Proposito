@@ -142,7 +142,7 @@ export default function Explorar({ onNavigate }) {
           </div>
         </div>
 
-        {/* 4. Desafios (Agora direcionando para o Desafio Celeste) */}
+        {/* 4. Desafios */}
         <div 
           onClick={() => onNavigate && onNavigate('desafioceleste')}
           className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
@@ -233,7 +233,8 @@ export default function Explorar({ onNavigate }) {
               <h3 className="text-xs font-bold text-white">Harpa Cristã</h3>
               <p className="text-[10px] text-slate-400">640 Hinos com Cifras</p>
             </div>
-            <div onClick={() => abrirEmBreve('Cantor Cristão')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
+            {/* AGORA DIRECIONANDO PARA O CANTOR CRISTÃO REAL */}
+            <div onClick={() => onNavigate && onNavigate('cantor-cristao')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
               <span className="text-amber-400 text-sm">🎵</span>
               <h3 className="text-xs font-bold text-white">Cantor Cristão</h3>
               <p className="text-[10px] text-slate-400">577 Canções Clássicas</p>
@@ -271,7 +272,6 @@ export default function Explorar({ onNavigate }) {
             </button>
           </div>
 
-          {/* Pedido 1 */}
           <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
             <div className="flex justify-between items-center text-[10px] text-slate-400">
               <span className="font-semibold text-slate-300">MG • Maria das Graças</span>
@@ -309,7 +309,7 @@ export default function Explorar({ onNavigate }) {
             <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-medium transition cursor-pointer text-center">
               Explorar
             </button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
+            <button onClick={() => onNavigate && onNavigate('configuracao')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
               Configurações
             </button>
             <button onClick={() => onNavigate && onNavigate('admin')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
@@ -325,7 +325,6 @@ export default function Explorar({ onNavigate }) {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl text-center">
             
-            {/* Modal de Caixinha de Promessas */}
             {modalAtivo === 'promessa' && (
               <>
                 <span className="text-3xl">🎁</span>
@@ -350,7 +349,6 @@ export default function Explorar({ onNavigate }) {
               </>
             )}
 
-            {/* Modal de Medalhas */}
             {modalAtivo === 'medalhas' && (
               <>
                 <span className="text-3xl">⭐</span>
@@ -365,7 +363,6 @@ export default function Explorar({ onNavigate }) {
               </>
             )}
 
-            {/* Modal de Diário */}
             {modalAtivo === 'diario' && (
               <>
                 <span className="text-3xl">🛡️</span>
@@ -380,7 +377,6 @@ export default function Explorar({ onNavigate }) {
               </>
             )}
 
-            {/* Modal de Concordância */}
             {modalAtivo === 'concordancia' && (
               <>
                 <span className="text-3xl">🔍</span>
@@ -395,7 +391,6 @@ export default function Explorar({ onNavigate }) {
               </>
             )}
 
-            {/* Modal de Pedido de Oração */}
             {modalAtivo === 'pedido' && (
               <>
                 <span className="text-3xl">👥</span>
@@ -421,7 +416,6 @@ export default function Explorar({ onNavigate }) {
               </>
             )}
 
-            {/* Modal para itens que ainda vai subir */}
             {modalAtivo === 'emBreve' && (
               <>
                 <span className="text-3xl">🚧</span>
