@@ -5,6 +5,7 @@ import Biblia from './Biblia';
 import Configuracao from './Configuracao';
 import JejumDaniel from './JejumDaniel';
 import RotinaPrimeiroAmor from './RotinaPrimeiroAmor';
+import DesafioCeleste from './DesafioCeleste';
 
 export default function App() {
   const [paginaAtual, setPaginaAtual] = useState('home');
@@ -23,6 +24,8 @@ export default function App() {
         return <JejumDaniel onNavigate={setPaginaAtual} />;
       case 'rotina':
         return <RotinaPrimeiroAmor onNavigate={setPaginaAtual} />;
+      case 'desafioceleste':
+        return <DesafioCeleste onNavigate={setPaginaAtual} />;
       default:
         return <Home onNavigate={setPaginaAtual} />;
     }

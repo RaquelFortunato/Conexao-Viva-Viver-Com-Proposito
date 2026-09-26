@@ -117,7 +117,7 @@ export default function Explorar({ onNavigate }) {
           </div>
         </div>
 
-        {/* 3. Jornadas & Hábitos Diários (Agora com Links Funcionais!) */}
+        {/* 3. Jornadas & Hábitos Diários */}
         <div className="space-y-2">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Jornadas & Hábitos Diários</h2>
           <div className="grid grid-cols-2 gap-2">
@@ -142,9 +142,9 @@ export default function Explorar({ onNavigate }) {
           </div>
         </div>
 
-        {/* 4. Desafios */}
+        {/* 4. Desafios (Agora direcionando para o Desafio Celeste) */}
         <div 
-          onClick={() => abrirEmBreve('Desafio Celeste')}
+          onClick={() => onNavigate && onNavigate('desafioceleste')}
           className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
         >
           <div className="flex items-center gap-3">
