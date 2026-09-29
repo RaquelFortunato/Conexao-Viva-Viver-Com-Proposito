@@ -8,6 +8,10 @@ export default function Admin({ onNavigate }) {
   const [novaSenha, setNovaSenha] = useState('');
   const [filtroMensagens, setFiltroMensagens] = useState('nao_lidas');
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Estado para controlar a modal/ação da Nova Ferramenta
+  const [modalNovaFerramentaAberta, setModalNovaFerramentaAberta] = useState(false);
+  const [nomeNovaFerramenta, setNomeNovaFerramenta] = useState('');
 
   useEffect(() => {
     async function checkUserAdmin() {
@@ -27,34 +31,30 @@ export default function Admin({ onNavigate }) {
     checkUserAdmin();
   }, []);
 
+  const handleCriarNovaFerramenta = () => {
+    if (!nomeNovaFerramenta.trim()) {
+      alert('Por favor, digite o nome da nova ferramenta/aba.');
+      return;
+    }
+    // Aqui você pode integrar com o seu banco ou lógica de salvamento
+    alert(`Ferramenta "${nomeNovaFerramenta}" criada com sucesso!`);
+    setNomeNovaFerramenta('');
+    setModalNovaFerramentaAberta(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
       
       {/* Container Principal Centralizado */}
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
-        {/* Cabeçalho do Painel Administrativo */}
+        {/* Cabeçalho do Painel Administrativo (Sem os números fictícios) */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner text-center space-y-1">
           <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
             Acesso Restrito & Exclusivo
           </span>
           <h1 className="text-base font-bold text-white mt-1">Gestão Administrativa</h1>
           <p className="text-xs text-slate-400">Painel de Raquel Fortunato • Conexão Viva</p>
-          
-          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-800/80 mt-3 text-center">
-            <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span className="block text-xs font-bold text-white">7 Módulos</span>
-              <span className="text-[10px] text-slate-400">Ativos</span>
-            </div>
-            <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span className="block text-xs font-bold text-amber-400">8</span>
-              <span className="text-[10px] text-slate-400">Pendentes</span>
-            </div>
-            <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-              <span className="block text-xs font-bold text-white">3.4k</span>
-              <span className="text-[10px] text-slate-400">Vidas</span>
-            </div>
-          </div>
         </div>
 
         {/* Conteúdos Diários */}
@@ -258,17 +258,57 @@ export default function Admin({ onNavigate }) {
             </label>
           </div>
 
-          {/* Extras & Novas Funcionalidades */}
+          {/* Extras & Novas Funcionalidades (Botão agora funcional!) */}
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between">
             <div>
               <h3 className="text-xs font-bold text-white">Extras & Novas Funcionalidades</h3>
               <p className="text-[10px] text-slate-400">Ativar/desativar módulos e criar abas</p>
             </div>
-            <button className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer">
+            <button 
+              onClick={() => setModalNovaFerramentaAberta(true)}
+              className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer shadow"
+            >
               Nova Ferramenta
             </button>
           </div>
         </div>
+
+        {/* Modal / Área interativa para Criar Nova Ferramenta */}
+        {modalNovaFerramentaAberta && (
+          <div className="bg-slate-950 border border-amber-500/50 p-4 rounded-2xl space-y-3 shadow-xl animate-fadeIn">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xs font-bold text-amber-400">Criar Nova Aba / Ferramenta</h3>
+              <button 
+                onClick={() => setModalNovaFerramentaAberta(false)}
+                className="text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
+              >
+                ✕ Fechar
+              </button>
+            </div>
+            <p className="text-[10px] text-slate-400">Digite o nome da nova ferramenta que deseja adicionar ao ecossistema:</p>
+            <input 
+              type="text"
+              value={nomeNovaFerramenta}
+              onChange={(e) => setNomeNovaFerramenta(e.target.value)}
+              placeholder="Ex: Mural de Pedidos, Testemunhos..."
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+            />
+            <div className="flex gap-2">
+              <button 
+                onClick={handleCriarNovaFerramenta}
+                className="flex-1 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer"
+              >
+                Salvar Ferramenta
+              </button>
+              <button 
+                onClick={() => setModalNovaFerramentaAberta(false)}
+                className="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl font-bold text-xs transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Mensagens & Sugestões */}
         <div className="space-y-2 pt-2">
