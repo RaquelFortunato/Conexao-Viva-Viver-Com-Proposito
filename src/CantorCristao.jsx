@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import hinosData from './data/cantor_cristao.json';
 
-export default function CantorCristao() {
+export default function CantorCristao({ onNavigate }) {
   const [hinos, setHinos] = useState([]);
   const [hinoSelecionado, setHinoSelecionado] = useState(null);
   const [busca, setBusca] = useState('');
@@ -42,7 +42,6 @@ export default function CantorCristao() {
     return favoritos.includes(idHino);
   };
 
-  // Filtrar hinos com base na busca e na aba ativa
   const hinosFiltrados = hinos.filter((hino) => {
     const numero = String(hino.numero || hino.id || '');
     const titulo = (hino.titulo || hino.title || hino.name || '').toLowerCase();
@@ -57,205 +56,136 @@ export default function CantorCristao() {
   });
 
   return (
-    <div style={{ background: '#121019', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif', paddingBottom: '40px' }}>
+    <div className="w-full min-h-screen bg-slate-950 text-white p-4 py-6 flex flex-col items-center">
       
-      {/* Topo / Header */}
-      <div style={{ background: '#191523', padding: '20px', borderBottom: '1px solid #2a2438', position: 'sticky', top: 0, zIndex: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: '800px', margin: '0 auto' }}>
-          
+      {/* Moldura do Aplicativo / Celular (Padronizada igual às outras telas) */}
+      <div className="w-full max-w-sm bg-slate-900 border border-slate-800 p-4 rounded-3xl shadow-2xl space-y-4 mb-10">
+        
+        {/* Cabeçalho com Botão Voltar */}
+        <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3 rounded-2xl shadow-inner">
           {hinoSelecionado ? (
             <button 
               onClick={() => setHinoSelecionado(null)}
-              style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl font-bold text-[10px] transition cursor-pointer"
             >
-              ←
+              ← Voltar
             </button>
           ) : (
-            <div style={{ width: '24px' }}></div>
+            <button 
+              onClick={() => onNavigate && onNavigate('explorar')}
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl font-bold text-[10px] transition cursor-pointer"
+            >
+              ← Voltar
+            </button>
           )}
 
-          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600', letterSpacing: '0.5px' }}>
+          <h1 className="text-xs font-bold text-white tracking-wider">
             {hinoSelecionado ? `Hino ${hinoSelecionado.numero || ''}` : 'Cantor Cristão'}
           </h1>
 
           {hinoSelecionado ? (
             <button 
               onClick={(e) => toggleFavorito(hinoSelecionado, e)}
-              style={{ background: 'transparent', border: 'none', fontSize: '22px', cursor: 'pointer', color: isFavorito(hinoSelecionado) ? '#ff4757' : '#fff' }}
+              className="text-base cursor-pointer"
+              style={{ color: isFavorito(hinoSelecionado) ? '#ff4757' : '#fff' }}
             >
               {isFavorito(hinoSelecionado) ? '♥' : '♡'}
             </button>
           ) : (
-            <div style={{ width: '24px' }}></div>
+            <div className="w-6"></div>
           )}
         </div>
 
-        {/* Barra de Pesquisa e Abas (Apenas na listagem) */}
+        {/* Barra de Pesquisa e Abas (Apenas na listagem geral) */}
         {!hinoSelecionado && (
-          <div style={{ maxWidth: '800px', margin: '15px auto 0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            
-            {/* Input de Pesquisa com Lupinha */}
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <span style={{ position: 'absolute', left: '15px', color: '#8c859b', fontSize: '16px' }}>🔍</span>
+          <div className="space-y-2.5">
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-slate-400 text-xs">🔍</span>
               <input 
                 type="text" 
                 placeholder="Pesquisar hino por nome ou número..." 
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 15px 12px 45px',
-                  background: '#221c2f',
-                  border: '1px solid #322b44',
-                  borderRadius: '12px',
-                  color: '#fff',
-                  fontSize: '15px',
-                  outline: 'none'
-                }}
+                className="w-full py-2.5 pl-9 pr-3 bg-slate-950/60 border border-slate-800 rounded-xl text-white text-[11px] outline-none focus:border-amber-500/50 transition"
               />
             </div>
 
-            {/* Abas: Todos / Favoritos */}
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setFiltroAba('todos')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  background: filtroAba === 'todos' ? '#6c5ce7' : '#221c2f',
-                  border: 'none',
-                  borderRadius: '10px',
-                  color: '#fff',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  transition: 'background 0.2s'
-                }}
+                className={`py-2 rounded-xl text-[10px] font-bold transition cursor-pointer ${filtroAba === 'todos' ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-950/60 text-slate-300 border border-slate-800'}`}
               >
                 Hinário
               </button>
               <button
                 onClick={() => setFiltroAba('favoritos')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  background: filtroAba === 'favoritos' ? '#6c5ce7' : '#221c2f',
-                  border: 'none',
-                  borderRadius: '10px',
-                  color: '#fff',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  transition: 'background 0.2s'
-                }}
+                className={`py-2 rounded-xl text-[10px] font-bold transition cursor-pointer ${filtroAba === 'favoritos' ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-950/60 text-slate-300 border border-slate-800'}`}
               >
                 ♥ Favoritos ({favoritos.length})
               </button>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Conteúdo Principal */}
-      <div style={{ padding: '20px 15px', maxWidth: '800px', margin: '0 auto' }}>
-        {hinoSelecionado ? (
-          /* Visualização da Letra do Hino */
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-              <h2 style={{ fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
-                {hinoSelecionado.titulo || hinoSelecionado.title || hinoSelecionado.name}
-              </h2>
-              <span style={{ color: '#a29bfe', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Hino {hinoSelecionado.numero || hinoSelecionado.id}
-              </span>
-            </div>
-
-            <div style={{ 
-              background: '#191523', 
-              padding: '25px', 
-              borderRadius: '16px', 
-              border: '1px solid #2a2438',
-              whiteSpace: 'pre-wrap', 
-              lineHeight: '1.9', 
-              fontSize: '16px', 
-              color: '#e0dcfc' 
-            }}>
-              {hinoSelecionado.letra || hinoSelecionado.lyrics || hinoSelecionado.text || hinoSelecionado.content || "Letra não disponível."}
-            </div>
-          </div>
-        ) : (
-          /* Listagem dos Hinos Estilo Aplicativo */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {hinosFiltrados.length === 0 ? (
-              <div style={{ textAlign: 'center', color: '#8c859b', marginTop: '40px', fontSize: '15px' }}>
-                Nenhum hino encontrado.
+        {/* Conteúdo: Letra do Hino ou Lista */}
+        <div className="space-y-2">
+          {hinoSelecionado ? (
+            <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
+              <div className="text-center pb-2 border-b border-slate-800">
+                <h2 className="text-xs font-bold text-white mb-1">
+                  {hinoSelecionado.titulo || hinoSelecionado.title || hinoSelecionado.name}
+                </h2>
+                <span className="text-[10px] text-amber-400 uppercase tracking-widest font-semibold">
+                  Hino {hinoSelecionado.numero || hinoSelecionado.id}
+                </span>
               </div>
-            ) : (
-              hinosFiltrados.map((hino, index) => {
-                const numero = hino.numero || hino.id || (index + 1);
-                const titulo = hino.titulo || hino.title || hino.name || `Hino ${index + 1}`;
-                const favorito = isFavorito(hino);
 
-                return (
-                  <div
-                    key={index}
-                    onClick={() => setHinoSelecionado(hino)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      background: '#191523',
-                      padding: '12px 15px',
-                      borderRadius: '14px',
-                      cursor: 'pointer',
-                      border: '1px solid #2a2438',
-                      transition: 'transform 0.1s, background 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#221c2f'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = '#191523'}
-                  >
-                    {/* Caixa com o número do Hino */}
-                    <div style={{
-                      background: '#251f33',
-                      color: '#a29bfe',
-                      width: '45px',
-                      height: '45px',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 'bold',
-                      fontSize: '15px',
-                      marginRight: '15px',
-                      flexShrink: 0
-                    }}>
-                      {numero}
-                    </div>
+              <div className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap font-sans max-h-96 overflow-y-auto pr-1">
+                {hinoSelecionado.letra || hinoSelecionado.lyrics || hinoSelecionado.text || hinoSelecionado.content || "Letra não disponível."}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
+              {hinosFiltrados.length === 0 ? (
+                <div className="text-center text-slate-400 py-8 text-[11px]">
+                  Nenhum hino encontrado.
+                </div>
+              ) : (
+                hinosFiltrados.map((hino, index) => {
+                  const numero = hino.numero || hino.id || (index + 1);
+                  const titulo = hino.titulo || hino.title || hino.name || `Hino ${index + 1}`;
+                  const favorito = isFavorito(hino);
 
-                    {/* Nome da música */}
-                    <div style={{ flex: 1, fontSize: '16px', fontWeight: '500', color: '#fff' }}>
-                      {titulo}
-                    </div>
-
-                    {/* Botão de Coração / Favorito */}
-                    <button
-                      onClick={(e) => toggleFavorito(hino, e)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        fontSize: '20px',
-                        cursor: 'pointer',
-                        color: favorito ? '#ff4757' : '#6c6380',
-                        padding: '8px'
-                      }}
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => setHinoSelecionado(hino)}
+                      className="flex items-center justify-between bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 p-2.5 rounded-xl cursor-pointer transition shadow-inner"
                     >
-                      {favorito ? '♥' : '♡'}
-                    </button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        )}
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 text-amber-400 font-bold text-[10px] flex items-center justify-center shrink-0 shadow">
+                          {numero}
+                        </div>
+                        <div className="text-[11px] font-medium text-white truncate">
+                          {titulo}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={(e) => toggleFavorito(hino, e)}
+                        className="text-sm cursor-pointer p-1 shrink-0"
+                        style={{ color: favorito ? '#ff4757' : '#64748b' }}
+                      >
+                        {favorito ? '♥' : '♡'}
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );

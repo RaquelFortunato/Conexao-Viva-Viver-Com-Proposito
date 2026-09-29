@@ -1,6 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+// Importe o seu cliente do Supabase aqui, ajuste o caminho se necessário (ex: './supabaseClient')
+// import { supabase } from '../supabaseClient'; 
 
 export default function Home({ onNavigate }) {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function checkUserAdmin() {
+      try {
+        // Se você estiver usando o Supabase, descomente as linhas abaixo:
+        /*
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && user.email === 'Raquellosnak@gmail.com') {
+          setIsAdmin(true);
+        }
+        */
+        
+        // Simulação temporária para teste local (remover quando o Supabase estiver conectado):
+        // Se quiser testar o admin aparecendo agora, mude para true:
+        setIsAdmin(true); 
+      } catch (error) {
+        console.error("Erro ao verificar admin:", error);
+      }
+    }
+    checkUserAdmin();
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
       
@@ -130,28 +155,17 @@ export default function Home({ onNavigate }) {
           </div>
         </div>
 
-        {/* 7. Navegação Interna (Home, Bíblia, Planos, Explorar, Configurações, Admin) */}
-        <div className="pt-4 border-t border-slate-800">
-          <p className="text-[11px] text-amber-400 font-semibold mb-2 text-center tracking-wide">MENU DE NAVEGAÇÃO</p>
-          <div className="grid grid-cols-3 gap-2">
-            <button onClick={() => onNavigate && onNavigate('home')} className="p-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-amber-400 text-xs font-medium transition cursor-pointer text-center">
-              Home
-            </button>
-            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
-              Bíblia
-            </button>
-            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
-              Planos
-            </button>
-            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
-              Explorar
-            </button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
-              Configurações
-            </button>
-            <button onClick={() => onNavigate && onNavigate('admin')} className="p-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 rounded-xl text-slate-200 text-xs font-medium transition cursor-pointer text-center">
-              Admin
-            </button>
+        {/* Menu de Navegação Inteligente (Dinâmico para o Admin) */}
+        <div className="pt-3 border-t border-slate-800">
+          <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
+            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Home</button>
+            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Bíblia</button>
+            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Planos</button>
+            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Explorar</button>
+            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Config</button>
+            {isAdmin && (
+              <button onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
+            )}
           </div>
         </div>
 

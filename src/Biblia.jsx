@@ -87,7 +87,6 @@ export default function Biblia({ onNavigate }) {
     const versaoObj = BIBLE_VERSIONS.find(v => v.id === versaoId);
     if (!versaoObj || !versaoObj.data) return [];
 
-    // Busca inteligente: tenta achar pelo abbrev (comparando minúsculo/maiúsculo) ou pelo nome do livro
     const livroObj = versaoObj.data.find(b => {
       const bAbbrev = (b.abbrev || b.sigla || '').toLowerCase();
       const bName = (b.name || b.nome || '').toLowerCase();
@@ -99,14 +98,12 @@ export default function Biblia({ onNavigate }) {
 
     if (!livroObj) return [];
 
-    // Tenta pegar os capítulos independentemente se a chave se chama chapters, capitulos ou verses
     const capitulosData = livroObj.chapters || livroObj.capitulos;
     if (!capitulosData) return [];
 
     const capituloArray = capitulosData[capitulo - 1];
     if (!capituloArray) return [];
 
-    // Se o capítulo for uma lista de objetos (ex: {number: 1, text: "..."}) ou texto puro
     return capituloArray.map((item, index) => {
       if (typeof item === 'string') {
         return { numero: index + 1, texto: item };
@@ -218,13 +215,14 @@ export default function Biblia({ onNavigate }) {
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-800">
-          <div className="grid grid-cols-5 gap-1.5 text-center">
-            <button onClick={() => onNavigate('home')} className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-[10px] font-medium cursor-pointer">Home</button>
-            <button onClick={() => onNavigate('biblia')} className="p-2 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-[10px] font-bold cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate('planos')} className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-[10px] font-medium cursor-pointer">Planos</button>
-            <button onClick={() => onNavigate('explorar')} className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-[10px] font-medium cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate('config')} className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-[10px] font-medium cursor-pointer">Ajustes</button>
+        {/* Menu de Navegação Integrado DENTRO do Aplicativo */}
+        <div className="pt-3 border-t border-slate-800">
+          <div className="grid grid-cols-5 gap-1 text-center">
+            <button onClick={() => onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Home</button>
+            <button onClick={() => onNavigate('biblia')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[10px] font-bold shadow-lg cursor-pointer">Bíblia</button>
+            <button onClick={() => onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Planos</button>
+            <button onClick={() => onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Explorar</button>
+            <button onClick={() => onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Config</button>
           </div>
         </div>
 
