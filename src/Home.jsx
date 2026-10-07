@@ -157,14 +157,21 @@ export default function Home({ onNavigate, userName }) {
           </div>
         </div>
 
-        {/* 6. Louvor do Dia (Ajustado para Vídeo) */}
+        {/* 6. Louvor do Dia (Lendo direto da pasta public com nome simples) */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🎵 LOUVOR DO DIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Aguardando vídeo</span>
+            <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-medium">Meu Respirar - Vineyard</span>
           </div>
-          <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
-            Nenhum vídeo enviado ainda
+          <div className="bg-slate-900/80 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center">
+            <video 
+              controls 
+              preload="metadata"
+              className="w-full h-auto max-h-64 object-cover rounded-xl"
+            >
+              <source src="/louvor.mp4" type="video/mp4" />
+              Seu navegador não suporta a reprodução de vídeos.
+            </video>
           </div>
           <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-slate-400 text-sm">
             <div className="flex items-center gap-4">

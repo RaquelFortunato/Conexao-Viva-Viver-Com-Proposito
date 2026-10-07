@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from './data/supabase.js'; 
+import logoImg from './assets/Whatslogo.jpeg';
 
 export default function Login({ onLoginSuccess }) {
   const [isCadastro, setIsCadastro] = useState(true);
@@ -38,8 +39,16 @@ export default function Login({ onLoginSuccess }) {
            throw new Error("Não foi possível criar a conta. Tente outro e-mail.");
         }
 
-        alert("Conta criada com sucesso! Faça login para continuar.");
-        setIsCadastro(false);
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
+        if (signInError) throw signInError;
+
+        const userNameFromDb = signInData.user.user_metadata?.full_name || nome || email.split('@')[0];
+        
+        onLoginSuccess(email, userNameFromDb, true); 
         
       } else {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -77,9 +86,14 @@ export default function Login({ onLoginSuccess }) {
       
       <div className="w-full max-w-md bg-slate-900/95 p-8 rounded-3xl border border-slate-800 shadow-2xl backdrop-blur-md my-auto">
         
+        {/* Logotipo no topo com a sua imagem local */}
         <div className="flex justify-center mb-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/20">
-            <span className="text-slate-950 font-bold text-xl">✝</span>
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center overflow-hidden">
+            <img 
+              src={logoImg} 
+              alt="Logo Conexão Viva" 
+              className="w-full h-full object-cover rounded-2xl"
+            />
           </div>
         </div>
 

@@ -1,4 +1,6 @@
 import React from 'react';
+import logoImg from './assets/Whatslogo.jpeg';
+import fotoPerfil from './assets/Whatsadministradora.jpeg';
 
 export default function Welcome({ onContinue }) {
   return (
@@ -6,10 +8,17 @@ export default function Welcome({ onContinue }) {
       
       <div className="w-full max-w-md bg-slate-900/95 p-8 rounded-3xl border border-slate-800 shadow-2xl backdrop-blur-md my-auto text-center">
         
-        {/* Logotipo no topo */}
+        {/* Logotipo no topo (Com imagem local) */}
         <div className="flex justify-center mb-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/20">
-            <span className="text-slate-950 font-bold text-xl">✝</span>
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center overflow-hidden">
+            <img 
+              src={logoImg} 
+              alt="Logo Conexão Viva" 
+              className="w-full h-full object-cover rounded-2xl"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
           </div>
         </div>
 
@@ -26,13 +35,19 @@ export default function Welcome({ onContinue }) {
           </p>
         </div>
 
-        {/* Card da Criadora (Raquel Fortunato) sem a etiqueta repetida */}
-        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 mb-6 text-center shadow-inner">
+        {/* Card da Criadora com a Foto da Raquel */}
+        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 mb-6 text-center shadow-inner relative">
+          
           <div className="flex justify-center mb-3">
-            <div className="w-16 h-16 rounded-full border-2 border-amber-400 overflow-hidden shadow-md">
-              <div className="w-full h-full bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-lg">
-                RF
-              </div>
+            <div className="w-16 h-16 rounded-full border-2 border-amber-400 overflow-hidden shadow-md bg-slate-800 flex items-center justify-center">
+              <img 
+                src={fotoPerfil} 
+                alt="Raquel Fortunato" 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
             </div>
           </div>
 

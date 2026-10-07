@@ -11,7 +11,11 @@ import JejumDaniel from './JejumDaniel';
 import RotinaPrimeiroAmor from './RotinaPrimeiroAmor';
 import DesafioCeleste from './DesafioCeleste';
 import CantorCristao from './CantorCristao';
-import HarpaCrista from './HarpaCrista'; // Importa o componente da Harpa
+import HarpaCrista from './HarpaCrista'; 
+
+// ⬇️ NOVOS IMPORTS ADICIONADOS PARA AS TELAS DE FÁBULAS E MÚSICA
+import Fabulas from './Fabulas';
+import PlaylistsMusica from './PlaylistsMusica';
 
 export default function App() {
   const [etapaAuth, setEtapaAuth] = useState('login'); 
@@ -82,16 +86,29 @@ export default function App() {
         {paginaAtual === 'desafioceleste' && <DesafioCeleste onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
         {paginaAtual === 'cantor-cristao' && <CantorCristao onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
         
-        {/* ⬇️ CORREÇÃO PRINCIPAL: Agora aceita tanto 'HarpaCrista' quanto 'harpa' */}
+        {/* ⬇️ ROTAS DA HARPA CRISTÃ (Mantive como estava antes) */}
         {(paginaAtual === 'HarpaCrista' || paginaAtual === 'harpa') && (
           <HarpaCrista onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
+        )}
+
+        {/* ⬇️ NOVAS ROTAS ADICIONADAS AQUI */}
+        {/* Rota para Fábulas */}
+        {paginaAtual === 'fabulas' && (
+          <Fabulas onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
+        )}
+
+        {/* Rota para Playlists de Música */}
+        {paginaAtual === 'player-musica' && (
+          <PlaylistsMusica onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
         )}
         
         {/* Lista de todas as páginas válidas para evitar fallback para Home se estiver em uma delas */}
         {![
           'home', 'explorar', 'biblia', 'planos', 'config', 'configuracao', 
           'admin', 'jejum', 'rotina', 'desafioceleste', 'cantor-cristao', 
-          'HarpaCrista', 'harpa' // Adicionei os dois nomes aqui também
+          'HarpaCrista', 'harpa', 
+          'fabulas',       // <-- Adicionado aqui
+          'player-musica'  // <-- Adicionado aqui
         ].includes(paginaAtual) && <Home onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
       </div>
     </div>

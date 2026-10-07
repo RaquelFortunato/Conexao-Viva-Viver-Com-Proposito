@@ -3,13 +3,20 @@ import { supabase } from './data/supabase';
 
 export default function Explorar({ onNavigate, userName }) {
   const [modalAtivo, setModalAtivo] = useState(null); 
-  const [tipoVisualizacao, setTipoVisualizacao] = useState(null); // 'fabulas' ou 'musicas'
+  const [tipoVisualizacao, setTipoVisualizacao] = useState(null); // 'fabulas', 'musicas', 'videos_reflexao', 'videos_mensagem', 'videos_louvor'
   
   // Estados para armazenar os dados vindos do banco
   const [listaFabulas, setListaFabulas] = useState([]);
   const [listaMusicas, setListaMusicas] = useState([]);
+  const [listaReflexoes, setListaReflexoes] = useState([]);
+  const [listaMensagens, setListaMensagens] = useState([]);
+  const [listaLouvores, setListaLouvores] = useState([]);
+  
   const [carregandoDados, setCarregandoDados] = useState(false);
   const [fabulaSelecionada, setFabulaSelecionada] = useState(null);
+  
+  // Estado para controlar o acesso admin
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const getIniciais = (nome) => {
     if (!nome) return 'RF';
@@ -20,41 +27,67 @@ export default function Explorar({ onNavigate, userName }) {
     return nome.substring(0, 2).toUpperCase();
   };
 
-  const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
+  const iniciaisUsuario = getIniciais(userName || 'Visitante');
 
-  // --- BUSCA AUTOMÁTICA DOS DADOS DO SUPABASE ---
+  // --- BUSCA AUTOMÁTICA DOS DADOS E VERIFICAÇÃO DE ADMIN ---
   useEffect(() => {
-    async function carregarConteudos() {
+    async function carregarConteudosEVerificarAdmin() {
       setCarregandoDados(true);
       
-      // Busca Fábulas
+      // 1. Verifica se o usuário logado é o Admin
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && user.email === 'Raquellosnak@gmail.com') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error("Erro ao verificar admin:", err);
+        setIsAdmin(false);
+      }
+
+      // 2. Busca Fábulas
       const { data: fabulasData, error: errFabulas } = await supabase
         .from('fabulas')
         .select('*')
         .order('criado_em', { ascending: false });
       
-      if (!errFabulas && fabulasData) {
-        setListaFabulas(fabulasData);
-      } else {
-        console.error("Erro fábulas:", errFabulas);
-      }
+      if (!errFabulas && fabulasData) setListaFabulas(fabulasData);
 
-      // Busca Músicas
+      // 3. Busca Músicas
       const { data: musicasData, error: errMusicas } = await supabase
         .from('playlists_musicas')
         .select('*')
         .order('criado_em', { ascending: false });
       
-      if (!errMusicas && musicasData) {
-        setListaMusicas(musicasData);
-      } else {
-        console.error("Erro músicas:", errMusicas);
-      }
+      if (!errMusicas && musicasData) setListaMusicas(musicasData);
+
+      // 4. Busca Reflexões Anteriores
+      const { data: refData } = await supabase
+        .from('reflexao_dia')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (refData) setListaReflexoes(refData);
+
+      // 5. Busca Mensagens Anteriores
+      const { data: msgData } = await supabase
+        .from('mensagem_dia')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (msgData) setListaMensagens(msgData);
+
+      // 6. Busca Louvores Anteriores
+      const { data: louvorData } = await supabase
+        .from('louvor_dia')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (louvorData) setListaLouvores(louvorData);
 
       setCarregandoDados(false);
     }
 
-    carregarConteudos();
+    carregarConteudosEVerificarAdmin();
   }, []);
 
   return (
@@ -78,41 +111,48 @@ export default function Explorar({ onNavigate, userName }) {
 
         {/* SE ESTIVER VENDO A LISTA DE FÁBULAS */}
         {tipoVisualizacao === 'fabulas' ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-amber-400">📖 Fábulas & Ensinamentos</h2>
+          <div className="space-y-3 animate-fade-in">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">📖 Histórias</h2>
               <button 
                 onClick={() => { setTipoVisualizacao(null); setFabulaSelecionada(null); }}
-                className="text-xs text-slate-400 hover:text-white bg-slate-800 px-3 py-1 rounded-xl cursor-pointer"
+                className="text-xs text-slate-300 hover:text-white bg-slate-800 px-4 py-2 rounded-xl cursor-pointer transition"
               >
-                ← Voltar
+                ← Voltar à Lista
               </button>
             </div>
 
             {fabulaSelecionada ? (
-              <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-2xl space-y-3">
-                <h3 className="text-sm font-bold text-amber-400">{fabulaSelecionada.titulo}</h3>
-                <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">{fabulaSelecionada.conteudo}</p>
+              <div className="bg-slate-950/80 border border-slate-700 p-5 rounded-2xl space-y-4 shadow-lg">
+                <h3 className="text-xl font-bold text-white leading-tight">{fabulaSelecionada.titulo}</h3>
+                <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <p className="text-base text-slate-200 leading-relaxed whitespace-pre-line font-serif italic opacity-90">
+                    {fabulaSelecionada.conteudo}
+                  </p>
+                </div>
                 <button 
                   onClick={() => setFabulaSelecionada(null)}
-                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl cursor-pointer"
+                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-sm font-bold rounded-xl cursor-pointer transition border border-slate-700"
                 >
-                  Ver Outras Histórias
+                  Ler Outra História
                 </button>
               </div>
             ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
                 {listaFabulas.length === 0 ? (
-                  <p className="text-xs text-slate-400 text-center py-4">Nenhuma fábula encontrada.</p>
+                  <p className="text-sm text-slate-400 text-center py-8">Nenhuma fábula encontrada.</p>
                 ) : (
                   listaFabulas.map((fabula) => (
                     <div 
                       key={fabula.id}
                       onClick={() => setFabulaSelecionada(fabula)}
-                      className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl hover:border-amber-500/40 transition cursor-pointer"
+                      className="group bg-slate-950/60 border border-slate-800 p-4 rounded-2xl hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer shadow-sm"
                     >
-                      <h3 className="text-xs font-bold text-white">{fabula.titulo}</h3>
-                      <p className="text-[10px] text-slate-400 truncate mt-1">{fabula.conteudo}</p>
+                      <div className="flex items-start justify-between">
+                        <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition line-clamp-1">{fabula.titulo}</h3>
+                        <span className="text-amber-500/30 group-hover:text-amber-500 transition ml-2">›</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 truncate mt-1 line-clamp-2">{fabula.conteudo}</p>
                     </div>
                   ))
                 )}
@@ -121,34 +161,80 @@ export default function Explorar({ onNavigate, userName }) {
           </div>
         ) : tipoVisualizacao === 'musicas' ? (
           /* SE ESTIVER VENDO A LISTA DE MÚSICAS */
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-amber-400">🎧 Playlists de Músicas</h2>
+          <div className="space-y-3 animate-fade-in">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">🎧 Playlists</h2>
               <button 
                 onClick={() => setTipoVisualizacao(null)}
-                className="text-xs text-slate-400 hover:text-white bg-slate-800 px-3 py-1 rounded-xl cursor-pointer"
+                className="text-xs text-slate-300 hover:text-white bg-slate-800 px-4 py-2 rounded-xl cursor-pointer transition"
+              >
+                ← Voltar à Lista
+              </button>
+            </div>
+
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+              {listaMusicas.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-8">Nenhuma música encontrada.</p>
+              ) : (
+                listaMusicas.map((musica) => (
+                  <div 
+                    key={musica.id}
+                    className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-400">♪</div>
+                       <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-bold text-white truncate">{musica.nome_playlist}</h3>
+                          {musica.descricao && <p className="text-[10px] text-slate-400 truncate">{musica.descricao}</p>}
+                       </div>
+                    </div>
+                    {musica.audio_url && (
+                      <div className="pt-1">
+                        <audio controls className="w-full h-10 rounded-lg opacity-90">
+                          <source src={musica.audio_url} type="audio/mp3" />
+                          Seu navegador não suporta elemento de áudio.
+                        </audio>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        ) : tipoVisualizacao === 'videos_reflexao' || tipoVisualizacao === 'videos_mensagem' || tipoVisualizacao === 'videos_louvor' ? (
+          /* SE ESTIVER VENDO O ACERVO DE VÍDEOS (REFLEXÃO, MENSAGEM OU LOUVOR) */
+          <div className="space-y-3 animate-fade-in">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h2 className="text-base font-bold text-amber-400 flex items-center gap-2">
+                {tipoVisualizacao === 'videos_reflexao' && '📖 Acervo de Reflexões'}
+                {tipoVisualizacao === 'videos_mensagem' && '🕊️ Acervo de Mensagens'}
+                {tipoVisualizacao === 'videos_louvor' && '🎶 Acervo de Louvores'}
+              </h2>
+              <button 
+                onClick={() => setTipoVisualizacao(null)}
+                className="text-xs text-slate-300 hover:text-white bg-slate-800 px-3 py-1.5 rounded-xl cursor-pointer transition"
               >
                 ← Voltar
               </button>
             </div>
 
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {listaMusicas.length === 0 ? (
-                <p className="text-xs text-slate-400 text-center py-4">Nenhuma música encontrada.</p>
+            <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+              {(tipoVisualizacao === 'videos_reflexao' ? listaReflexoes : 
+                tipoVisualizacao === 'videos_mensagem' ? listaMensagens : listaLouvores).length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-8">Nenhum vídeo anterior encontrado.</p>
               ) : (
-                listaMusicas.map((musica) => (
-                  <div 
-                    key={musica.id}
-                    className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl space-y-2"
-                  >
-                    <h3 className="text-xs font-bold text-white">{musica.nome_playlist}</h3>
-                    {musica.descricao && <p className="text-[10px] text-slate-400">{musica.descricao}</p>}
-                    
-                    {musica.audio_url && (
-                      <audio controls className="w-full h-8 mt-2">
-                        <source src={musica.audio_url} type="audio/mp3" />
-                        Seu navegador não suporta elemento de áudio.
-                      </audio>
+                (tipoVisualizacao === 'videos_reflexao' ? listaReflexoes : 
+                 tipoVisualizacao === 'videos_mensagem' ? listaMensagens : listaLouvores).map((item) => (
+                  <div key={item.id} className="bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl space-y-2 shadow-inner">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xs font-bold text-white">{item.titulo || 'Conteúdo Devocional'}</h3>
+                      <span className="text-[10px] text-slate-400">{new Date(item.created_at).toLocaleDateString()}</span>
+                    </div>
+                    {item.video_url && (
+                      <video controls className="w-full h-48 rounded-xl bg-black object-cover">
+                        <source src={item.video_url} type="video/mp4" />
+                        Seu navegador não suporta vídeos.
+                      </video>
                     )}
                   </div>
                 ))
@@ -199,9 +285,58 @@ export default function Explorar({ onNavigate, userName }) {
               <span className="text-slate-500">›</span>
             </div>
 
-            {/* 3. Conteúdo Educativo & Musical (AGORA CONECTADO AO SUPABASE!) */}
+            {/* 3. Acervo de Vídeos Anteriores (Reflexão, Mensagem e Louvor) */}
             <div className="space-y-2">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Estudo & Louvor</h2>
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Vídeos & Mensagens Anteriores</h2>
+              
+              <div className="grid grid-cols-1 gap-2">
+                <div 
+                  onClick={() => setTipoVisualizacao('videos_reflexao')}
+                  className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-amber-400 text-base">📖</span>
+                    <div>
+                      <h3 className="text-xs font-bold text-white">Reflexões Anteriores</h3>
+                      <p className="text-[10px] text-slate-400">{listaReflexoes.length} vídeos salvos</p>
+                    </div>
+                  </div>
+                  <span className="text-slate-500">›</span>
+                </div>
+
+                <div 
+                  onClick={() => setTipoVisualizacao('videos_mensagem')}
+                  className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-amber-400 text-base">🕊️</span>
+                    <div>
+                      <h3 className="text-xs font-bold text-white">Mensagens Anteriores</h3>
+                      <p className="text-[10px] text-slate-400">{listaMensagens.length} vídeos salvos</p>
+                    </div>
+                  </div>
+                  <span className="text-slate-500">›</span>
+                </div>
+
+                <div 
+                  onClick={() => setTipoVisualizacao('videos_louvor')}
+                  className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-amber-400 text-base">🎶</span>
+                    <div>
+                      <h3 className="text-xs font-bold text-white">Louvores Anteriores</h3>
+                      <p className="text-[10px] text-slate-400">{listaLouvores.length} vídeos salvos</p>
+                    </div>
+                  </div>
+                  <span className="text-slate-500">›</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Estudo & Louvor (Fábulas e Músicas Áudio) */}
+            <div className="space-y-2">
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Estudo & Leitura</h2>
               
               <div className="space-y-2">
                 <div 
@@ -209,12 +344,10 @@ export default function Explorar({ onNavigate, userName }) {
                   className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-amber-400">📖</span>
+                    <span className="text-amber-400">📜</span>
                     <div>
                       <h3 className="text-xs font-bold text-white">Fábulas & Ensinamentos</h3>
-                      <p className="text-[10px] text-slate-400">
-                        {carregandoDados ? "Carregando..." : `${listaFabulas.length} histórias prontas`}
-                      </p>
+                      <p className="text-[10px] text-slate-400">{listaFabulas.length} histórias prontas</p>
                     </div>
                   </div>
                   <span className="text-slate-500">›</span>
@@ -227,10 +360,8 @@ export default function Explorar({ onNavigate, userName }) {
                   <div className="flex items-center gap-3">
                     <span className="text-amber-400">🎧</span>
                     <div>
-                      <h3 className="text-xs font-bold text-white">Playlists de Músicas</h3>
-                      <p className="text-[10px] text-slate-400">
-                         {carregandoDados ? "Buscando áudios..." : `${listaMusicas.length} faixas carregadas`}
-                      </p>
+                      <h3 className="text-xs font-bold text-white">Playlists de Músicas (Áudio)</h3>
+                      <p className="text-[10px] text-slate-400">{listaMusicas.length} faixas carregadas</p>
                     </div>
                   </div>
                   <span className="text-slate-500">›</span>
@@ -238,7 +369,7 @@ export default function Explorar({ onNavigate, userName }) {
               </div>
             </div>
 
-            {/* 4. Acervo Hinoário */}
+            {/* 5. Acervo Hinoário */}
             <div className="space-y-2">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Acervo Hinoário</h2>
@@ -258,12 +389,10 @@ export default function Explorar({ onNavigate, userName }) {
               </div>
             </div>
 
-            {/* 5. Mural de Oração */}
+            {/* 6. Mural de Oração */}
             <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xs font-bold text-white uppercase tracking-wider">Mural de Oração</h2>
-                </div>
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider">Mural de Oração</h2>
                 <button 
                   onClick={() => setModalAtivo('pedido')}
                   className="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer"
@@ -289,12 +418,21 @@ export default function Explorar({ onNavigate, userName }) {
 
         {/* Menu de Navegação Inferior */}
         <div className="pt-3 border-t border-slate-800">
-          <div className="grid grid-cols-5 gap-1 text-center">
-            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Home</button>
-            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Planos</button>
+          <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
+            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer hover:text-white transition">Home</button>
+            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer hover:text-white transition">Bíblia</button>
+            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer hover:text-white transition">Planos</button>
             <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Config</button>
+            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer hover:text-white transition">Config</button>
+            
+            {isAdmin && (
+              <button 
+                onClick={() => onNavigate && onNavigate('admin')} 
+                className="p-2 bg-slate-950/60 border border-amber-500/30 rounded-xl text-amber-400 text-[9px] font-bold cursor-pointer hover:bg-amber-500 hover:text-slate-950 transition shadow-inner"
+              >
+                Admin
+              </button>
+            )}
           </div>
         </div>
 
