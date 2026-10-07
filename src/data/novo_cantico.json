@@ -1,0 +1,163 @@
+{
+  "-1": { "meta": "Dados iniciais do Hinário Novo Cântico" },
+  "1": {
+    "hino": "1 - Grandioso És Tu",
+    "coro": "Grandioso és Tu, grandioso és Tu,<br>Não há outro igual ao Teu poder;<br>Minh'alma canta a Ti, ó Deus vivo,<br>Grandioso és Tu!",
+    "verses": {
+      "1": "Ao contemplar os céus e ouvir trovões,<br>Tua criação revela quem Tu és;<br>As nuvens, o arco-íris, luz do sol,<br>Mostram Tua bondade e amor fiel.",
+      "2": "Quando vier Cristo em glória reinar,<br>E os santos todos juntos adorar,<br>Cantarão então, com voz unida:<br>'Grandioso és Tu, Senhor da vida!'."
+    }
+  },
+  "2": {
+    "hino": "2 - Deixa Brilhar Tua Luz",
+    "coro": "Deixa brilhar tua luz, deixa brilhar tua luz,<br>No mundo escuro ao redor, mostra Jesus;<br>Deixa brilhar tua luz, sim, hoje mesmo,",
+    "verses": {
+      "1": "O mundo jaz em trevas profundas,<br>Sem ver a senda que leva aos céus;<br>Mas tu tens a lâmpada da Palavra,<br>Pra guiar os passos dos irmãos.",
+      "2": "Não guardes pra ti tal tesouro,<br>A mensagem viva de salvação;<br>Compartilha a graça que recebeste,<br>Levando esperança ao coração."
+    }
+  },
+  "3": {
+    "hino": "3 - Vem, Espírito Santo",
+    "coro": "Vem, Espírito Santo, enche este lugar,<br>Derrama teu fogo, vem nos renovar;<br>Vem, Espírito Santo, toca meu ser,<br>Faz-me instrumento do Teu querer.",
+    "verses": {
+      "1": "Ó Consolador, promessa do Pai,<br>Vem habitar onde a fé existir;<br>Ensina-nos orar, guia-nos na verdade,<br>Em nós queres morar e agir.",
+      "2": "Purifica a mente, renova o espírito,<br>Traz unidade ao povo de Deus;<br>Onde há divisão, traz reconciliação,<br>Unindo os fiéis sob os céus."
+    }
+  },
+  "4": {
+    "hino": "4 - Aleluia! Cristo Vive",
+    "coro": "Aleluia! Cristo vive!<br>Aleluia! Cristo reina!<br>Aleluia! Cristo volta!<br>Aleluia! Glória eterna!",
+    "verses": {
+      "1": "A pedra rolou, o túmulo está vazio,<br>A morte perdeu, venceu o Senhor;<br>Triunfante Ele sai, com poder infinito,<br>Reinando pra sempre em esplendor.",
+      "2": "Os anjos cantam, a terra responde,<br>Todo joelho se dobrará;<br>Diante do Rei que morreu e reviveu,<br>A glória jamais passará."
+    }
+  },
+  "5": {
+    "hino": "5 - Sou Feliz Porque Ele Vive",
+    "coro": "Sou feliz porque Ele vive,<br>Posso encarar o amanhã;<br>Não temo o que possa vir,<br>Pois sei que Ele me guarda.",
+    "verses": {
+      "1": "Tenho a paz que excede entendimento,<br>Que o mundo não pode dar nem tirar;<br>É fruto da cruz e do sangue vertido,<br>Que veio pra mim resgatar.",
+      "2": "Conheço um nome que sopra esperanças,<br>Num mundo cheio de dor e aflição;<br>Jesus é meu amigo, meu Salvador,<br>Dono da minha salvação."
+    }
+  },
+  "6": {
+    "hino": "6 - Cordeiro de Deus",
+    "coro": "Cordeiro de Deus, que tiras o pecado do mundo,<br>Tem piedade de nós;<br>Cordeiro de Deus, que tiras o pecado do mundo,<br>Tem piedade de nós;",
+    "verses": {
+      "1": "João Batista apontou para Ti,<br>Dizendo: 'Eis o Cordeiro!',<br>Vindo do céu para nos salvar,<br>Do peso do mundo inteiro.",
+      "2": "Na cruz foste sacrificado,<br>Sangue inocente derramou;<br>Abriu-nos as portas do céu,<br>Redenção nos conquistou."
+    }
+  },
+  "7": {
+    "hino": "7 - Vinde, Fiéis",
+    "coro": "Vinde, fiéis, triunfantes,<br>Vinde a Belém contemplar;<br>Vinde, vinde adorai-O,<br>Rei dos anjos, Deus encarnar!",
+    "verses": {
+      "1": "Virgem Mãe, vê o Filho,<br>Em manjedoura reclinado;<br>Menino frágil, mas eterno,<br>Pelo mundo imolado.",
+      "2": "Anjos cantam glórias,<br>Estrelas guiam os magos;<br>Todos juntos celebremos<br>O nascimento sagrado."
+    }
+  },
+  "8": {
+    "hino": "8 - Aleluia, Aleluia",
+    "coro": "Aleluia, aleluia,<br>Aleluia, aleluia;<br>Cristo ressuscitou,<br>Aleluia, aleluia!",
+    "verses": {
+      "1": "Morte, onde está teu aguilhão?<br>Túmulo, onde está tua vitória?<br>O Rei da vida venceu,<br>Rompendo as correntes da história.",
+      "2": "Primeira colheita dos mortos,<br>Primícias da nova criação;<br>Nele temos a garantia<br>Da nossa própria ressurreição."
+    }
+  },
+  "9": {
+    "hino": "9 - Santo, Santo, Santo",
+    "coro": "Santo, santo, santo, Senhor Deus Todo-Poderoso!<br>Céus e terra proclamam a Tua majestade;<br>Hosana nas alturas, hosana ao Rei dos reis!",
+    "verses": {
+      "1": "Santo, santo, santo, Deus Onipotente!<br>Anjos prostrados diante do Trono estão;<br>Vestes brancas e coroas de ouro,<br>Oferecem louvor em santa adoração.",
+      "2": "Santo, santo, santo, embora a glória oculta<br>Esteja em nuvem densa e resplendor;<br>Tu és o primeiro e o último,<br>Reinando eternamente em poder e amor."
+    }
+  },
+  "10": {
+    "hino": "10 - Glória a Deus nas Alturas",
+    "coro": "Glória a Deus nas alturas,<br>Paz na terra aos homens bons;<br>Louvemos o Nome divino,<br>Entre celestes canções.",
+    "verses": {
+      "1": "Pastores viram a estrela brilhar,<br>E ouviram a voz celestial;<br>'Nasceu o Messias prometido',<br>Notícia boa e especial.",
+      "2": "Magos trouxeram incenso e mirra,<br>Prostraram-se ao Menino Divino;<br>Reconhecendo Seu reinado,<br>Ofereceram ouro fino."
+    }
+  },
+  "11": {
+    "hino": "11 - Eu Quero Andar Com Meu Jesus",
+    "coro": "Eu quero andar com meu Jesus,<br>Andar com meu Jesus;<br>Eu quero andar com meu Jesus,<br>Onde quer que Ele vá.",
+    "verses": {
+      "1": "Ele foi ao Jordão batizar-se,<br>E eu quero estar lá também;<br>Seguir Seus passos, aprender d'Ele,<br>Até chegar ao fim.",
+      "2": "Ele subiu ao monte orar,<br>E eu quero subir também;<br>Buscar Sua face, sentir Seu toque,<br>Na noite e no amanhecer."
+    }
+  },
+  "12": {
+    "hino": "12 - Maranata, Ora Vem Senhor Jesus",
+    "coro": "Maranata, ora vem Senhor Jesus,<br>Maranata, ora vem Senhor Jesus;<br>Vem depressa, não tardes mais,<br>Vem buscar a Tua igreja amada.",
+    "verses": {
+      "1": "As trombetas soarão nos ares,<br>Os mortos ressurgirão em glória;<br>Os vivos serão transformados,<br>Para encontrar o Rei da Vitória.",
+      "2": "Preparai-vos, pois não sabeis,<br>Em que hora virá o Senhor;<br>Vigiai e orai constantemente,<br>Prontos para o encontro final."
+    }
+  },
+  "13": {
+    "hino": "13 - A Cruz Está Vazia",
+    "coro": "A cruz está vazia, o túmulo aberto está,<br>Cristo vive, Cristo reina, aleluia cantará;<br>A cruz está vazia, a morte foi vencida,<br>Jesus é o Senhor, para toda a eternidade.",
+    "verses": {
+      "1": "Onde estava aquele corpo morto,<br>Agora só há linhos enrolados;<br>As guardas dormem, assustadas,<br>Pois o Príncipe da Vida despertou.",
+      "2": "Maria Madalena chorava,<br>Mas ouviu a voz do Bom Pastor;<br>'Não chores mais', disse Jesus,<br>'Eu sou a Ressurreição e a Vida'."
+    }
+  },
+  "14": {
+    "hino": "14 - Bendito Seja o Senhor",
+    "coro": "Bendito seja o Senhor, Deus de Israel,<br>Desde a eternidade até a eternidade;<br>Bendito seja o Seu nome glorioso,<br>Que encha toda a terra da Sua glória.",
+    "verses": {
+      "1": "Ele nos levantou uma força de salvação,<br>Na casa de Davi, Seu servo;<br>Como prometeu pelos boca dos profetas,<br>Desde os tempos antigos.",
+      "2": "Para nos salvar dos nossos inimigos,<br>E das mãos de todos os que nos odeiam;<br>Para usar de misericórdia com nossos pais,<br>E lembrar da Sua santa aliança."
+    }
+  },
+  "15": {
+    "hino": "15 - O Senhor é Meu Pastor",
+    "coro": "O Senhor é meu pastor, nada me faltará;<br>Deitar-me faz em verdes pastos,<br>Guia-me mansamente a águas tranquilas.",
+    "verses": {
+      "1": "Refrigera a minha alma;<br>Guia-me pelas veredas da justiça,<br>Por amor do Seu nome.",
+      "2": "Ainda que eu andasse pelo vale da sombra da morte,<br>Não temeria mal algum,<br>Pois Tu estás comigo;"
+    }
+  },
+  "16": {
+    "hino": "16 - Quão Grande És Tu",
+    "coro": "Quão grande és Tu,<br>Quão grande és Tu;<br>As montanhas não poderiam esconder<br>A Tua glória infinita.",
+    "verses": {
+      "1": "Quando contemplo os céus,<br>Obra dos Teus dedos;<br>A lua e as estrelas que puseste,<br>Brilhando no espaço sideral.",
+      "2": "Então diz a minha alma:<br>Quão grande és Tu, Senhor!<br>Quão grande és Tu, Deus criador!"
+    }
+  },
+  "17": {
+    "hino": "17 - Aleluia! Cantai ao Senhor",
+    "coro": "Aleluia! Cantai ao Senhor um cântico novo,<br>Aleluia! Louvai-O na congregação dos santos;<br>Aleluia! Com pandeiros e danças,<br>Aleluia! Com trombetas e harpas.",
+    "verses": {
+      "1": "Porque a Sua benignidade dura para sempre,<br>E a Sua fidelidade de geração em geração;<br>Portanto, celebraremos o Seu nome santo.",
+      "2": "Grande é o Senhor e mui digno de louvor,<br>Na cidade do nosso Deus, no Seu santo monte;"
+    }
+  },
+  "18": {
+    "hino": "18 - Vinde, Todos os Que Estais Cansados",
+    "coro": "Vinde a Mim, todos os que estais cansados e oprimidos,<br>E Eu vos aliviarei;<br>Tomai sobre vós o Meu jugo,<br>E aprendei de Mim, que sou manso e humilde de coração.",
+    "verses": {
+      "1": "Porque o Meu jugo é suave,<br>E o Meu fardo é leve;<br>Descansareis as vossas almas,<br>Encontrando refúgio em Mim.",
+      "2": "Não busqueis descanso no mundo,<br>Nem nas riquezas passageiras;<br>Só em Mim achareis a paz verdadeira,<br>Que excede todo entendimento."
+    }
+  },
+  "19": {
+    "hino": "19 - Eu Sei Em Quem Tenho Crido",
+    "coro": "Eu sei em quem tenho crido,<br>E estou certo de que é poderoso<br>Para guardar o meu depósito<br>Até aquele Dia.",
+    "verses": {
+      "1": "Embora eu não veja,<br>Confio plenamente;<br>Embora eu não entenda,<br>Aceito por fé.",
+      "2": "Se Ele prometeu,<br>Cumprirá com certeza;<br>Nenhuma palavra d'Ele<br>Cairá por terra."
+    }
+  },
+  "20": {
+    "hino": "20 - Digno É o Cordeiro",
+    "coro": "Digno é o Cordeiro que foi morto,<br>De receber o poder, e riqueza,<br>E sabedoria, e força,<br>E honra, e glória, e louvor.",
+    "verses": {
+      "1": "Milhões de milhões de anjos<br>Adoram diante do Trono;<br>Sanctus, Sanctus, Sanctus,<br>Senhor Deus dos Exércitos.",
+      "2": "Toda criatura no céu,<br>Na terra e debaixo da terra,<br>Diz: Ao que está assentado no trono,<br>Seja o louvor e a honra pelos séculos dos séculos."
+    }
+  }
+}

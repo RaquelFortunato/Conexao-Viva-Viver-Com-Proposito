@@ -1,17 +1,75 @@
 import React, { useState } from 'react';
+import { supabase } from './data/supabase.js'; 
 
 export default function Login({ onLoginSuccess }) {
-  // Começa como 'true' para abrir direto na tela de Cadastro/Primeiro Acesso que você desenhou
   const [isCadastro, setIsCadastro] = useState(true);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
-  const [codigo, setCodigo] = useState('');
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLoginSuccess();
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (isCadastro) {
+        if (senha !== confirmaSenha) {
+          throw new Error("As senhas não coincidem.");
+        }
+
+        const { data, error: authError } = await supabase.auth.signUp({
+          email,
+          password: senha,
+          options: {
+            data: {
+              full_name: nome,
+            },
+          },
+        });
+
+        if (authError) throw authError;
+
+        if (!data.user) {
+           throw new Error("Não foi possível criar a conta. Tente outro e-mail.");
+        }
+
+        alert("Conta criada com sucesso! Faça login para continuar.");
+        setIsCadastro(false);
+        
+      } else {
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
+        if (signInError) throw signInError;
+
+        const userNameFromDb = data.user.user_metadata?.full_name || email.split('@')[0];
+        
+        onLoginSuccess(email, userNameFromDb, false); 
+      }
+
+    } catch (err) {
+      console.error(err);
+      let message = err.message;
+      
+      if (message.includes("Invalid login credentials")) {
+        message = "E-mail ou senha incorretos.";
+      } else if (message.includes("Email not confirmed")) {
+        message = "Verifique seu e-mail para confirmar a conta antes de entrar.";
+      } else if (message.includes("User already registered")) {
+        message = "Este e-mail já possui uma conta. Tente entrar.";
+      }
+      
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -19,14 +77,12 @@ export default function Login({ onLoginSuccess }) {
       
       <div className="w-full max-w-md bg-slate-900/95 p-8 rounded-3xl border border-slate-800 shadow-2xl backdrop-blur-md my-auto">
         
-        {/* Ícone / Logo no topo */}
         <div className="flex justify-center mb-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/20">
             <span className="text-slate-950 font-bold text-xl">✝</span>
           </div>
         </div>
 
-        {/* Cabeçalho */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold tracking-wide text-white">Conexão Viva</h1>
           <p className="text-amber-400 text-xs font-semibold tracking-widest mt-0.5">VIVER COM PROPÓSITO</p>
@@ -48,11 +104,10 @@ export default function Login({ onLoginSuccess }) {
           </p>
         </div>
 
-        {/* Abas Entrar / Cadastrar */}
         <div className="flex bg-slate-950 p-1 rounded-xl mb-6 border border-slate-800">
           <button
             type="button"
-            onClick={() => setIsCadastro(false)}
+            onClick={() => { setIsCadastro(false); setError(null); }}
             className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${
               !isCadastro ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
             }`}
@@ -61,7 +116,7 @@ export default function Login({ onLoginSuccess }) {
           </button>
           <button
             type="button"
-            onClick={() => setIsCadastro(true)}
+            onClick={() => { setIsCadastro(true); setError(null); }}
             className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${
               isCadastro ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
             }`}
@@ -70,7 +125,12 @@ export default function Login({ onLoginSuccess }) {
           </button>
         </div>
 
-        {/* Formulário */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-900/30 border border-red-800 text-red-300 text-xs rounded-lg text-center animate-pulse">
+            ❌ {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           
           {isCadastro && (
@@ -82,7 +142,8 @@ export default function Login({ onLoginSuccess }) {
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Seu nome completo"
                 required={isCadastro}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                disabled={loading}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 disabled:opacity-50"
               />
             </div>
           )}
@@ -97,7 +158,8 @@ export default function Login({ onLoginSuccess }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="seu.email@exemplo.com"
               required
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              disabled={loading}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 disabled:opacity-50"
             />
           </div>
 
@@ -107,7 +169,7 @@ export default function Login({ onLoginSuccess }) {
                 {isCadastro ? 'Criar Senha' : 'Senha'}
               </label>
               {!isCadastro && (
-                <a href="#esqueci" onClick={(e) => { e.preventDefault(); alert('Instruções enviadas para o seu e-mail.'); }} className="text-xs text-amber-400 hover:underline">
+                <a href="#esqueci" onClick={(e) => { e.preventDefault(); alert('Funcionalidade de recuperação em breve.'); }} className="text-xs text-amber-400 hover:underline">
                   Esqueci minha senha
                 </a>
               )}
@@ -118,7 +180,9 @@ export default function Login({ onLoginSuccess }) {
               onChange={(e) => setSenha(e.target.value)}
               placeholder={isCadastro ? "Crie uma senha segura" : "Sua senha secreta"}
               required
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              minLength={6}
+              disabled={loading}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 disabled:opacity-50"
             />
           </div>
 
@@ -132,38 +196,36 @@ export default function Login({ onLoginSuccess }) {
                   onChange={(e) => setConfirmaSenha(e.target.value)}
                   placeholder="Repita a senha"
                   required={isCadastro}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                  minLength={6}
+                  disabled={loading}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 disabled:opacity-50"
                 />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Código de Confirmação</label>
-                <input
-                  type="text"
-                  value={codigo}
-                  onChange={(e) => setCodigo(e.target.value)}
-                  placeholder="Digite o código enviado"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">Enviaremos um código de 6 dígitos para o seu e-mail para validar seu acesso com total segurança.</p>
               </div>
             </>
           )}
 
-          {/* Botão de Ação */}
           <button
             type="submit"
-            className="w-full mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+            disabled={loading}
+            className="w-full mt-4 bg-amber-500 hover:bg-amber-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-slate-950 font-bold py-3 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>{isCadastro ? 'Criar Conta e Continuar' : 'Entrar na Conta'}</span>
-            <span className="text-base">→</span>
+            {loading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-slate-950" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processando...
+              </>
+            ) : (
+              <span>{isCadastro ? 'Criar Conta e Continuar' : 'Entrar na Conta'}</span>
+            )}
           </button>
         </form>
 
-        {/* Rodapé e Termos */}
         <div className="mt-6 text-center space-y-2 border-t border-slate-800/60 pt-4">
           <p className="text-[11px] text-slate-400 font-medium">
-            🔒 Ambiente seguro, privado, dados protegidos.
+            🔒 Ambiente seguro, privado, dados protegidos pelo Supabase.
           </p>
           <p className="text-[10px] text-slate-500">
             Ao continuar, você concorda com nossos <span className="underline cursor-pointer text-slate-400">Termos de Uso</span>.

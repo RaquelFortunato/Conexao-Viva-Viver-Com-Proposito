@@ -2,25 +2,46 @@ import React, { useState, useEffect } from 'react';
 // Importe o seu cliente do Supabase aqui, ajuste o caminho se necessário (ex: './supabaseClient')
 // import { supabase } from '../supabaseClient'; 
 
-export default function Home({ onNavigate }) {
+export default function Home({ onNavigate, userName }) {
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Função para calcular as iniciais do usuário dinamicamente
+  const getIniciais = (nome) => {
+    if (!nome) return 'RF';
+    const partes = nome.trim().split(' ');
+    if (partes.length >= 2) {
+      return (partes[0][0] + partes[1][0]).toUpperCase();
+    }
+    return nome.substring(0, 2).toUpperCase();
+  };
+
+  const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
 
   useEffect(() => {
     async function checkUserAdmin() {
       try {
-        // Se você estiver usando o Supabase, descomente as linhas abaixo:
+        // Quando o Supabase estiver conectado ao login, descomente o bloco abaixo:
         /*
         const { data: { user } } = await supabase.auth.getUser();
         if (user && user.email === 'Raquellosnak@gmail.com') {
           setIsAdmin(true);
+          return;
         }
         */
         
-        // Simulação temporária para teste local (remover quando o Supabase estiver conectado):
-        // Se quiser testar o admin aparecendo agora, mude para true:
-        setIsAdmin(true); 
+        // --- SIMULAÇÃO DE LOGIN ---
+        // Se colocar 'Raquellosnak@gmail.com' -> O botão Admin APARECE.
+        // Se colocar outro e-mail ou '' (vazio) -> O botão Admin SOME.
+        const emailUsuarioLogado = ''; // Altere aqui para testar (ex: '' para conta comum)
+
+        if (emailUsuarioLogado === 'Raquellosnak@gmail.com') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
       } catch (error) {
         console.error("Erro ao verificar admin:", error);
+        setIsAdmin(false);
       }
     }
     checkUserAdmin();
@@ -41,8 +62,8 @@ export default function Home({ onNavigate }) {
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">Tela Inicial</p>
           </div>
-          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
-            RF
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
+            {iniciaisUsuario}
           </div>
         </div>
 
@@ -136,14 +157,14 @@ export default function Home({ onNavigate }) {
           </div>
         </div>
 
-        {/* 6. Louvor do Dia */}
+        {/* 6. Louvor do Dia (Ajustado para Vídeo) */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🎵 LOUVOR DO DIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Aguardando louvor</span>
+            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Aguardando vídeo</span>
           </div>
           <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
-            Nenhum louvor enviado ainda
+            Nenhum vídeo enviado ainda
           </div>
           <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-slate-400 text-sm">
             <div className="flex items-center gap-4">

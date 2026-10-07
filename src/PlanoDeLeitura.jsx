@@ -3,27 +3,48 @@ import { PLANOS_LEITURA } from './data/PlanosData';
 // Importe o seu cliente do Supabase aqui, ajuste o caminho se necessário (ex: './supabaseClient')
 // import { supabase } from '../supabaseClient'; 
 
-export default function PlanoDeLeitura({ onNavigate }) {
+export default function PlanoDeLeitura({ onNavigate, userName }) {
   const [abaAtivaPlano, setAbaAtivaPlano] = useState('catalogo'); // 'catalogo', 'detalhe'
   const [planoAtivo, setPlanoAtivo] = useState(null);
   const [diasConcluidos, setDiasConcluidos] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Função para calcular as iniciais do usuário dinamicamente
+  const getIniciais = (nome) => {
+    if (!nome) return 'RF';
+    const partes = nome.trim().split(' ');
+    if (partes.length >= 2) {
+      return (partes[0][0] + partes[1][0]).toUpperCase();
+    }
+    return nome.substring(0, 2).toUpperCase();
+  };
+
+  const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
+
   useEffect(() => {
     async function checkUserAdmin() {
       try {
-        // Se você estiver usando o Supabase, descomente as linhas abaixo:
+        // Quando o Supabase estiver conectado ao login, descomente o bloco abaixo:
         /*
         const { data: { user } } = await supabase.auth.getUser();
         if (user && user.email === 'Raquellosnak@gmail.com') {
           setIsAdmin(true);
+          return;
         }
         */
         
-        // Simulação temporária para teste local (mude para true se quiser ver o admin nesta tela):
-        setIsAdmin(true); 
+        // --- SIMULAÇÃO DE LOGIN ---
+        // Deixe '' (vazio) para usuários comuns. Coloque 'Raquellosnak@gmail.com' para liberar o Admin.
+        const emailUsuarioLogado = ''; 
+
+        if (emailUsuarioLogado === 'Raquellosnak@gmail.com') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
       } catch (error) {
         console.error("Erro ao verificar admin:", error);
+        setIsAdmin(false);
       }
     }
     checkUserAdmin();
@@ -59,8 +80,8 @@ export default function PlanoDeLeitura({ onNavigate }) {
             </h1>
             <p className="text-base font-bold text-amber-400 mt-0.5">Planos de Leitura</p>
           </div>
-          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
-            RF
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
+            {iniciaisUsuario}
           </div>
         </div>
 

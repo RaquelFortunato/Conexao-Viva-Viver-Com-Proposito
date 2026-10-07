@@ -1,60 +1,68 @@
 import React, { useState, useEffect } from 'react';
-// Importe o seu cliente do Supabase aqui, ajuste o caminho se necessário (ex: './supabaseClient')
-// import { supabase } from '../supabaseClient'; 
+import { supabase } from './data/supabase'; 
 
-export default function Explorar({ onNavigate }) {
-  // Estados para controlar os modais e avisos interativos
-  const [modalAtivo, setModalAtivo] = useState(null); // 'promessa', 'medalhas', 'diario', 'concordancia', 'pedido', 'emBreve'
-  const [tituloEmBreve, setTituloEmBreve] = useState('');
-  const [promessaDoDia, setPromessaDoDia] = useState('"O Senhor é o meu pastor; nada me faltará." - Salmos 23:1');
-  const [orando, setOrando] = useState(false);
-  const [contadorOracao, setContadorOracao] = useState(42);
-  const [isAdmin, setIsAdmin] = useState(false);
+export default function Explorar({ onNavigate, userName }) {
+  const [modalAtivo, setModalAtivo] = useState(null); 
+  const [tipoVisualizacao, setTipoVisualizacao] = useState(null); // 'fabulas' ou 'musicas'
+  
+  // Estados para armazenar os dados vindos do banco
+  const [listaFabulas, setListaFabulas] = useState([]);
+  const [listaMusicas, setListaMusicas] = useState([]);
+  const [carregandoDados, setCarregandoDados] = useState(false);
+  const [fabulaSelecionada, setFabulaSelecionada] = useState(null);
 
-  useEffect(() => {
-    async function checkUserAdmin() {
-      try {
-        // Se você estiver usando o Supabase, descomente as linhas abaixo:
-        /*
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user && user.email === 'Raquellosnak@gmail.com') {
-          setIsAdmin(true);
-        }
-        */
-        
-        // Simulação temporária para teste local (mude para true se quiser ver o admin nesta tela):
-        setIsAdmin(true); 
-      } catch (error) {
-        console.error("Erro ao verificar admin:", error);
-      }
+  const getIniciais = (nome) => {
+    if (!nome) return 'RF';
+    const partes = nome.trim().split(' ');
+    if (partes.length >= 2) {
+      return (partes[0][0] + partes[1][0]).toUpperCase();
     }
-    checkUserAdmin();
+    return nome.substring(0, 2).toUpperCase();
+  };
+
+  const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
+
+  // --- BUSCA AUTOMÁTICA DOS DADOS DO SUPABASE ---
+  useEffect(() => {
+    async function carregarConteudos() {
+      setCarregandoDados(true);
+      
+      // Busca Fábulas
+      const { data: fabulasData, error: errFabulas } = await supabase
+        .from('fabulas')
+        .select('*')
+        .order('criado_em', { ascending: false });
+      
+      if (!errFabulas && fabulasData) {
+        setListaFabulas(fabulasData);
+      } else {
+        console.error("Erro fábulas:", errFabulas);
+      }
+
+      // Busca Músicas
+      const { data: musicasData, error: errMusicas } = await supabase
+        .from('playlists_musicas')
+        .select('*')
+        .order('criado_em', { ascending: false });
+      
+      if (!errMusicas && musicasData) {
+        setListaMusicas(musicasData);
+      } else {
+        console.error("Erro músicas:", errMusicas);
+      }
+
+      setCarregandoDados(false);
+    }
+
+    carregarConteudos();
   }, []);
-
-  const abrirEmBreve = (nomeRecurso) => {
-    setTituloEmBreve(nomeRecurso);
-    setModalAtivo('emBreve');
-  };
-
-  const tirarNovaPromessa = () => {
-    const promessas = [
-      "\"Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.\" - Provérbios 3:5",
-      "\"Disse-lhe Jesus: Eu sou a ressurreição e a vida; quem crê em mim, ainda que esteja morto, viverá.\" - João 11:25",
-      "\"O Senhor te guardará de todo o mal; ele guardará a tua alma.\" - Salmos 121:7",
-      "\"Esconde-me debaixo da sombra das tuas asas.\" - Salmos 17:8",
-      "\"Porque sou eu que conheço os planos que tenho para vocês, diz o Senhor, planos de fazê-los prosperar e não de causar dano.\" - Jeremias 29:11"
-    ];
-    const aleatoria = promessas[Math.floor(Math.random() * promessas.length)];
-    setPromessaDoDia(aleatoria);
-  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center relative">
       
-      {/* Container Principal Centralizado */}
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
-        {/* Cabeçalho Padronizado */}
+        {/* Cabeçalho */}
         <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner">
           <div>
             <h1 className="text-sm font-bold text-white flex items-center gap-1.5">
@@ -63,384 +71,259 @@ export default function Explorar({ onNavigate }) {
             </h1>
             <p className="text-base font-bold text-amber-400 mt-0.5">Explorar</p>
           </div>
-          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
-            RF
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
+            {iniciaisUsuario}
           </div>
         </div>
 
-        {/* 1. Caixinha de Promessas */}
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">✨ Diário da Fé</span>
-            <span className="text-[10px] text-slate-400">🟡 Promessa de Hoje</span>
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-white">Caixinha de Promessas</h2>
-            <p className="text-[11px] text-slate-400 mt-0.5">Toque para retirar sua palavra de consolo e força para hoje.</p>
-          </div>
-          <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-amber-400 text-base">🎁</span>
-              <div>
-                <p className="text-xs font-bold text-white">Tirar Promessa</p>
-                <p className="text-[10px] text-slate-400 truncate max-w-[170px]">{promessaDoDia}</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setModalAtivo('promessa')}
-              className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer"
-            >
-              Abrir
-            </button>
-          </div>
-        </div>
-
-        {/* 2. Medalhas & Conquistas */}
-        <div 
-          onClick={() => setModalAtivo('medalhas')}
-          className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3 hover:border-amber-500/40 transition cursor-pointer"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-amber-400">⭐</span>
-              <h2 className="text-sm font-bold text-white">Medalhas & Conquistas</h2>
-            </div>
-            <span className="text-[10px] font-semibold text-amber-400">Nível 8 • Discípulo Fiel</span>
-          </div>
-          <div>
-            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
-              <span>Progresso da Semana</span>
-              <span className="text-white font-semibold">18 / 20 Hábitos</span>
-            </div>
-            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div className="bg-amber-400 h-full w-[90%] rounded-full"></div>
-            </div>
-          </div>
-          <div className="grid grid-cols-4 gap-2 pt-1">
-            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
-              <span className="text-xs">🔥</span>
-              <p className="text-[10px] font-bold text-white mt-1">14 Dias</p>
-              <p className="text-[9px] text-slate-400">Constância</p>
-            </div>
-            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
-              <span className="text-xs">🙏</span>
-              <p className="text-[10px] font-bold text-white mt-1">50 Preces</p>
-              <p className="text-[9px] text-slate-400">Intercessor</p>
-            </div>
-            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center">
-              <span className="text-xs">📖</span>
-              <p className="text-[10px] font-bold text-white mt-1">30 Cap.</p>
-              <p className="text-[9px] text-slate-400">Leitor Voraz</p>
-            </div>
-            <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 text-center opacity-60">
-              <span className="text-xs">🔒</span>
-              <p className="text-[10px] font-bold text-white mt-1">Mestre</p>
-              <p className="text-[9px] text-slate-400">Bloqueado</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Jornadas & Hábitos Diários */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Jornadas & Hábitos Diários</h2>
-          <div className="grid grid-cols-2 gap-2">
-            <div 
-              onClick={() => onNavigate && onNavigate('jejum')}
-              className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition cursor-pointer"
-            >
-              <span className="text-amber-400 text-base">🌾</span>
-              <p className="text-[10px] text-slate-400 uppercase font-semibold">Desintoxicação</p>
-              <h3 className="text-xs font-bold text-white">Jejum de Daniel</h3>
-              <p className="text-[10px] text-slate-400 leading-tight">Guia espiritual, receitas e cronograma de 21 dias.</p>
-            </div>
-            <div 
-              onClick={() => onNavigate && onNavigate('rotina')}
-              className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition cursor-pointer"
-            >
-              <span className="text-amber-400 text-base">☀️</span>
-              <p className="text-[10px] text-slate-400 uppercase font-semibold">Devoção</p>
-              <h3 className="text-xs font-bold text-white">Rotina Primeiro Amor</h3>
-              <p className="text-[10px] text-slate-400 leading-tight">Restaure sua intimidade matinal com Deus.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. Desafios */}
-        <div 
-          onClick={() => onNavigate && onNavigate('desafioceleste')}
-          className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-amber-400 text-lg p-2 bg-slate-900 rounded-xl border border-slate-800">🎯</span>
-            <div>
-              <p className="text-[10px] text-slate-400 uppercase font-semibold">Desafios</p>
-              <h3 className="text-xs font-bold text-white">Desafio Celeste</h3>
-              <p className="text-[10px] text-slate-400">Metas semanais de oração e atos de bondade.</p>
-            </div>
-          </div>
-          <span className="text-slate-500">›</span>
-        </div>
-
-        {/* 5. Estudo, Louvor & Intimidade */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Estudo, Louvor & Intimidade</h2>
-          
-          <div className="space-y-2">
-            <div 
-              onClick={() => setModalAtivo('diario')}
-              className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-amber-400">🔒</span>
-                <div>
-                  <h3 className="text-xs font-bold text-white">Meu Diário Espiritual 🛡️</h3>
-                  <p className="text-[10px] text-slate-400">Reflexões protegidas com senha ou biometria.</p>
-                </div>
-              </div>
-              <span className="text-slate-500">›</span>
-            </div>
-
-            <div 
-              onClick={() => setModalAtivo('concordancia')}
-              className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-amber-400">🔍</span>
-                <div>
-                  <h3 className="text-xs font-bold text-white">Concordância Bíblica</h3>
-                  <p className="text-[10px] text-slate-400">Busca temática por palavras, tópicos e versículos.</p>
-                </div>
-              </div>
-              <span className="text-slate-500">›</span>
-            </div>
-
-            <div 
-              onClick={() => abrirEmBreve('Fábulas & Ensinamentos')}
-              className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-amber-400">📖</span>
-                <div>
-                  <h3 className="text-xs font-bold text-white">Fábulas & Ensinamentos</h3>
-                  <p className="text-[10px] text-slate-400">Histórias alegóricas e parábolas contemporâneas.</p>
-                </div>
-              </div>
-              <span className="text-slate-500">›</span>
-            </div>
-
-            <div 
-              onClick={() => abrirEmBreve('Playlists de Músicas')}
-              className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-amber-400">🎧</span>
-                <div>
-                  <h3 className="text-xs font-bold text-white">Playlists de Músicas</h3>
-                  <p className="text-[10px] text-slate-400">Sons acústicos para oração, vigília e meditação.</p>
-                </div>
-              </div>
-              <span className="text-slate-500">›</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 6. Hinários Completos */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hinários Completos</h2>
-            <span className="text-[10px] text-amber-400 font-semibold">5 Coleções</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div onClick={() => abrirEmBreve('Harpa Cristã')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
-              <span className="text-amber-400 text-sm">🎶</span>
-              <h3 className="text-xs font-bold text-white">Harpa Cristã</h3>
-              <p className="text-[10px] text-slate-400">640 Hinos com Cifras</p>
-            </div>
-            <div onClick={() => onNavigate && onNavigate('cantor-cristao')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
-              <span className="text-amber-400 text-sm">🎵</span>
-              <h3 className="text-xs font-bold text-white">Cantor Cristão</h3>
-              <p className="text-[10px] text-slate-400">577 Canções Clássicas</p>
-            </div>
-            <div onClick={() => abrirEmBreve('Cantor para Culto')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
-              <span className="text-amber-400 text-sm">⛪</span>
-              <h3 className="text-xs font-bold text-white">Cantor para Culto</h3>
-              <p className="text-[10px] text-slate-400">Seleção Especial</p>
-            </div>
-            <div onClick={() => abrirEmBreve('Hinário Evangélico')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
-              <span className="text-amber-400 text-sm">📜</span>
-              <h3 className="text-xs font-bold text-white">Hinário Evangélico</h3>
-              <p className="text-[10px] text-slate-400">Hinos Tradicionais</p>
-            </div>
-            <div onClick={() => abrirEmBreve('Hinário Novo Cântico')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer col-span-2">
-              <span className="text-amber-400 text-sm">✨</span>
-              <h3 className="text-xs font-bold text-white">Hinário Novo Cântico</h3>
-              <p className="text-[10px] text-slate-400">Louvores Contemporâneos e Clássicos</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 7. Mural de Intercessão */}
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-amber-400">👥</span>
-              <h2 className="text-xs font-bold text-white uppercase tracking-wider">Mural de Intercessão</h2>
-            </div>
-            <button 
-              onClick={() => setModalAtivo('pedido')}
-              className="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer"
-            >
-              + Pedir Oração
-            </button>
-          </div>
-
-          <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
-            <div className="flex justify-between items-center text-[10px] text-slate-400">
-              <span className="font-semibold text-slate-300">MG • Maria das Graças</span>
-              <span>Há 12 min</span>
-            </div>
-            <p className="text-[11px] text-slate-300 italic">"Peço orações pela cura e restauração da saúde do meu irmão Lucas no hospital."</p>
-            <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px]">
+        {/* SE ESTIVER VENDO A LISTA DE FÁBULAS */}
+        {tipoVisualizacao === 'fabulas' ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-amber-400">📖 Fábulas & Ensinamentos</h2>
               <button 
-                onClick={() => {
-                  setOrando(!orando);
-                  setContadorOracao(prev => orando ? prev - 1 : prev + 1);
-                }}
-                className={`transition cursor-pointer font-semibold ${orando ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
+                onClick={() => { setTipoVisualizacao(null); setFabulaSelecionada(null); }}
+                className="text-xs text-slate-400 hover:text-white bg-slate-800 px-3 py-1 rounded-xl cursor-pointer"
               >
-                {orando ? '❤️ Você está orando' : '🤍 Estou Orando'} ({contadorOracao})
+                ← Voltar
               </button>
-              <span className="text-slate-500">Notificação mútua</span>
+            </div>
+
+            {fabulaSelecionada ? (
+              <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-2xl space-y-3">
+                <h3 className="text-sm font-bold text-amber-400">{fabulaSelecionada.titulo}</h3>
+                <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">{fabulaSelecionada.conteudo}</p>
+                <button 
+                  onClick={() => setFabulaSelecionada(null)}
+                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl cursor-pointer"
+                >
+                  Ver Outras Histórias
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {listaFabulas.length === 0 ? (
+                  <p className="text-xs text-slate-400 text-center py-4">Nenhuma fábula encontrada.</p>
+                ) : (
+                  listaFabulas.map((fabula) => (
+                    <div 
+                      key={fabula.id}
+                      onClick={() => setFabulaSelecionada(fabula)}
+                      className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl hover:border-amber-500/40 transition cursor-pointer"
+                    >
+                      <h3 className="text-xs font-bold text-white">{fabula.titulo}</h3>
+                      <p className="text-[10px] text-slate-400 truncate mt-1">{fabula.conteudo}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        ) : tipoVisualizacao === 'musicas' ? (
+          /* SE ESTIVER VENDO A LISTA DE MÚSICAS */
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-amber-400">🎧 Playlists de Músicas</h2>
+              <button 
+                onClick={() => setTipoVisualizacao(null)}
+                className="text-xs text-slate-400 hover:text-white bg-slate-800 px-3 py-1 rounded-xl cursor-pointer"
+              >
+                ← Voltar
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {listaMusicas.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-4">Nenhuma música encontrada.</p>
+              ) : (
+                listaMusicas.map((musica) => (
+                  <div 
+                    key={musica.id}
+                    className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl space-y-2"
+                  >
+                    <h3 className="text-xs font-bold text-white">{musica.nome_playlist}</h3>
+                    {musica.descricao && <p className="text-[10px] text-slate-400">{musica.descricao}</p>}
+                    
+                    {musica.audio_url && (
+                      <audio controls className="w-full h-8 mt-2">
+                        <source src={musica.audio_url} type="audio/mp3" />
+                        Seu navegador não suporta elemento de áudio.
+                      </audio>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </div>
-        </div>
+        ) : (
+          /* TELA NORMAL COMPLETA DE EXPLORAR */
+          <>
+            {/* 1. Jornadas & Hábitos Diários */}
+            <div className="space-y-2">
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Jornadas Espirituais</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <div 
+                  onClick={() => onNavigate && onNavigate('jejum')}
+                  className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition cursor-pointer"
+                >
+                  <span className="text-amber-400 text-base">🌾</span>
+                  <p className="text-[10px] text-slate-400 uppercase font-semibold">Desintoxicação</p>
+                  <h3 className="text-xs font-bold text-white">Jejum de Daniel</h3>
+                  <p className="text-[10px] text-slate-400 leading-tight">Guia espiritual e cronograma de 21 dias.</p>
+                </div>
+                <div 
+                  onClick={() => onNavigate && onNavigate('rotina')}
+                  className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1.5 hover:border-amber-500/40 transition cursor-pointer"
+                >
+                  <span className="text-amber-400 text-base">☀️</span>
+                  <p className="text-[10px] text-slate-400 uppercase font-semibold">Devoção</p>
+                  <h3 className="text-xs font-bold text-white">Rotina Primeiro Amor</h3>
+                  <p className="text-[10px] text-slate-400 leading-tight">Restaure sua intimidade matinal.</p>
+                </div>
+              </div>
+            </div>
 
-        {/* Menu de Navegação Inteligente (Dinâmico para o Admin) */}
+            {/* 2. Desafios */}
+            <div 
+              onClick={() => onNavigate && onNavigate('desafioceleste')}
+              className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-amber-400 text-lg p-2 bg-slate-900 rounded-xl border border-slate-800">🎯</span>
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase font-semibold">Meta Semanal</p>
+                  <h3 className="text-xs font-bold text-white">Desafio Celeste</h3>
+                  <p className="text-[10px] text-slate-400">Oração constante e atos de bondade.</p>
+                </div>
+              </div>
+              <span className="text-slate-500">›</span>
+            </div>
+
+            {/* 3. Conteúdo Educativo & Musical (AGORA CONECTADO AO SUPABASE!) */}
+            <div className="space-y-2">
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Estudo & Louvor</h2>
+              
+              <div className="space-y-2">
+                <div 
+                  onClick={() => setTipoVisualizacao('fabulas')}
+                  className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-amber-400">📖</span>
+                    <div>
+                      <h3 className="text-xs font-bold text-white">Fábulas & Ensinamentos</h3>
+                      <p className="text-[10px] text-slate-400">
+                        {carregandoDados ? "Carregando..." : `${listaFabulas.length} histórias prontas`}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-slate-500">›</span>
+                </div>
+
+                <div 
+                  onClick={() => setTipoVisualizacao('musicas')}
+                  className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-amber-400">🎧</span>
+                    <div>
+                      <h3 className="text-xs font-bold text-white">Playlists de Músicas</h3>
+                      <p className="text-[10px] text-slate-400">
+                         {carregandoDados ? "Buscando áudios..." : `${listaMusicas.length} faixas carregadas`}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-slate-500">›</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Acervo Hinoário */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Acervo Hinoário</h2>
+                <span className="text-[10px] text-amber-400 font-semibold">Completo</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div onClick={() => onNavigate && onNavigate('HarpaCrista')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
+                  <span className="text-amber-400 text-sm">🎶</span>
+                  <h3 className="text-xs font-bold text-white">Harpa Cristã</h3>
+                  <p className="text-[10px] text-slate-400">640 Hinos Clássicos</p>
+                </div>
+                <div onClick={() => onNavigate && onNavigate('cantor-cristao')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-1 hover:border-amber-500/40 transition cursor-pointer">
+                  <span className="text-amber-400 text-sm">🎵</span>
+                  <h3 className="text-xs font-bold text-white">Cantor Cristão</h3>
+                  <p className="text-[10px] text-slate-400">577 Canções Preciosas</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Mural de Oração */}
+            <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xs font-bold text-white uppercase tracking-wider">Mural de Oração</h2>
+                </div>
+                <button 
+                  onClick={() => setModalAtivo('pedido')}
+                  className="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer"
+                >
+                  + Pedir Oração
+                </button>
+              </div>
+
+              <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                <div className="flex justify-between items-center text-[10px] text-slate-400">
+                  <span className="font-semibold text-slate-300">MG • Maria das Graças</span>
+                  <span>Há 12 min</span>
+                </div>
+                <p className="text-[11px] text-slate-300 italic">"Peço orações pela cura e restauração da saúde do meu irmão Lucas no hospital."</p>
+                <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px]">
+                  <span className="font-semibold text-slate-400">🤍 Quero Orar (42)</span>
+                  <span className="text-slate-500">Notificação ativa</span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Menu de Navegação Inferior */}
         <div className="pt-3 border-t border-slate-800">
-          <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
-            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Home</button>
-            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Planos</button>
+          <div className="grid grid-cols-5 gap-1 text-center">
+            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Home</button>
+            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Bíblia</button>
+            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Planos</button>
             <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Config</button>
-            {isAdmin && (
-              <button onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
-            )}
+            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] cursor-pointer">Config</button>
           </div>
         </div>
 
       </div>
 
-      {/* MODAIS INTERATIVOS */}
-      {modalAtivo && (
+      {/* MODAL DE PEDIDO DE ORAÇÃO */}
+      {modalAtivo === 'pedido' && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl text-center">
-            
-            {modalAtivo === 'promessa' && (
-              <>
-                <span className="text-3xl">🎁</span>
-                <h3 className="text-base font-bold text-amber-400">Sua Promessa de Hoje</h3>
-                <p className="text-xs text-slate-300 italic bg-slate-950/60 p-4 rounded-2xl border border-slate-800 leading-relaxed">
-                  {promessaDoDia}
-                </p>
-                <div className="flex gap-2 pt-2">
-                  <button 
-                    onClick={tirarNovaPromessa}
-                    className="flex-1 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
-                  >
-                    Tirar Outra
-                  </button>
-                  <button 
-                    onClick={() => setModalAtivo(null)}
-                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer"
-                  >
-                    Guardar
-                  </button>
-                </div>
-              </>
-            )}
-
-            {modalAtivo === 'medalhas' && (
-              <>
-                <span className="text-3xl">⭐</span>
-                <h3 className="text-base font-bold text-amber-400">Suas Conquistas</h3>
-                <p className="text-xs text-slate-300">Você está no Nível 8 com 18 hábitos cumpridos esta semana. Continue firme na fé!</p>
-                <button 
-                  onClick={() => setModalAtivo(null)}
-                  className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
-                >
-                  Fechar
-                </button>
-              </>
-            )}
-
-            {modalAtivo === 'diario' && (
-              <>
-                <span className="text-3xl">🛡️</span>
-                <h3 className="text-base font-bold text-amber-400">Meu Diário Espiritual</h3>
-                <p className="text-xs text-slate-300">Suas anotações e reflexões diárias com Deus estão protegidas e salvas com segurança.</p>
-                <button 
-                  onClick={() => setModalAtivo(null)}
-                  className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
-                >
-                  Entendido
-                </button>
-              </>
-            )}
-
-            {modalAtivo === 'concordancia' && (
-              <>
-                <span className="text-3xl">🔍</span>
-                <h3 className="text-base font-bold text-amber-400">Concordância Bíblica</h3>
-                <p className="text-xs text-slate-300">Ferramenta pronta para busca temática avançada por palavras-chave e versículos.</p>
-                <button 
-                  onClick={() => setModalAtivo(null)}
-                  className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
-                >
-                  Fechar
-                </button>
-              </>
-            )}
-
-            {modalAtivo === 'pedido' && (
-              <>
-                <span className="text-3xl">👥</span>
-                <h3 className="text-base font-bold text-amber-400">Novo Pedido de Oração</h3>
-                <textarea 
-                  placeholder="Escreva seu pedido de oração para a comunidade..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-amber-400 h-24 resize-none"
-                ></textarea>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => { alert('Pedido enviado com sucesso!'); setModalAtivo(null); }}
-                    className="flex-1 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
-                  >
-                    Enviar Pedido
-                  </button>
-                  <button 
-                    onClick={() => setModalAtivo(null)}
-                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </>
-            )}
-
-            {modalAtivo === 'emBreve' && (
-              <>
-                <span className="text-3xl">🚧</span>
-                <h3 className="text-base font-bold text-amber-400">{tituloEmBreve}</h3>
-                <p className="text-xs text-slate-300">Este recurso está reservado e em breve receberá todo o conteúdo que você vai enviar!</p>
-                <button 
-                  onClick={() => setModalAtivo(null)}
-                  className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
-                >
-                  Ok, aguardando!
-                </button>
-              </>
-            )}
-
+            <span className="text-3xl">🙏</span>
+            <h3 className="text-base font-bold text-amber-400">Compartilhe seu Pedido</h3>
+            <textarea 
+              placeholder="Escreva aqui o motivo da sua oração..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-amber-400 h-24 resize-none"
+            ></textarea>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => { alert('Pedido enviado para a comunidade!'); setModalAtivo(null); }}
+                className="flex-1 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
+              >
+                Enviar
+              </button>
+              <button 
+                onClick={() => setModalAtivo(null)}
+                className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}

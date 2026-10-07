@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Login from './Login';
+import Welcome from './Welcome';
 import Home from './Home';
 import Explorar from './Explorar';
 import Biblia from './Biblia';
@@ -9,44 +11,88 @@ import JejumDaniel from './JejumDaniel';
 import RotinaPrimeiroAmor from './RotinaPrimeiroAmor';
 import DesafioCeleste from './DesafioCeleste';
 import CantorCristao from './CantorCristao';
-import HarpaCrista from './HarpaCrista';
+import HarpaCrista from './HarpaCrista'; // Importa o componente da Harpa
 
 export default function App() {
+  const [etapaAuth, setEtapaAuth] = useState('login'); 
   const [paginaAtual, setPaginaAtual] = useState('home');
+  const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
 
-  const renderizarTela = () => {
-    switch (paginaAtual) {
-      case 'home':
-        return <Home onNavigate={setPaginaAtual} />;
-      case 'explorar':
-        return <Explorar onNavigate={setPaginaAtual} />;
-      case 'biblia':
-        return <Biblia onNavigate={setPaginaAtual} />;
-      case 'planos':
-        return <PlanoDeLeitura onNavigate={setPaginaAtual} />;
-      case 'configuracao':
-        return <Configuracao onNavigate={setPaginaAtual} />;
-      case 'admin':
-        return <PainelAdministrativo onNavigate={setPaginaAtual} />;
-      case 'jejum':
-        return <JejumDaniel onNavigate={setPaginaAtual} />;
-      case 'rotina':
-        return <RotinaPrimeiroAmor onNavigate={setPaginaAtual} />;
-      case 'desafioceleste':
-        return <DesafioCeleste onNavigate={setPaginaAtual} />;
-      case 'cantor-cristao':
-        return <CantorCristao onNavigate={setPaginaAtual} />;
-      case 'harpa':
-        return <HarpaCrista onNavigate={setPaginaAtual} />;
-      default:
-        return <Home onNavigate={setPaginaAtual} />;
+  const handleLoginSuccess = (emailDigitado, nomeDigitado, isCadastro) => {
+    if (emailDigitado) setUserEmail(emailDigitado);
+    if (nomeDigitado) setUserName(nomeDigitado);
+
+    if (isCadastro) {
+      setEtapaAuth('welcome'); 
+    } else {
+      setEtapaAuth('app');
+      setPaginaAtual('home');
     }
   };
+
+  const handleWelcomeContinue = () => {
+    setEtapaAuth('app'); 
+    setPaginaAtual('home');
+  };
+
+  const handleLogout = () => {
+    setUserEmail('');
+    setUserName('');
+    setPaginaAtual('home');
+    setEtapaAuth('login'); 
+  };
+
+  console.log("Etapa Auth:", etapaAuth, "| Página Atual:", paginaAtual, "| Usuário:", userName);
+
+  if (etapaAuth === 'login') {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  if (etapaAuth === 'welcome') {
+    return <Welcome onContinue={handleWelcomeContinue} />;
+  }
 
   return (
     <div className="w-full min-h-screen bg-slate-950 font-sans flex flex-col justify-center items-center">
       <div className="w-full flex-1 flex justify-center items-center">
-        {renderizarTela()}
+        {paginaAtual === 'home' && <Home onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        
+        {/* Repassando o userEmail e userName para o Explorar */}
+        {paginaAtual === 'explorar' && <Explorar onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        
+        {/* Repassando o userEmail e userName para a Bíblia */}
+        {paginaAtual === 'biblia' && <Biblia onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        
+        {/* Repassando o userEmail e userName para os Planos de Leitura */}
+        {paginaAtual === 'planos' && <PlanoDeLeitura onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        
+        {(paginaAtual === 'config' || paginaAtual === 'configuracao') && (
+          <Configuracao 
+            onNavigate={setPaginaAtual} 
+            userEmail={userEmail} 
+            userName={userName} 
+            onLogout={handleLogout} 
+          />
+        )}
+        
+        {paginaAtual === 'admin' && <PainelAdministrativo onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        {paginaAtual === 'jejum' && <JejumDaniel onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        {paginaAtual === 'rotina' && <RotinaPrimeiroAmor onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        {paginaAtual === 'desafioceleste' && <DesafioCeleste onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        {paginaAtual === 'cantor-cristao' && <CantorCristao onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        
+        {/* ⬇️ CORREÇÃO PRINCIPAL: Agora aceita tanto 'HarpaCrista' quanto 'harpa' */}
+        {(paginaAtual === 'HarpaCrista' || paginaAtual === 'harpa') && (
+          <HarpaCrista onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
+        )}
+        
+        {/* Lista de todas as páginas válidas para evitar fallback para Home se estiver em uma delas */}
+        {![
+          'home', 'explorar', 'biblia', 'planos', 'config', 'configuracao', 
+          'admin', 'jejum', 'rotina', 'desafioceleste', 'cantor-cristao', 
+          'HarpaCrista', 'harpa' // Adicionei os dois nomes aqui também
+        ].includes(paginaAtual) && <Home onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
       </div>
     </div>
   );

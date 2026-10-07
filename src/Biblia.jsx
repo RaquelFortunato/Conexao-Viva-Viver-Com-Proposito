@@ -73,11 +73,23 @@ const LIVROS_BIBLIA = [
   { id: 'ap', nome: 'Apocalipse', testamento: 'NT', capitulos: 22 }
 ];
 
-export default function Biblia({ onNavigate }) {
+export default function Biblia({ onNavigate, userName }) {
   const [versaoId, setVersaoId] = useState('nvi');
   const [testamento, setTestamento] = useState('VT');
   const [livro, setLivro] = useState(LIVROS_BIBLIA.find(l => l.id === 'sl'));
   const [capitulo, setCapitulo] = useState(23);
+
+  // Função para calcular as iniciais do usuário (ex: Patrícia -> PA, Raquel Fortunato -> RF)
+  const getIniciais = (nome) => {
+    if (!nome) return 'RF';
+    const partes = nome.trim().split(' ');
+    if (partes.length >= 2) {
+      return (partes[0][0] + partes[1][0]).toUpperCase();
+    }
+    return nome.substring(0, 2).toUpperCase();
+  };
+
+  const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
 
   const livrosFiltrados = useMemo(() => {
     return LIVROS_BIBLIA.filter(l => l.testamento === testamento);
@@ -119,6 +131,17 @@ export default function Biblia({ onNavigate }) {
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-4">
         
+        {/* Cabeçalho com o nome do app e a bolinha do perfil (Iniciais) */}
+        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+          <div>
+            <h1 className="text-sm font-bold text-white">Conexão Viva <span className="text-amber-400 font-normal">• Viver com Propósito</span></h1>
+            <p className="text-[11px] text-slate-400">Bíblia Sagrada</p>
+          </div>
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow-md">
+            {iniciaisUsuario}
+          </div>
+        </div>
+
         <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl space-y-2">
           <label className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Versão da Bíblia</label>
           <select 
