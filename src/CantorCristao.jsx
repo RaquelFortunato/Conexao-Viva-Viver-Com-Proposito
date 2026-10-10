@@ -65,6 +65,7 @@ export default function CantorCristao({ onNavigate }) {
         <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-3 rounded-2xl shadow-inner">
           {hinoSelecionado ? (
             <button 
+              type="button"
               onClick={() => setHinoSelecionado(null)}
               className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl font-bold text-[10px] transition cursor-pointer"
             >
@@ -72,6 +73,7 @@ export default function CantorCristao({ onNavigate }) {
             </button>
           ) : (
             <button 
+              type="button"
               onClick={() => onNavigate && onNavigate('explorar')}
               className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl font-bold text-[10px] transition cursor-pointer"
             >
@@ -85,6 +87,7 @@ export default function CantorCristao({ onNavigate }) {
 
           {hinoSelecionado ? (
             <button 
+              type="button"
               onClick={(e) => toggleFavorito(hinoSelecionado, e)}
               className="text-base cursor-pointer"
               style={{ color: isFavorito(hinoSelecionado) ? '#ff4757' : '#fff' }}
@@ -112,12 +115,14 @@ export default function CantorCristao({ onNavigate }) {
 
             <div className="grid grid-cols-2 gap-2">
               <button
+                type="button"
                 onClick={() => setFiltroAba('todos')}
                 className={`py-2 rounded-xl text-[10px] font-bold transition cursor-pointer ${filtroAba === 'todos' ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-950/60 text-slate-300 border border-slate-800'}`}
               >
                 Hinário
               </button>
               <button
+                type="button"
                 onClick={() => setFiltroAba('favoritos')}
                 className={`py-2 rounded-xl text-[10px] font-bold transition cursor-pointer ${filtroAba === 'favoritos' ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-950/60 text-slate-300 border border-slate-800'}`}
               >
@@ -127,7 +132,7 @@ export default function CantorCristao({ onNavigate }) {
           </div>
         )}
 
-        {/* Conteúdo: Letra do Hino ou Lista */}
+        {/* Conteúdo: Letra do Hino ou Lista (BARRA LATERAL BRANCA REMOVIDA) */}
         <div className="space-y-2">
           {hinoSelecionado ? (
             <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
@@ -140,12 +145,12 @@ export default function CantorCristao({ onNavigate }) {
                 </span>
               </div>
 
-              <div className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap font-sans max-h-96 overflow-y-auto pr-1">
+              <div className="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap font-sans max-h-96 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
                 {hinoSelecionado.letra || hinoSelecionado.lyrics || hinoSelecionado.text || hinoSelecionado.content || "Letra não disponível."}
               </div>
             </div>
           ) : (
-            <div className="space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
+            <div className="space-y-1.5 max-h-[420px] overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
               {hinosFiltrados.length === 0 ? (
                 <div className="text-center text-slate-400 py-8 text-[11px]">
                   Nenhum hino encontrado.
@@ -172,6 +177,7 @@ export default function CantorCristao({ onNavigate }) {
                       </div>
 
                       <button
+                        type="button"
                         onClick={(e) => toggleFavorito(hino, e)}
                         className="text-sm cursor-pointer p-1 shrink-0"
                         style={{ color: favorito ? '#ff4757' : '#64748b' }}

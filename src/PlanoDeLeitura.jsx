@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { PLANOS_LEITURA } from './data/PlanosData';
-// Importe o seu cliente do Supabase aqui, ajuste o caminho se necessário (ex: './supabaseClient')
-// import { supabase } from '../supabaseClient'; 
 
 export default function PlanoDeLeitura({ onNavigate, userName }) {
   const [abaAtivaPlano, setAbaAtivaPlano] = useState('catalogo'); // 'catalogo', 'detalhe'
@@ -24,19 +22,7 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
   useEffect(() => {
     async function checkUserAdmin() {
       try {
-        // Quando o Supabase estiver conectado ao login, descomente o bloco abaixo:
-        /*
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user && user.email === 'Raquellosnak@gmail.com') {
-          setIsAdmin(true);
-          return;
-        }
-        */
-        
-        // --- SIMULAÇÃO DE LOGIN ---
-        // Deixe '' (vazio) para usuários comuns. Coloque 'Raquellosnak@gmail.com' para liberar o Admin.
         const emailUsuarioLogado = ''; 
-
         if (emailUsuarioLogado === 'Raquellosnak@gmail.com') {
           setIsAdmin(true);
         } else {
@@ -65,6 +51,20 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
     setAbaAtivaPlano('detalhe');
   };
 
+  // Função para convidar via WhatsApp otimizada para celular
+  const handleConvidarAmigo = (plano) => {
+    const textoMensagem = `Olá! 👋 Eu comecei o plano de leitura "${plano.titulo}" no aplicativo Conexão Viva e gostaria muito de convidar você para fazer essa *Leitura Conjunta* comigo! Vamos ler e nos fortalecer juntos na Palavra? 📖✨`;
+    
+    const urlApp = `whatsapp://send?text=${encodeURIComponent(textoMensagem)}`;
+    const urlWeb = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoMensagem)}`;
+
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      window.location.href = urlApp;
+    } else {
+      window.open(urlWeb, '_blank');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
       
@@ -89,6 +89,7 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
         {abaAtivaPlano === 'detalhe' && planoAtivo ? (
           <div className="space-y-4">
             <button 
+              type="button"
               onClick={() => setAbaAtivaPlano('catalogo')}
               className="text-xs font-bold text-amber-400 flex items-center gap-1 hover:underline cursor-pointer"
             >
@@ -119,11 +120,33 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
               })()}
             </div>
 
-            {/* Lista dos Dias do Plano */}
+            {/* CARD DE OPÇÕES DE LEITURA: LEITURA CONJUNTA */}
+            <div className="bg-slate-950/80 border border-amber-500/30 p-4 rounded-2xl space-y-3 shadow-lg">
+              <div className="flex items-center gap-2">
+                <span className="text-base">🤝</span>
+                <h3 className="text-xs font-bold text-amber-400">Modalidade de Leitura</h3>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Ler acompanhado incentiva a consistência! Você pode caminhar sozinho ou convidar um amigo para ler junto.
+              </p>
+
+              <div className="grid grid-cols-1 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleConvidarAmigo(planoAtivo)}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition shadow flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>📱</span>
+                  <span>Convidar Amigo para Leitura Conjunta</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Lista dos Dias do Plano - BARRA BRANCA ESCONDIDA */}
             <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2">
               <h3 className="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">Cronograma de Leitura</h3>
 
-              <div className="text-xs space-y-2 max-h-72 overflow-y-auto pr-1">
+              <div className="text-xs space-y-2 max-h-72 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
                 {planoAtivo.dias.map((item) => {
                   const concluido = !!diasConcluidos[planoAtivo.id]?.[item.dia];
                   return (
@@ -160,7 +183,7 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
               <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-lg font-medium">Ligado</span>
             </div>
 
-            {/* Lista de Planos Disponíveis Dinâmica vinda do PlanosData.js */}
+            {/* Lista de Planos Disponíveis */}
             <div className="space-y-3">
               <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Catálogo de Planos</h2>
 
@@ -173,6 +196,7 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
                   <h3 className="text-xs font-bold text-white">{plano.titulo}</h3>
                   <p className="text-[11px] text-slate-400 leading-relaxed">{plano.descricao}</p>
                   <button 
+                    type="button"
                     onClick={() => abrirDetalhes(plano)}
                     className="w-full mt-2 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
                   >
@@ -184,16 +208,16 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
           </>
         )}
 
-        {/* Menu de Navegação Inteligente (Dinâmico para o Admin) */}
+        {/* Menu de Navegação Inteligente */}
         <div className="pt-3 border-t border-slate-800">
           <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
-            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Home</button>
-            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Planos</button>
-            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Config</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Home</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Bíblia</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Planos</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Explorar</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Config</button>
             {isAdmin && (
-              <button onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
+              <button type="button" onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
             )}
           </div>
         </div>
