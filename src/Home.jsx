@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
-// Importe o seu cliente do Supabase aqui, ajuste o caminho se necessário (ex: './supabaseClient')
-// import { supabase } from '../supabaseClient'; 
+import { supabase } from './data/supabase'; 
+
+function getYouTubeEmbedUrl(url) {
+  if (!url) return '';
+  let linkLimpo = url.replace('ww.youtube.com', 'www.youtube.com');
+  let videoId = '';
+  if (linkLimpo.includes('watch?v=')) {
+    videoId = linkLimpo.split('watch?v=')[1]?.split('&')[0];
+  } else if (linkLimpo.includes('youtu.be/')) {
+    videoId = linkLimpo.split('youtu.be/')[1]?.split('?')[0];
+  } else if (linkLimpo.includes('/embed/')) {
+    videoId = linkLimpo.split('/embed/')[1]?.split('?')[0];
+  }
+  return videoId ? `https://www.youtube.com/embed/${videoId}?cc_load_policy=0&rel=0` : '';
+}
 
 export default function Home({ onNavigate, userName }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Função para calcular as iniciais do usuário dinamicamente
   const getIniciais = (nome) => {
     if (!nome) return 'RF';
     const partes = nome.trim().split(' ');
@@ -20,25 +32,12 @@ export default function Home({ onNavigate, userName }) {
   useEffect(() => {
     async function checkUserAdmin() {
       try {
-        // Quando o Supabase estiver conectado ao login, descomente o bloco abaixo:
-        /*
         const { data: { user } } = await supabase.auth.getUser();
         if (user && user.email === 'Raquellosnak@gmail.com') {
           setIsAdmin(true);
           return;
         }
-        */
-        
-        // --- SIMULAÇÃO DE LOGIN ---
-        // Se colocar 'Raquellosnak@gmail.com' -> O botão Admin APARECE.
-        // Se colocar outro e-mail ou '' (vazio) -> O botão Admin SOME.
-        const emailUsuarioLogado = ''; // Altere aqui para testar (ex: '' para conta comum)
-
-        if (emailUsuarioLogado === 'Raquellosnak@gmail.com') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
+        setIsAdmin(false);
       } catch (error) {
         console.error("Erro ao verificar admin:", error);
         setIsAdmin(false);
@@ -49,11 +48,8 @@ export default function Home({ onNavigate, userName }) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
-      
-      {/* Container Principal Centralizado */}
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
-        {/* Cabeçalho */}
         <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner">
           <div>
             <h1 className="text-sm font-bold text-white flex items-center gap-1.5">
@@ -67,7 +63,6 @@ export default function Home({ onNavigate, userName }) {
           </div>
         </div>
 
-        {/* 1. Devocional de Hoje */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2">
           <div className="flex items-center justify-between text-xs text-amber-400 font-semibold tracking-wider">
             <span>🟡 DEVOCIONAL DE HOJE</span>
@@ -81,7 +76,6 @@ export default function Home({ onNavigate, userName }) {
           </div>
         </div>
 
-        {/* 2. Citação Diária */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">💬 CITAÇÃO DIÁRIA</span>
@@ -90,17 +84,8 @@ export default function Home({ onNavigate, userName }) {
           <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center text-slate-400 text-xs italic">
             "Citação do dia..."
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-slate-400 text-sm">
-            <div className="flex items-center gap-4">
-              <button title="Curtir" className="hover:text-amber-400 transition cursor-pointer">⭐</button>
-              <button title="Baixar" className="hover:text-amber-400 transition cursor-pointer">📥</button>
-              <button title="Compartilhar" className="hover:text-amber-400 transition cursor-pointer">🔗</button>
-            </div>
-            <button className="text-xs hover:text-amber-400 transition flex items-center gap-1 cursor-pointer">📋 Copiar</button>
-          </div>
         </div>
 
-        {/* 3. Reflexão do Dia */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🌿 REFLEXÃO DO DIA</span>
@@ -109,36 +94,8 @@ export default function Home({ onNavigate, userName }) {
           <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
             Nenhum vídeo enviado ainda
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-slate-400 text-sm">
-            <div className="flex items-center gap-4">
-              <button title="Curtir" className="hover:text-amber-400 transition cursor-pointer">⭐</button>
-              <button title="Baixar" className="hover:text-amber-400 transition cursor-pointer">📥</button>
-              <button title="Compartilhar" className="hover:text-amber-400 transition cursor-pointer">🔗</button>
-            </div>
-            <button className="text-xs hover:text-amber-400 transition flex items-center gap-1 cursor-pointer">📋 Copiar</button>
-          </div>
         </div>
 
-        {/* 4. Mensagem do Dia */}
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400 tracking-wider">💬 MENSAGEM DO DIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Aguardando vídeo</span>
-          </div>
-          <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
-            Nenhum vídeo enviado ainda
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-slate-400 text-sm">
-            <div className="flex items-center gap-4">
-              <button title="Curtir" className="hover:text-amber-400 transition cursor-pointer">⭐</button>
-              <button title="Baixar" className="hover:text-amber-400 transition cursor-pointer">📥</button>
-              <button title="Compartilhar" className="hover:text-amber-400 transition cursor-pointer">🔗</button>
-            </div>
-            <button className="text-xs hover:text-amber-400 transition flex items-center gap-1 cursor-pointer">📋 Copiar</button>
-          </div>
-        </div>
-
-        {/* 5. Oração do Dia */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🙏 ORAÇÃO DO DIA</span>
@@ -147,43 +104,8 @@ export default function Home({ onNavigate, userName }) {
           <div className="h-20 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
             Nenhum áudio enviado ainda
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-slate-400 text-sm">
-            <div className="flex items-center gap-4">
-              <button title="Curtir" className="hover:text-amber-400 transition cursor-pointer">⭐</button>
-              <button title="Baixar" className="hover:text-amber-400 transition cursor-pointer">📥</button>
-              <button title="Compartilhar" className="hover:text-amber-400 transition cursor-pointer">🔗</button>
-            </div>
-            <button className="text-xs hover:text-amber-400 transition flex items-center gap-1 cursor-pointer">📋 Copiar</button>
-          </div>
         </div>
 
-        {/* 6. Louvor do Dia (Lendo direto da pasta public com nome simples) */}
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400 tracking-wider">🎵 LOUVOR DO DIA</span>
-            <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-medium">Meu Respirar - Vineyard</span>
-          </div>
-          <div className="bg-slate-900/80 rounded-xl border border-slate-800 overflow-hidden flex items-center justify-center">
-            <video 
-              controls 
-              preload="metadata"
-              className="w-full h-auto max-h-64 object-cover rounded-xl"
-            >
-              <source src="/louvor.mp4" type="video/mp4" />
-              Seu navegador não suporta a reprodução de vídeos.
-            </video>
-          </div>
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-slate-400 text-sm">
-            <div className="flex items-center gap-4">
-              <button title="Curtir" className="hover:text-amber-400 transition cursor-pointer">⭐</button>
-              <button title="Baixar" className="hover:text-amber-400 transition cursor-pointer">📥</button>
-              <button title="Compartilhar" className="hover:text-amber-400 transition cursor-pointer">🔗</button>
-            </div>
-            <button className="text-xs hover:text-amber-400 transition flex items-center gap-1 cursor-pointer">📋 Copiar</button>
-          </div>
-        </div>
-
-        {/* Menu de Navegação Inteligente (Dinâmico para o Admin) */}
         <div className="pt-3 border-t border-slate-800">
           <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
             <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Home</button>

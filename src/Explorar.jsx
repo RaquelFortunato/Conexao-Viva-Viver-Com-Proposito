@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase'; 
 
+// Função utilitária para converter links do YouTube (watch, youtu.be, embed) em URL válida para iframe
+function getYouTubeEmbedUrl(url) {
+  if (!url) return '';
+  let videoId = '';
+  if (url.includes('watch?v=')) {
+    videoId = url.split('watch?v=')[1]?.split('&')[0];
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+  } else if (url.includes('/embed/')) {
+    return url;
+  }
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+}
+
 export default function Explorar({ onNavigate, userName }) {
   const [modalAtivo, setModalAtivo] = useState(null); 
   const [tipoVisualizacao, setTipoVisualizacao] = useState(null); // 'fabulas', 'musicas', 'videos_reflexao', 'videos_mensagem', 'videos_louvor'
@@ -63,21 +77,21 @@ export default function Explorar({ onNavigate, userName }) {
       
       if (!errMusicas && musicasData) setListaMusicas(musicasData);
 
-      // 4. Busca Reflexões Anteriores
+      // 4. Busca Reflexões
       const { data: refData } = await supabase
         .from('reflexao_dia')
         .select('*')
         .order('created_at', { ascending: false });
       if (refData) setListaReflexoes(refData);
 
-      // 5. Busca Mensagens Anteriores
+      // 5. Busca Mensagens
       const { data: msgData } = await supabase
         .from('mensagem_dia')
         .select('*')
         .order('created_at', { ascending: false });
       if (msgData) setListaMensagens(msgData);
 
-      // 6. Busca Louvores Anteriores
+      // 6. Busca Louvores
       const { data: louvorData } = await supabase
         .from('louvor_dia')
         .select('*')
@@ -206,9 +220,9 @@ export default function Explorar({ onNavigate, userName }) {
           <div className="space-y-3 animate-fade-in">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
               <h2 className="text-base font-bold text-amber-400 flex items-center gap-2">
-                {tipoVisualizacao === 'videos_reflexao' && '📖 Acervo de Reflexões'}
-                {tipoVisualizacao === 'videos_mensagem' && '🕊️ Acervo de Mensagens'}
-                {tipoVisualizacao === 'videos_louvor' && '🎶 Acervo de Louvores'}
+                {tipoVisualizacao === 'videos_reflexao' && '📖 Reflexões'}
+                {tipoVisualizacao === 'videos_mensagem' && '🕊️ Mensagens'}
+                {tipoVisualizacao === 'videos_louvor' && '🎶 Louvores'}
               </h2>
               <button 
                 onClick={() => setTipoVisualizacao(null)}
@@ -221,20 +235,25 @@ export default function Explorar({ onNavigate, userName }) {
             <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
               {(tipoVisualizacao === 'videos_reflexao' ? listaReflexoes : 
                 tipoVisualizacao === 'videos_mensagem' ? listaMensagens : listaLouvores).length === 0 ? (
-                <p className="text-sm text-slate-400 text-center py-8">Nenhum vídeo anterior encontrado.</p>
+                <p className="text-sm text-slate-400 text-center py-8">Nenhum vídeo encontrado.</p>
               ) : (
                 (tipoVisualizacao === 'videos_reflexao' ? listaReflexoes : 
                  tipoVisualizacao === 'videos_mensagem' ? listaMensagens : listaLouvores).map((item) => (
                   <div key={item.id} className="bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl space-y-2 shadow-inner">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-xs font-bold text-white">{item.titulo || 'Conteúdo Devocional'}</h3>
+                      <h3 className="text-xs font-bold text-white">{item.titulo || (tipoVisualizacao === 'videos_reflexao' ? 'Reflexão' : tipoVisualizacao === 'videos_mensagem' ? 'Mensagem' : 'Louvor')}</h3>
                       <span className="text-[10px] text-slate-400">{new Date(item.created_at).toLocaleDateString()}</span>
                     </div>
-                    {item.video_url && (
-                      <video controls className="w-full h-48 rounded-xl bg-black object-cover">
-                        <source src={item.video_url} type="video/mp4" />
-                        Seu navegador não suporta vídeos.
-                      </video>
+                    {item.link && (
+                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
+                        <iframe
+                          className="w-full h-full border-0"
+                          src={getYouTubeEmbedUrl(item.link)}
+                          title="Vídeo"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
                     )}
                   </div>
                 ))
@@ -285,9 +304,9 @@ export default function Explorar({ onNavigate, userName }) {
               <span className="text-slate-500">›</span>
             </div>
 
-            {/* 3. Acervo de Vídeos Anteriores (Reflexão, Mensagem e Louvor) */}
+            {/* 3. Acervo de Vídeos (Reflexão, Mensagem e Louvor) */}
             <div className="space-y-2">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Vídeos & Mensagens Anteriores</h2>
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Vídeos & Mensagens</h2>
               
               <div className="grid grid-cols-1 gap-2">
                 <div 
@@ -297,7 +316,7 @@ export default function Explorar({ onNavigate, userName }) {
                   <div className="flex items-center gap-3">
                     <span className="text-amber-400 text-base">📖</span>
                     <div>
-                      <h3 className="text-xs font-bold text-white">Reflexões Anteriores</h3>
+                      <h3 className="text-xs font-bold text-white">Reflexões</h3>
                       <p className="text-[10px] text-slate-400">{listaReflexoes.length} vídeos salvos</p>
                     </div>
                   </div>
@@ -311,7 +330,7 @@ export default function Explorar({ onNavigate, userName }) {
                   <div className="flex items-center gap-3">
                     <span className="text-amber-400 text-base">🕊️</span>
                     <div>
-                      <h3 className="text-xs font-bold text-white">Mensagens Anteriores</h3>
+                      <h3 className="text-xs font-bold text-white">Mensagens</h3>
                       <p className="text-[10px] text-slate-400">{listaMensagens.length} vídeos salvos</p>
                     </div>
                   </div>
@@ -325,7 +344,7 @@ export default function Explorar({ onNavigate, userName }) {
                   <div className="flex items-center gap-3">
                     <span className="text-amber-400 text-base">🎶</span>
                     <div>
-                      <h3 className="text-xs font-bold text-white">Louvores Anteriores</h3>
+                      <h3 className="text-xs font-bold text-white">Louvores</h3>
                       <p className="text-[10px] text-slate-400">{listaLouvores.length} vídeos salvos</p>
                     </div>
                   </div>
