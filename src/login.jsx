@@ -74,6 +74,19 @@ export default function Login({ onLoginSuccess }) {
 
         if (signInError) throw signInError;
 
+        // Salva/Ajusta o perfil inicial com try/catch seguro
+        try {
+          await supabase.from('perfis_usuario').upsert({
+            id: signInData.user.id,
+            nome: nome,
+            email: email,
+            conta_excluida: false,
+            updated_at: new Date().toISOString()
+          });
+        } catch (errProfile) {
+          console.log("Aviso ao criar perfil:", errProfile);
+        }
+
         const userNameFromDb = signInData.user.user_metadata?.full_name || nome || email.split('@')[0];
         
         onLoginSuccess(email, userNameFromDb, true); 
@@ -85,6 +98,25 @@ export default function Login({ onLoginSuccess }) {
         });
 
         if (signInError) throw signInError;
+
+        // --- VERIFICAÇÃO DE SEGURANÇA: CONTA EXCLUÍDA PERMANENTEMENTE ---
+        try {
+          const { data: perfil } = await supabase
+            .from('perfis_usuario')
+            .select('conta_excluida')
+            .eq('id', data.user.id)
+            .maybeSingle();
+
+          if (perfil && perfil.conta_excluida === true) {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            throw new Error("Esta conta foi excluída permanentemente. Crie uma nova conta para acessar.");
+          }
+        } catch (errPerfil) {
+          if (errPerfil.message.includes("excluída permanentemente")) {
+            throw errPerfil;
+          }
+        }
 
         const userNameFromDb = data.user.user_metadata?.full_name || email.split('@')[0];
         

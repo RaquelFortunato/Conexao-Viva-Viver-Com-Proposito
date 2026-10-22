@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './data/supabase';
 
 export default function Configuracao({ onNavigate, userEmail, userName, onLogout }) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -8,7 +9,6 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [notificacoes, setNotificacoes] = useState(true);
-  const [modoEscuro, setModoEscuro] = useState(true);
   const [fotoPerfil, setFotoPerfil] = useState(null);
 
   // Verificação rigorosa: O painel Admin SÓ aparece para o seu e-mail oficial
@@ -23,7 +23,7 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
     }
   }, [email, userEmail]);
 
-  // Função para gerar as iniciais dinamicamente com base no nome atual do usuário logado
+  // Função para gerar as iniciais dinamicamente
   const getIniciais = (nomeStr) => {
     if (!nomeStr) return 'U';
     const partes = nomeStr.trim().split(' ');
@@ -35,20 +35,43 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
 
   const iniciaisAtuais = getIniciais(nome);
 
-  const handleSalvarPerfil = (e) => {
+  const handleSalvarPerfil = async (e) => {
     e.preventDefault();
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('perfis_usuario').upsert({
+          id: user.id,
+          nome: nome,
+          email: email,
+          updated_at: new Date().toISOString()
+        });
+      }
+    } catch (err) {
+      console.error("Erro ao salvar dados do perfil:", err);
+    }
     alert('Dados de perfil atualizados com sucesso!');
   };
 
-  const handleMudarSenha = (e) => {
+  const handleMudarSenha = async (e) => {
     e.preventDefault();
-    if (!senhaAtual || !novaSenha) {
-      alert('Preencha os campos de senha.');
+    if (!novaSenha) {
+      alert('Por favor, digite a nova senha.');
       return;
     }
-    alert('Senha alterada com sucesso!');
-    setSenhaAtual('');
-    setNovaSenha('');
+    
+    try {
+      const { error } = await supabase.auth.updateUser({ password: novaSenha });
+      if (error) {
+        alert('Erro ao atualizar senha: ' + error.message);
+      } else {
+        alert('Senha alterada com sucesso!');
+        setSenhaAtual('');
+        setNovaSenha('');
+      }
+    } catch (err) {
+      alert('Ocorreu um erro ao alterar a senha.');
+    }
   };
 
   const handleFotoChange = (e) => {
@@ -62,31 +85,46 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
     }
   };
 
-  const handleCompartilhar = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Conexão Viva',
-        text: 'Venha conhecer o aplicativo Conexão Viva - Viver com Propósito!',
-        url: window.location.href,
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link do aplicativo copiado para a área de transferência!');
-    }
-  };
-
-  const handleSairConta = () => {
+  const handleSairConta = async () => {
     if (confirm('Deseja realmente sair da sua conta?')) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {}
       if (typeof onLogout === 'function') {
         onLogout();
       }
     }
   };
 
-  const handleExcluirConta = () => {
-    if (confirm('Atenção! Deseja realmente excluir permanentemente sua conta e todos os dados? Esta ação não pode ser desfeita.')) {
-      alert('Conta excluída com sucesso.');
-      if (typeof onLogout === 'function') onLogout();
+  const handleExcluirConta = async () => {
+    if (confirm('Atenção! Deseja realmente excluir permanentemente sua conta e todos os seus dados? Esta ação não pode ser desfeita.')) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Garante que o perfil seja criado/atualizado com conta_excluida = true (funciona para contas antigas e novas)
+          await supabase.from('perfis_usuario').upsert({
+            id: user.id,
+            email: user.email,
+            conta_excluida: true,
+            notificacoes_ativas: false,
+            updated_at: new Date().toISOString()
+          });
+        }
+        // Desconecta a sessão por completo do Supabase
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.error("Erro ao processar exclusão:", err);
+      }
+
+      // Limpa dados salvos no navegador para impedir reuso da sessão
+      localStorage.clear();
+      sessionStorage.clear();
+
+      alert('Sua conta foi excluída com sucesso.');
+
+      if (typeof onLogout === 'function') {
+        onLogout();
+      }
     }
   };
 
@@ -199,7 +237,7 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
         {/* Preferências */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <h2 className="text-xs font-bold text-amber-400 tracking-wider">⚙️ PREFERÊNCIAS DO APLICATIVO</h2>
-          <div className="flex items-center justify-between py-1 border-b border-slate-800/60">
+          <div className="flex items-center justify-between py-1">
             <span className="text-xs text-slate-300">Notificações Diárias</span>
             <button
               type="button"
@@ -211,30 +249,23 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
               {notificacoes ? 'Ativadas' : 'Desativadas'}
             </button>
           </div>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-xs text-slate-300">Modo de Exibição</span>
-            <button
-              type="button"
-              onClick={() => setModoEscuro(!modoEscuro)}
-              className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
-                modoEscuro ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'
-              }`}
-            >
-              {modoEscuro ? '🌙 Escuro' : '☀️ Claro'}
-            </button>
-          </div>
         </div>
 
         {/* Ações */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2">
           <h2 className="text-xs font-bold text-amber-400 tracking-wider mb-2">🌐 OUTRAS AÇÕES</h2>
-          <button onClick={handleCompartilhar} className="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium py-2 rounded-xl transition-all cursor-pointer">
-            📤 Compartilhar Aplicativo
-          </button>
-          <button onClick={handleSairConta} className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-medium py-2 rounded-xl transition-all cursor-pointer">
+          <button 
+            type="button"
+            onClick={handleSairConta} 
+            className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-medium py-2 rounded-xl transition-all cursor-pointer"
+          >
             🚪 Sair da Conta
           </button>
-          <button onClick={handleExcluirConta} className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium py-2 rounded-xl transition-all cursor-pointer">
+          <button 
+            type="button"
+            onClick={handleExcluirConta} 
+            className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium py-2 rounded-xl transition-all cursor-pointer"
+          >
             ⚠️ Excluir Conta Permanentemente
           </button>
         </div>
@@ -242,13 +273,13 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
         {/* Menu de Navegação */}
         <div className="pt-3 border-t border-slate-800">
           <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
-            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Home</button>
-            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Planos</button>
-            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Config</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Home</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Bíblia</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Planos</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Explorar</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Config</button>
             {isAdmin && (
-              <button onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
+              <button type="button" onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
             )}
           </div>
         </div>
