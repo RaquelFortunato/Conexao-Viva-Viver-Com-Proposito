@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { supabase } from './data/supabase';
 import BIBLE_VERSIONS from './data/BibleData';
 
 const LIVROS_BIBLIA = [
@@ -78,8 +79,10 @@ export default function Biblia({ onNavigate, userName }) {
   const [testamento, setTestamento] = useState('VT');
   const [livro, setLivro] = useState(LIVROS_BIBLIA.find(l => l.id === 'sl'));
   const [capitulo, setCapitulo] = useState(23);
+  const [fotoPerfil, setFotoPerfil] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Função para calcular as iniciais do usuário (ex: Patrícia -> PA, Raquel Fortunato -> RF)
+  // Função para calcular as iniciais do usuário
   const getIniciais = (nome) => {
     if (!nome) return 'RF';
     const partes = nome.trim().split(' ');
@@ -90,6 +93,36 @@ export default function Biblia({ onNavigate, userName }) {
   };
 
   const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
+
+  useEffect(() => {
+    async function carregarPerfilEAdmin() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          if (user.email && user.email.toLowerCase() === 'raquellosnak@gmail.com') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+
+          const { data: perfilData, error: perfilError } = await supabase
+            .from('perfis_usuario')
+            .select('foto_url, foto_perfil')
+            .eq('id', user.id)
+            .single();
+
+          if (perfilData && !perfilError) {
+            if (perfilData.foto_url || perfilData.foto_perfil) {
+              setFotoPerfil(perfilData.foto_url || perfilData.foto_perfil);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar perfil na Bíblia:", error);
+      }
+    }
+    carregarPerfilEAdmin();
+  }, []);
 
   const livrosFiltrados = useMemo(() => {
     return LIVROS_BIBLIA.filter(l => l.testamento === testamento);
@@ -131,14 +164,18 @@ export default function Biblia({ onNavigate, userName }) {
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-4">
         
-        {/* Cabeçalho com o nome do app e a bolinha do perfil (Iniciais) */}
+        {/* Cabeçalho com o nome do app e a foto ou iniciais do perfil */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
           <div>
             <h1 className="text-sm font-bold text-white">Conexão Viva <span className="text-amber-400 font-normal">• Viver com Propósito</span></h1>
             <p className="text-[11px] text-slate-400">Bíblia Sagrada</p>
           </div>
-          <div className="w-10 h-10 rounded-full border-2 border-amber-400 bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow-md">
-            {iniciaisUsuario}
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow-md">
+            {fotoPerfil ? (
+              <img src={fotoPerfil} alt="Perfil" className="w-full h-full object-cover" />
+            ) : (
+              iniciaisUsuario
+            )}
           </div>
         </div>
 
@@ -224,7 +261,8 @@ export default function Biblia({ onNavigate, userName }) {
             <span className="text-[10px] text-slate-400 font-semibold uppercase">{versaoId}</span>
           </div>
 
-          <div className="text-xs text-slate-300 leading-relaxed space-y-2 font-serif max-h-64 overflow-y-auto pr-1">
+          {/* Área de texto dos versículos com a barra branca OCULTA */}
+          <div className="text-xs text-slate-300 leading-relaxed space-y-2 font-serif max-h-64 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
             {versiculosAtuais.length > 0 ? (
               versiculosAtuais.map((v) => (
                 <p key={v.numero}>
@@ -238,14 +276,17 @@ export default function Biblia({ onNavigate, userName }) {
           </div>
         </div>
 
-        {/* Menu de Navegação Integrado DENTRO do Aplicativo */}
+        {/* Menu de Navegação Integrado */}
         <div className="pt-3 border-t border-slate-800">
-          <div className="grid grid-cols-5 gap-1 text-center">
-            <button onClick={() => onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Home</button>
-            <button onClick={() => onNavigate('biblia')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[10px] font-bold shadow-lg cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Planos</button>
-            <button onClick={() => onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[10px] font-medium cursor-pointer">Config</button>
+          <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
+            <button type="button" onClick={() => onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Home</button>
+            <button type="button" onClick={() => onNavigate('biblia')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Bíblia</button>
+            <button type="button" onClick={() => onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Planos</button>
+            <button type="button" onClick={() => onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Explorar</button>
+            <button type="button" onClick={() => onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Config</button>
+            {isAdmin && (
+              <button type="button" onClick={() => onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
+            )}
           </div>
         </div>
 

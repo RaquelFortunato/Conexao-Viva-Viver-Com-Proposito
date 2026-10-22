@@ -17,6 +17,7 @@ function getYouTubeEmbedUrl(url) {
 
 export default function Home({ onNavigate, userName }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [fotoPerfil, setFotoPerfil] = useState(null);
 
   const getIniciais = (nome) => {
     if (!nome) return 'RF';
@@ -30,20 +31,34 @@ export default function Home({ onNavigate, userName }) {
   const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
 
   useEffect(() => {
-    async function checkUserAdmin() {
+    async function checkUserAdminEPerfil() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user && user.email === 'Raquellosnak@gmail.com') {
-          setIsAdmin(true);
-          return;
+        if (user) {
+          if (user.email && user.email.toLowerCase() === 'raquellosnak@gmail.com') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+
+          const { data: perfilData, error: perfilError } = await supabase
+            .from('perfis_usuario')
+            .select('foto_url, foto_perfil')
+            .eq('id', user.id)
+            .single();
+
+          if (perfilData && !perfilError) {
+            if (perfilData.foto_url || perfilData.foto_perfil) {
+              setFotoPerfil(perfilData.foto_url || perfilData.foto_perfil);
+            }
+          }
         }
-        setIsAdmin(false);
       } catch (error) {
-        console.error("Erro ao verificar admin:", error);
+        console.error("Erro ao verificar admin ou perfil:", error);
         setIsAdmin(false);
       }
     }
-    checkUserAdmin();
+    checkUserAdminEPerfil();
   }, []);
 
   return (
@@ -59,7 +74,11 @@ export default function Home({ onNavigate, userName }) {
             <p className="text-xs text-slate-400 mt-0.5">Tela Inicial</p>
           </div>
           <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
-            {iniciaisUsuario}
+            {fotoPerfil ? (
+              <img src={fotoPerfil} alt="Perfil" className="w-full h-full object-cover" />
+            ) : (
+              iniciaisUsuario
+            )}
           </div>
         </div>
 

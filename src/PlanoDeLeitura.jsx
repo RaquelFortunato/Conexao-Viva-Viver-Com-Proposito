@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './data/supabase';
 import { PLANOS_LEITURA } from './data/PlanosData';
 
 export default function PlanoDeLeitura({ onNavigate, userName }) {
@@ -6,6 +7,7 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
   const [planoAtivo, setPlanoAtivo] = useState(null);
   const [diasConcluidos, setDiasConcluidos] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
+  const [fotoPerfil, setFotoPerfil] = useState(null);
 
   // Função para calcular as iniciais do usuário dinamicamente
   const getIniciais = (nome) => {
@@ -20,20 +22,35 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
   const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
 
   useEffect(() => {
-    async function checkUserAdmin() {
+    async function carregarDadosEVerificarAdmin() {
       try {
-        const emailUsuarioLogado = ''; 
-        if (emailUsuarioLogado === 'Raquellosnak@gmail.com') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          if (user.email && user.email.toLowerCase() === 'raquellosnak@gmail.com') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+
+          // Busca a foto de perfil no Supabase
+          const { data: perfilData, error: perfilError } = await supabase
+            .from('perfis_usuario')
+            .select('foto_url, foto_perfil')
+            .eq('id', user.id)
+            .single();
+
+          if (perfilData && !perfilError) {
+            if (perfilData.foto_url || perfilData.foto_perfil) {
+              setFotoPerfil(perfilData.foto_url || perfilData.foto_perfil);
+            }
+          }
         }
       } catch (error) {
-        console.error("Erro ao verificar admin:", error);
+        console.error("Erro ao carregar dados do usuário:", error);
         setIsAdmin(false);
       }
     }
-    checkUserAdmin();
+    carregarDadosEVerificarAdmin();
   }, []);
 
   const toggleDia = (planoId, diaNum) => {
@@ -81,7 +98,11 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
             <p className="text-base font-bold text-amber-400 mt-0.5">Planos de Leitura</p>
           </div>
           <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
-            {iniciaisUsuario}
+            {fotoPerfil ? (
+              <img src={fotoPerfil} alt="Perfil" className="w-full h-full object-cover" />
+            ) : (
+              iniciaisUsuario
+            )}
           </div>
         </div>
 
@@ -142,7 +163,7 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
               </div>
             </div>
 
-            {/* Lista dos Dias do Plano - BARRA BRANCA ESCONDIDA */}
+            {/* Lista dos Dias do Plano */}
             <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2">
               <h3 className="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">Cronograma de Leitura</h3>
 

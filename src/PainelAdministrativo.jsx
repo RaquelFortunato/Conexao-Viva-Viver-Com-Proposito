@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from './data/supabase';
 
 export default function Admin({ onNavigate }) {
   const [citacao, setCitacao] = useState('');
@@ -295,6 +291,7 @@ export default function Admin({ onNavigate }) {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
             />
             <button 
+              type="button"
               onClick={handlePublicarCitacao}
               className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
             >
@@ -316,6 +313,7 @@ export default function Admin({ onNavigate }) {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
             <button 
+              type="button"
               onClick={handlePublicarReflexao}
               className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
             >
@@ -337,6 +335,7 @@ export default function Admin({ onNavigate }) {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
             <button 
+              type="button"
               onClick={handlePublicarMensagem}
               className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
             >
@@ -358,6 +357,7 @@ export default function Admin({ onNavigate }) {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
             <button 
+              type="button"
               onClick={handlePublicarOracao}
               className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
             >
@@ -379,6 +379,7 @@ export default function Admin({ onNavigate }) {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
             <button 
+              type="button"
               onClick={handlePublicarLouvor}
               className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
             >
@@ -400,6 +401,7 @@ export default function Admin({ onNavigate }) {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
             />
             <button 
+              type="button"
               onClick={handlePublicarFabula}
               className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
             >
@@ -421,6 +423,7 @@ export default function Admin({ onNavigate }) {
               <input type="file" accept="audio/mp3,audio/wav" onChange={(e) => setAudioPlaylist(e.target.files[0])} className="hidden" />
             </label>
             <button 
+              type="button"
               onClick={handlePublicarAudio}
               className="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white rounded-xl font-bold text-xs transition cursor-pointer"
             >
@@ -444,6 +447,7 @@ export default function Admin({ onNavigate }) {
                   <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
                     <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'} ({new Date(item.created_at).toLocaleDateString()})</span>
                     <button 
+                      type="button"
                       onClick={() => handleExcluirItem('louvor_dia', item.id)}
                       className="px-2 py-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
                     >
@@ -466,6 +470,7 @@ export default function Admin({ onNavigate }) {
                   <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
                     <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'} ({new Date(item.created_at).toLocaleDateString()})</span>
                     <button 
+                      type="button"
                       onClick={() => handleExcluirItem('mensagem_dia', item.id)}
                       className="px-2 py-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
                     >
@@ -488,6 +493,7 @@ export default function Admin({ onNavigate }) {
                   <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
                     <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'} ({new Date(item.created_at).toLocaleDateString()})</span>
                     <button 
+                      type="button"
                       onClick={() => handleExcluirItem('reflexao_dia', item.id)}
                       className="px-2 py-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
                     >
@@ -514,6 +520,7 @@ export default function Admin({ onNavigate }) {
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
               />
               <button 
+                type="button"
                 onClick={handleAtualizarSenha}
                 className="px-3 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer whitespace-nowrap"
               >
@@ -532,6 +539,7 @@ export default function Admin({ onNavigate }) {
             </div>
             {logoApp && (
               <button 
+                type="button"
                 onClick={handleSubirLogo}
                 className="w-full py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer"
               >
@@ -553,6 +561,7 @@ export default function Admin({ onNavigate }) {
             </div>
             {fotoPerfil && (
               <button 
+                type="button"
                 onClick={handleSubirFotoPerfil}
                 className="w-full py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer"
               >
@@ -564,6 +573,7 @@ export default function Admin({ onNavigate }) {
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between">
             <div><h3 className="text-xs font-bold text-white">Extras & Novas Ferramentas</h3></div>
             <button 
+              type="button"
               onClick={() => setModalNovaFerramentaAberta(true)}
               className="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-[10px] transition cursor-pointer shadow"
             >
@@ -576,7 +586,7 @@ export default function Admin({ onNavigate }) {
           <div className="bg-slate-950 border border-amber-500/50 p-4 rounded-2xl space-y-3 shadow-xl">
             <div className="flex justify-between items-center">
               <h3 className="text-xs font-bold text-amber-400">Criar Nova Aba / Ferramenta</h3>
-              <button onClick={() => setModalNovaFerramentaAberta(false)} className="text-slate-400 hover:text-white text-xs font-bold cursor-pointer">✕ Fechar</button>
+              <button type="button" onClick={() => setModalNovaFerramentaAberta(false)} className="text-slate-400 hover:text-white text-xs font-bold cursor-pointer">✕ Fechar</button>
             </div>
             <input 
               type="text"
@@ -586,8 +596,8 @@ export default function Admin({ onNavigate }) {
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
             <div className="flex gap-2">
-              <button onClick={handleCriarNovaFerramenta} className="flex-1 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer">Salvar</button>
-              <button onClick={() => setModalNovaFerramentaAberta(false)} className="px-3 py-2 bg-slate-900 text-slate-300 rounded-xl font-bold text-xs transition cursor-pointer">Cancelar</button>
+              <button type="button" onClick={handleCriarNovaFerramenta} className="flex-1 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer">Salvar</button>
+              <button type="button" onClick={() => setModalNovaFerramentaAberta(false)} className="px-3 py-2 bg-slate-900 text-slate-300 rounded-xl font-bold text-xs transition cursor-pointer">Cancelar</button>
             </div>
           </div>
         )}
@@ -596,10 +606,10 @@ export default function Admin({ onNavigate }) {
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Mensagens & Sugestões</h2>
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-3">
             <div className="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-center">
-              <button onClick={() => setFiltroMensagens('nao_lidas')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'nao_lidas' ? 'bg-amber-400 text-slate-950' : 'text-slate-400'}`}>Não Lidas</button>
-              <button onClick={() => setFiltroMensagens('lidas')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'lidas' ? 'bg-amber-400 text-slate-950' : 'text-slate-400'}`}>Lidas</button>
-              <button onClick={() => setFiltroMensagens('escondidas')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'escondidas' ? 'bg-amber-400 text-amber-400' : 'text-slate-400'}`}>Escondidas</button>
-              <button onClick={() => setFiltroMensagens('aguardando')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'aguardando' ? 'bg-amber-400 text-slate-950' : 'text-slate-400'}`}>Aguardando</button>
+              <button type="button" onClick={() => setFiltroMensagens('nao_lidas')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'nao_lidas' ? 'bg-amber-400 text-slate-950' : 'text-slate-400'}`}>Não Lidas</button>
+              <button type="button" onClick={() => setFiltroMensagens('lidas')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'lidas' ? 'bg-amber-400 text-slate-950' : 'text-slate-400'}`}>Lidas</button>
+              <button type="button" onClick={() => setFiltroMensagens('escondidas')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'escondidas' ? 'bg-amber-400 text-amber-400' : 'text-slate-400'}`}>Escondidas</button>
+              <button type="button" onClick={() => setFiltroMensagens('aguardando')} className={`py-1.5 text-[10px] font-bold rounded-lg transition cursor-pointer ${filtroMensagens === 'aguardando' ? 'bg-amber-400 text-slate-950' : 'text-slate-400'}`}>Aguardando</button>
             </div>
             <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-xl text-center text-slate-400 text-xs">
               Nenhuma mensagem pendente no momento.
@@ -609,12 +619,12 @@ export default function Admin({ onNavigate }) {
 
         <div className="pt-3 border-t border-slate-800">
           <div className="grid grid-cols-6 gap-1 text-center">
-            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Home</button>
-            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Planos</button>
-            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Config</button>
-            <button onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Admin</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Home</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Bíblia</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Planos</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Explorar</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 text-[9px] font-medium cursor-pointer">Config</button>
+            <button type="button" onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Admin</button>
           </div>
         </div>
 

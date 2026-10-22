@@ -31,6 +31,7 @@ export default function Explorar({ onNavigate, userName }) {
   const [carregandoDados, setCarregandoDados] = useState(false);
   const [fabulaSelecionada, setFabulaSelecionada] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [fotoPerfil, setFotoPerfil] = useState(null);
 
   const getIniciais = (nome) => {
     if (!nome) return 'RF';
@@ -49,14 +50,28 @@ export default function Explorar({ onNavigate, userName }) {
       
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user && user.email === 'Raquellosnak@gmail.com') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
+        if (user) {
+          if (user.email && user.email.toLowerCase() === 'raquellosnak@gmail.com') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+
+          // Busca a foto de perfil salva no Supabase
+          const { data: perfilData, error: perfilError } = await supabase
+            .from('perfis_usuario')
+            .select('foto_url, foto_perfil')
+            .eq('id', user.id)
+            .single();
+
+          if (perfilData && !perfilError) {
+            if (perfilData.foto_url || perfilData.foto_perfil) {
+              setFotoPerfil(perfilData.foto_url || perfilData.foto_perfil);
+            }
+          }
         }
       } catch (err) {
-        console.error("Erro ao verificar admin:", err);
-        setIsAdmin(false);
+        console.error("Erro ao verificar admin ou perfil:", err);
       }
 
       const { data: fabulasData } = await supabase.from('fabulas').select('*').order('criado_em', { ascending: false });
@@ -156,7 +171,11 @@ export default function Explorar({ onNavigate, userName }) {
             <p className="text-base font-bold text-amber-400 mt-0.5">Explorar</p>
           </div>
           <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
-            {iniciaisUsuario}
+            {fotoPerfil ? (
+              <img src={fotoPerfil} alt="Perfil" className="w-full h-full object-cover" />
+            ) : (
+              iniciaisUsuario
+            )}
           </div>
         </div>
 

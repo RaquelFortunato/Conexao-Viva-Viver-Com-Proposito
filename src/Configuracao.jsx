@@ -10,8 +10,35 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
   const [novaSenha, setNovaSenha] = useState('');
   const [notificacoes, setNotificacoes] = useState(true);
   const [fotoPerfil, setFotoPerfil] = useState(null);
+  const [salvando, setSalvando] = useState(false);
 
-  // Verificação rigorosa: O painel Admin SÓ aparece para o seu e-mail oficial
+  useEffect(() => {
+    const carregarPerfilUsuario = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase
+            .from('perfis_usuario')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          if (data && !error) {
+            if (data.nome) setNome(data.nome);
+            if (data.email) setEmail(data.email);
+            if (data.foto_url || data.foto_perfil) {
+              setFotoPerfil(data.foto_url || data.foto_perfil);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do perfil:", err);
+      }
+    };
+
+    carregarPerfilUsuario();
+  }, []);
+
   useEffect(() => {
     const emailAdminOficial = 'raquellosnak@gmail.com';
     const emailAtual = (email || userEmail || '').trim().toLowerCase();
@@ -23,7 +50,6 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
     }
   }, [email, userEmail]);
 
-  // Função para gerar as iniciais dinamicamente
   const getIniciais = (nomeStr) => {
     if (!nomeStr) return 'U';
     const partes = nomeStr.trim().split(' ');
@@ -37,20 +63,31 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
 
   const handleSalvarPerfil = async (e) => {
     e.preventDefault();
+    setSalvando(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from('perfis_usuario').upsert({
+        const { error } = await supabase.from('perfis_usuario').upsert({
           id: user.id,
           nome: nome,
           email: email,
+          foto_url: fotoPerfil,
+          foto_perfil: fotoPerfil,
           updated_at: new Date().toISOString()
         });
+
+        if (error) {
+          alert('Erro ao salvar no banco de dados: ' + error.message);
+        } else {
+          alert('Perfil e foto atualizados com sucesso!');
+        }
       }
     } catch (err) {
       console.error("Erro ao salvar dados do perfil:", err);
+      alert("Ocorreu um erro ao salvar o perfil.");
+    } finally {
+      setSalvando(false);
     }
-    alert('Dados de perfil atualizados com sucesso!');
   };
 
   const handleMudarSenha = async (e) => {
@@ -101,7 +138,6 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Garante que o perfil seja criado/atualizado com conta_excluida = true (funciona para contas antigas e novas)
           await supabase.from('perfis_usuario').upsert({
             id: user.id,
             email: user.email,
@@ -110,13 +146,11 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
             updated_at: new Date().toISOString()
           });
         }
-        // Desconecta a sessão por completo do Supabase
         await supabase.auth.signOut();
       } catch (err) {
         console.error("Erro ao processar exclusão:", err);
       }
 
-      // Limpa dados salvos no navegador para impedir reuso da sessão
       localStorage.clear();
       sessionStorage.clear();
 
@@ -130,6 +164,7 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
+      {/* max-w-md fixado para alinhar exatamente com a Bíblia e Explorar */}
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
         {/* Cabeçalho */}
@@ -194,9 +229,10 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
             </div>
             <button
               type="submit"
+              disabled={salvando}
               className="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs font-bold py-2 rounded-xl transition-all cursor-pointer"
             >
-              Salvar Alterações de Perfil
+              {salvando ? 'Salvando...' : 'Salvar Alterações de Perfil'}
             </button>
           </form>
         </div>
