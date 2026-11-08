@@ -1,16 +1,22 @@
 # 🌟 Conexão Viva - Viver com Propósito
 
-Aplicativo desenvolvido com foco em código aberto para a comunidade[span_1](start_span)[span_1](end_span)[span_2](start_span)[span_2](end_span), criado para fortalecer a fé, a comunhão e o crescimento espiritual diário através da Palavra, orações, louvores e reflexões.
+Aplicativo desenvolvido com foco em código aberto para a comunidade, criado para fortalecer a fé, a comunhão e o crescimento espiritual diário através da Palavra, orações, louvores, jornadas e reflexões.
 
 ---
 
 ## 📱 O que o Aplicativo Oferece
 
-* **📖 Devocional Diário**: Citações, reflexões e orações atualizadas para guiar sua caminhada diária.
-* **📜 Fábulas & Ensinamentos**: Histórias edificantes e parábolas com mensagens de sabedoria.
-* **🎵 Hinário **: Acesso à Harpa Cristã, Cantor Cristão e playlists de músicas em áudio.
-* **🙏 Mural de Oração**: Um espaço comunitário para compartilhar e interagir com pedidos de oração.
-* **🎯 Jornadas Espirituais**: Guias e cronogramas para momentos de busca e devoção.
+* **✨ Devocional & Conteúdo Diário**: Citação diária, reflexão diária e oração diária para guiar a caminhada com Deus.
+* **📖 Bíblia Completa & Planos de Leitura**: 
+  * Os Evangelhos em 60 dias
+  * Livro de Salmos em 1 mês
+  * Provérbios em 1 mês
+  * Bíblia em ordem cronológica em 1 ano
+  * Bíblia em 1 ano em ordem normal (de Gênesis a Apocalipse)
+* **🔥 Desafios & Jornadas Espirituais**: Jejum de Daniel, rotina do primeiro amor e desafio celeste.
+* **💬 Mensagens & Louvores**: Mensagens inspiradoras e louvores para adoração.
+* **📜 Harpa Cristã, Cantor Cristão & Áudios**: Hinos tradicionais, fábulas edificantes e playlists de música em áudio.
+* **🙏 Comunidade & Interação**: Mural de oração, opção para compartilhar o aplicativo com amigos, envio de feedback e sugestões.
 
 ---
 
@@ -25,4 +31,4 @@ Aplicativo desenvolvido com foco em código aberto para a comunidade[span_1](sta
 
 ## 📄 Licença
 
-Este projeto é distribuído sob a licença **GPL-3.0**[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span), garantindo sua liberdade de uso, modificação e compartilhamento em código aberto.
+Este projeto é distribuído sob a licença **GPL-3.0**, garantindo sua liberdade de uso, modificação e compartilhamento em código aberto.
