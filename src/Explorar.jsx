@@ -3,15 +3,17 @@ import { supabase } from './data/supabase';
 
 function getYouTubeEmbedUrl(url) {
   if (!url) return '';
+  let linkLimpo = url.replace('ww.youtube.com', 'www.youtube.com');
   let videoId = '';
-  if (url.includes('watch?v=')) {
-    videoId = url.split('watch?v=')[1]?.split('&')[0];
-  } else if (url.includes('youtu.be/')) {
-    videoId = url.split('youtu.be/')[1]?.split('?')[0];
-  } else if (url.includes('/embed/')) {
-    return url;
+  if (linkLimpo.includes('watch?v=')) {
+    videoId = linkLimpo.split('watch?v=')[1]?.split('&')[0];
+  } else if (linkLimpo.includes('youtu.be/')) {
+    videoId = linkLimpo.split('youtu.be/')[1]?.split('?')[0];
+  } else if (linkLimpo.includes('/embed/')) {
+    videoId = linkLimpo.split('/embed/')[1]?.split('?')[0];
   }
-  return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+  // Parâmetros blindados contra legendas automáticas: cc_load_policy=0 e iv_load_policy=3
+  return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&cc_load_policy=0&iv_load_policy=3&hl=pt` : '';
 }
 
 export default function Explorar({ onNavigate, userName }) {
@@ -57,7 +59,6 @@ export default function Explorar({ onNavigate, userName }) {
             setIsAdmin(false);
           }
 
-          // Busca a foto de perfil salva no Supabase
           const { data: perfilData, error: perfilError } = await supabase
             .from('perfis_usuario')
             .select('foto_url, foto_perfil')
@@ -74,10 +75,10 @@ export default function Explorar({ onNavigate, userName }) {
         console.error("Erro ao verificar admin ou perfil:", err);
       }
 
-      const { data: fabulasData } = await supabase.from('fabulas').select('*').order('criado_em', { ascending: false });
+      const { data: fabulasData } = await supabase.from('fabulas').select('*').order('id', { ascending: false });
       if (fabulasData) setListaFabulas(fabulasData);
 
-      const { data: musicasData } = await supabase.from('playlists_musicas').select('*').order('criado_em', { ascending: false });
+      const { data: musicasData } = await supabase.from('playlists_musicas').select('*').order('id', { ascending: false });
       if (musicasData) setListaMusicas(musicasData);
 
       const { data: refData } = await supabase.from('reflexao_dia').select('*').order('created_at', { ascending: false });
@@ -440,7 +441,7 @@ export default function Explorar({ onNavigate, userName }) {
               <button
                 type="button"
                 onClick={handleCompartilharApp}
-                className="bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600/30 p-3 rounded-2xl text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 shadow-inner"
+                className="bg-emerald-600/25 border border-emerald-500/40 hover:bg-emerald-600/35 p-3 rounded-2xl text-center transition cursor-pointer flex flex-col items-center justify-center gap-1 shadow-inner"
               >
                 <span className="text-lg">📱</span>
                 <span className="text-xs font-bold text-emerald-300">Compartilhar App</span>

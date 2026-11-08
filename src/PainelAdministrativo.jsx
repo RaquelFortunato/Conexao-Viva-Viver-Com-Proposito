@@ -4,7 +4,6 @@ import { supabase } from './data/supabase';
 export default function Admin({ onNavigate }) {
   const [citacao, setCitacao] = useState('');
   const [fabula, setFabula] = useState('');
-  const [novaSenha, setNovaSenha] = useState('');
   const [filtroMensagens, setFiltroMensagens] = useState('nao_lidas');
   
   // Estados para armazenar as URLs do YouTube dos vídeos diários
@@ -21,21 +20,37 @@ export default function Admin({ onNavigate }) {
   const [nomeNovaFerramenta, setNomeNovaFerramenta] = useState('');
 
   // Estados para gerenciar e excluir itens antigos/com erro
+  const [listaCitacoes, setListaCitacoes] = useState([]);
   const [listaReflexoes, setListaReflexoes] = useState([]);
   const [listaMensagens, setListaMensagens] = useState([]);
+  const [listaOracoes, setListaOracoes] = useState([]);
   const [listaLouvores, setListaLouvores] = useState([]);
+  const [listaFabulas, setListaFabulas] = useState([]);
+  const [listaMusicas, setListaMusicas] = useState([]);
 
   // Carrega listas para gerenciamento/exclusão
   const carregarAcervosAdmin = async () => {
     try {
+      const { data: citData } = await supabase.from('citacao_dia').select('*').order('created_at', { ascending: false });
+      if (citData) setListaCitacoes(citData);
+
       const { data: refData } = await supabase.from('reflexao_dia').select('*').order('created_at', { ascending: false });
       if (refData) setListaReflexoes(refData);
 
       const { data: msgData } = await supabase.from('mensagem_dia').select('*').order('created_at', { ascending: false });
       if (msgData) setListaMensagens(msgData);
 
+      const { data: orcData } = await supabase.from('oracao_dia').select('*').order('created_at', { ascending: false });
+      if (orcData) setListaOracoes(orcData);
+
       const { data: louvorData } = await supabase.from('louvor_dia').select('*').order('created_at', { ascending: false });
       if (louvorData) setListaLouvores(louvorData);
+
+      const { data: fabData } = await supabase.from('fabulas').select('*').order('id', { ascending: false });
+      if (fabData) setListaFabulas(fabData);
+
+      const { data: musData } = await supabase.from('playlists_musicas').select('*').order('id', { ascending: false });
+      if (musData) setListaMusicas(musData);
     } catch (err) {
       console.error("Erro ao carregar acervos:", err);
     }
@@ -46,24 +61,16 @@ export default function Admin({ onNavigate }) {
   }, []);
 
   const handleExcluirItem = async (tabela, id) => {
-    if (!window.confirm('Tem certeza que deseja excluir este item?')) return;
+    if (!window.confirm('Tem certeza que deseja excluir este item permanentemente?')) return;
     try {
-      // 1. Remove da tela imediatamente
-      if (tabela === 'louvor_dia') {
-        setListaLouvores(prev => prev.filter(item => item.id !== id));
-      } else if (tabela === 'mensagem_dia') {
-        setListaMensagens(prev => prev.filter(item => item.id !== id));
-      } else if (tabela === 'reflexao_dia') {
-        setListaReflexoes(prev => prev.filter(item => item.id !== id));
-      }
-
-      // 2. Executa a exclusão no Supabase
       const { error } = await supabase.from(tabela).delete().eq('id', id);
+      
       if (error) {
         console.error("Erro RLS/Supabase:", error);
-        alert('Aviso: Se o item recarregar ao atualizar a página, verifique se a política de DELETE está habilitada no painel do Supabase.');
+        alert('Erro ao excluir no banco. Verifique se a política de DELETE está habilitada no Supabase.');
       } else {
         alert('Item excluído com sucesso!');
+        carregarAcervosAdmin();
       }
     } catch (err) {
       console.error(err);
@@ -87,10 +94,11 @@ export default function Admin({ onNavigate }) {
       return;
     }
     try {
-      const { error } = await supabase.from('citacao_dia').insert([{ conteudo: citacao, data: new Date().toISOString() }]);
+      const { error } = await supabase.from('citacao_dia').insert([{ conteudo: citacao }]);
       if (error) throw error;
       alert('Citação publicada com sucesso!');
       setCitacao('');
+      carregarAcervosAdmin();
     } catch (err) {
       console.error(err);
       alert('Erro ao publicar citação: ' + err.message);
@@ -114,6 +122,7 @@ export default function Admin({ onNavigate }) {
 
       alert('Fábula publicada com sucesso!');
       setFabula('');
+      carregarAcervosAdmin();
     } catch (err) {
       console.error(err);
       alert('Erro ao publicar fábula: ' + err.message);
@@ -144,14 +153,14 @@ export default function Admin({ onNavigate }) {
       
       alert('Áudio enviado e registado na playlist com sucesso!');
       setAudioPlaylist(null);
+      carregarAcervosAdmin();
     } catch (err) {
       console.error(err);
       alert('Erro ao enviar áudio: ' + err.message);
     }
   };
 
-  // Função genérica para salvar no banco
-  const handlePublicarVideoGenerico = async (urlVideo, tabelaDia, tipoConteudo, tituloPadrao) => {
+  const handlePublicarVideoGenerico = async (urlVideo, tabelaDia) => {
     if (!urlVideo.trim()) {
       alert('Cole o link do YouTube primeiro.');
       return;
@@ -159,7 +168,6 @@ export default function Admin({ onNavigate }) {
     try {
       const linkFormatado = urlVideo.trim();
 
-      // 1. Salva na tabela do Dia (Home)
       const { error: errDia } = await supabase.from(tabelaDia).insert([
         {
           link: linkFormatado,
@@ -168,18 +176,7 @@ export default function Admin({ onNavigate }) {
       ]);
       if (errDia) throw errDia;
 
-      // 2. Salva na tabela conteudos_explorar (Histórico da aba Explorar)
-      const { error: errExplorar } = await supabase.from('conteudos_explorar').insert([
-        {
-          titulo: tituloPadrao,
-          url_video: linkFormatado,
-          tipo: tipoConteudo,
-          created_at: new Date().toISOString()
-        }
-      ]);
-      if (errExplorar) console.error("Aviso ao salvar no explorar:", errExplorar);
-
-      alert('Vídeo publicado com sucesso! Já está na Home e salvo no histórico do Explorar.');
+      alert('Vídeo publicado com sucesso!');
       carregarAcervosAdmin();
     } catch (err) {
       console.error(err);
@@ -188,39 +185,23 @@ export default function Admin({ onNavigate }) {
   };
 
   const handlePublicarReflexao = async () => {
-    await handlePublicarVideoGenerico(videoReflexao, 'reflexao_dia', 'reflexao', 'Reflexão do Dia');
+    await handlePublicarVideoGenerico(videoReflexao, 'reflexao_dia');
     setVideoReflexao('');
   };
 
   const handlePublicarMensagem = async () => {
-    await handlePublicarVideoGenerico(videoMensagem, 'mensagem_dia', 'mensagem', 'Mensagem do Dia');
+    await handlePublicarVideoGenerico(videoMensagem, 'mensagem_dia');
     setVideoMensagem('');
   };
 
   const handlePublicarOracao = async () => {
-    await handlePublicarVideoGenerico(videoOracao, 'oracao_dia', 'oracao', 'Oração do Dia');
+    await handlePublicarVideoGenerico(videoOracao, 'oracao_dia');
     setVideoOracao('');
   };
 
   const handlePublicarLouvor = async () => {
-    await handlePublicarVideoGenerico(videoLouvor, 'louvor_dia', 'louvor', 'Louvor do Dia');
+    await handlePublicarVideoGenerico(videoLouvor, 'louvor_dia');
     setVideoLouvor('');
-  };
-
-  const handleAtualizarSenha = async () => {
-    if (!novaSenha) {
-      alert('Digite a nova senha.');
-      return;
-    }
-    try {
-      const { error } = await supabase.auth.updateUser({ password: novaSenha });
-      if (error) throw error;
-      alert('Senha atualizada com sucesso!');
-      setNovaSenha('');
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao atualizar senha: ' + err.message);
-    }
   };
 
   const handleSubirLogo = async () => {
@@ -288,7 +269,7 @@ export default function Admin({ onNavigate }) {
               value={citacao}
               onChange={(e) => setCitacao(e.target.value)}
               placeholder="Escreva a citação do dia..."
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             />
             <button 
               type="button"
@@ -323,7 +304,7 @@ export default function Admin({ onNavigate }) {
 
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🕊️ Mensagem do Dia</span></h3>
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🕊️ Mensagem</span></h3>
               <span className="text-[10px] text-amber-400 font-medium">Link do YouTube</span>
             </div>
             <p className="text-[10px] text-slate-400">Cole o link do vídeo do YouTube</p>
@@ -367,7 +348,7 @@ export default function Admin({ onNavigate }) {
 
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🎶 Louvor do Dia</span></h3>
+              <h3 className="text-xs font-bold text-white flex items-center gap-1.5"><span>🎶 Louvor</span></h3>
               <span className="text-[10px] text-amber-400 font-medium">Link do YouTube</span>
             </div>
             <p className="text-[10px] text-slate-400">Cole o link do vídeo do YouTube</p>
@@ -398,7 +379,7 @@ export default function Admin({ onNavigate }) {
               value={fabula}
               onChange={(e) => setFabula(e.target.value)}
               placeholder="Digite o título na 1ª linha e a fábula abaixo..."
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none"
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 resize-none [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             />
             <button 
               type="button"
@@ -432,24 +413,23 @@ export default function Admin({ onNavigate }) {
           </div>
         </div>
 
-        {/* --- SEÇÃO DE GERENCIAMENTO E EXCLUSÃO DE HISTÓRICO --- */}
+        {/* --- SEÇÃO DE GERENCIAMENTO E EXCLUSÃO --- */}
         <div className="space-y-3 pt-2">
           <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider px-1">Gerenciar / Excluir Registros Anteriores</h2>
           
-          {/* Louvores */}
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
-            <h3 className="text-xs font-bold text-white">Louvores Salvos ({listaLouvores.length})</h3>
-            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-              {listaLouvores.length === 0 ? (
-                <p className="text-[10px] text-slate-400">Nenhum louvor registrado.</p>
+            <h3 className="text-xs font-bold text-white">Citações Salvas ({listaCitacoes.length})</h3>
+            <div className="max-h-36 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] space-y-1.5 pr-1">
+              {listaCitacoes.length === 0 ? (
+                <p className="text-[10px] text-slate-400">Nenhuma citação registrada.</p>
               ) : (
-                listaLouvores.map((item) => (
+                listaCitacoes.map((item) => (
                   <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
-                    <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'} ({new Date(item.created_at).toLocaleDateString()})</span>
+                    <span className="truncate flex-1 pr-2 text-slate-300">{item.conteudo || 'Sem texto'}</span>
                     <button 
                       type="button"
-                      onClick={() => handleExcluirItem('louvor_dia', item.id)}
-                      className="px-2 py-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
+                      onClick={() => handleExcluirItem('citacao_dia', item.id)}
+                      className="px-2 py-1 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
                     >
                       Excluir
                     </button>
@@ -459,43 +439,129 @@ export default function Admin({ onNavigate }) {
             </div>
           </div>
 
-          {/* Mensagens */}
-          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
-            <h3 className="text-xs font-bold text-white">Mensagens Salvas ({listaMensagens.length})</h3>
-            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-              {listaMensagens.length === 0 ? (
-                <p className="text-[10px] text-slate-400">Nenhuma mensagem registrada.</p>
-              ) : (
-                listaMensagens.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
-                    <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'} ({new Date(item.created_at).toLocaleDateString()})</span>
-                    <button 
-                      type="button"
-                      onClick={() => handleExcluirItem('mensagem_dia', item.id)}
-                      className="px-2 py-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
-                    >
-                      Excluir
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Reflexões */}
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
             <h3 className="text-xs font-bold text-white">Reflexões Salvas ({listaReflexoes.length})</h3>
-            <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+            <div className="max-h-36 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] space-y-1.5 pr-1">
               {listaReflexoes.length === 0 ? (
                 <p className="text-[10px] text-slate-400">Nenhuma reflexão registrada.</p>
               ) : (
                 listaReflexoes.map((item) => (
                   <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
-                    <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'} ({new Date(item.created_at).toLocaleDateString()})</span>
+                    <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'}</span>
                     <button 
                       type="button"
                       onClick={() => handleExcluirItem('reflexao_dia', item.id)}
-                      className="px-2 py-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
+                      className="px-2 py-1 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <h3 className="text-xs font-bold text-white">Mensagens Salvas ({listaMensagens.length})</h3>
+            <div className="max-h-36 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] space-y-1.5 pr-1">
+              {listaMensagens.length === 0 ? (
+                <p className="text-[10px] text-slate-400">Nenhuma mensagem registrada.</p>
+              ) : (
+                listaMensagens.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
+                    <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'}</span>
+                    <button 
+                      type="button"
+                      onClick={() => handleExcluirItem('mensagem_dia', item.id)}
+                      className="px-2 py-1 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <h3 className="text-xs font-bold text-white">Orações Salvas ({listaOracoes.length})</h3>
+            <div className="max-h-36 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] space-y-1.5 pr-1">
+              {listaOracoes.length === 0 ? (
+                <p className="text-[10px] text-slate-400">Nenhuma oração registrada.</p>
+              ) : (
+                listaOracoes.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
+                    <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'}</span>
+                    <button 
+                      type="button"
+                      onClick={() => handleExcluirItem('oracao_dia', item.id)}
+                      className="px-2 py-1 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <h3 className="text-xs font-bold text-white">Louvores Salvos ({listaLouvores.length})</h3>
+            <div className="max-h-36 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] space-y-1.5 pr-1">
+              {listaLouvores.length === 0 ? (
+                <p className="text-[10px] text-slate-400">Nenhum louvor registrado.</p>
+              ) : (
+                listaLouvores.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
+                    <span className="truncate flex-1 pr-2 text-slate-300">{item.link || 'Sem link'}</span>
+                    <button 
+                      type="button"
+                      onClick={() => handleExcluirItem('louvor_dia', item.id)}
+                      className="px-2 py-1 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <h3 className="text-xs font-bold text-white">Fábulas Salvas ({listaFabulas.length})</h3>
+            <div className="max-h-36 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] space-y-1.5 pr-1">
+              {listaFabulas.length === 0 ? (
+                <p className="text-[10px] text-slate-400">Nenhuma fábula registrada.</p>
+              ) : (
+                listaFabulas.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
+                    <span className="truncate flex-1 pr-2 text-slate-300">{item.titulo || 'Sem título'}</span>
+                    <button 
+                      type="button"
+                      onClick={() => handleExcluirItem('fabulas', item.id)}
+                      className="px-2 py-1 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
+            <h3 className="text-xs font-bold text-white">Áudios da Playlist ({listaMusicas.length})</h3>
+            <div className="max-h-36 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] space-y-1.5 pr-1">
+              {listaMusicas.length === 0 ? (
+                <p className="text-[10px] text-slate-400">Nenhum áudio registrado.</p>
+              ) : (
+                listaMusicas.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between bg-slate-900 p-2 rounded-xl text-[10px]">
+                    <span className="truncate flex-1 pr-2 text-slate-300">{item.nome_playlist || 'Sem nome'}</span>
+                    <button 
+                      type="button"
+                      onClick={() => handleExcluirItem('playlists_musicas', item.id)}
+                      className="px-2 py-1 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition font-bold cursor-pointer whitespace-nowrap"
                     >
                       Excluir
                     </button>
@@ -509,26 +575,6 @@ export default function Admin({ onNavigate }) {
         <div className="space-y-2 pt-2">
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Configurações & Marca</h2>
           
-          <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
-            <h3 className="text-xs font-bold text-white">Mudar Senha do Admin</h3>
-            <div className="flex gap-2">
-              <input 
-                type="password"
-                value={novaSenha}
-                onChange={(e) => setNovaSenha(e.target.value)}
-                placeholder="Nova Senha"
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-              />
-              <button 
-                type="button"
-                onClick={handleAtualizarSenha}
-                className="px-3 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer whitespace-nowrap"
-              >
-                Atualizar
-              </button>
-            </div>
-          </div>
-
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-white">Subir Logo do Aplicativo</h3>

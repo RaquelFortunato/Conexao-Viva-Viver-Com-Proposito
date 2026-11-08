@@ -40,6 +40,33 @@ export default function Login({ onLoginSuccess }) {
     fetchBrandAssets();
   }, []);
 
+  // --- FUNÇÃO DE RECUPERAÇÃO DE SENHA FUNCIONAL ---
+  const handleEsqueciSenha = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      alert('Por favor, digite o seu e-mail no campo acima primeiro.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: window.location.origin,
+      });
+
+      if (error) throw error;
+
+      alert('📧 E-mail de recuperação enviado com sucesso! Verifique sua caixa de entrada.');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao enviar e-mail de recuperação: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -257,9 +284,13 @@ export default function Login({ onLoginSuccess }) {
                   {isCadastro ? 'Criar Senha' : 'Senha'}
                 </label>
                 {!isCadastro && (
-                  <a href="#esqueci" onClick={(e) => { e.preventDefault(); alert('Funcionalidade de recuperação em breve.'); }} className="text-xs text-amber-400 hover:underline">
+                  <button 
+                    type="button" 
+                    onClick={handleEsqueciSenha} 
+                    className="text-xs text-amber-400 hover:underline bg-transparent border-0 cursor-pointer p-0"
+                  >
                     Esqueci minha senha
-                  </a>
+                  </button>
                 )}
               </div>
               <div className="relative">

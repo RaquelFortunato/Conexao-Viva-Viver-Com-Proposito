@@ -82,6 +82,13 @@ export default function Biblia({ onNavigate, userName }) {
   const [fotoPerfil, setFotoPerfil] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Estados para controlar quais modais/listas estão abertos
+  const [modalVersaoAberto, setModalVersaoAberto] = useState(false);
+  const [modalLivroAberto, setModalLivroAberto] = useState(false);
+  const [modalCapituloAberto, setModalCapituloAberto] = useState(false);
+
+  const versaoAtualNome = BIBLE_VERSIONS.find(v => v.id === versaoId)?.name || 'Versão';
+
   // Função para calcular as iniciais do usuário
   const getIniciais = (nome) => {
     if (!nome) return 'RF';
@@ -162,7 +169,7 @@ export default function Biblia({ onNavigate, userName }) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
-      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-4">
+      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-4 relative">
         
         {/* Cabeçalho com o nome do app e a foto ou iniciais do perfil */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
@@ -179,21 +186,44 @@ export default function Biblia({ onNavigate, userName }) {
           </div>
         </div>
 
+        {/* Seletor de Versão Customizado (Sem barra de rolagem de PC) */}
         <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl space-y-2">
           <label className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Versão da Bíblia</label>
-          <select 
-            value={versaoId}
-            onChange={(e) => setVersaoId(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 text-xs text-white font-semibold rounded-xl p-2.5 focus:outline-none cursor-pointer"
+          <button
+            type="button"
+            onClick={() => { setModalVersaoAberto(true); setModalLivroAberto(false); setModalCapituloAberto(false); }}
+            className="w-full bg-slate-900 border border-slate-700 text-xs text-white font-semibold rounded-xl p-2.5 flex items-center justify-between focus:outline-none cursor-pointer"
           >
-            {BIBLE_VERSIONS.map(v => (
-              <option key={v.id} value={v.id}>{v.name}</option>
-            ))}
-          </select>
+            <span>{versaoAtualNome}</span>
+            <span className="text-amber-400 text-xs font-bold">▼</span>
+          </button>
         </div>
+
+        {/* Modal/Lista flutuante de Versões */}
+        {modalVersaoAberto && (
+          <div className="bg-slate-950 border border-amber-500/50 rounded-2xl p-3 space-y-1.5 shadow-xl max-h-48 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex justify-between items-center pb-1 border-b border-slate-800 mb-1">
+              <span className="text-[10px] font-bold text-amber-400 uppercase">Escolha a Versão</span>
+              <button type="button" onClick={() => setModalVersaoAberto(false)} className="text-slate-400 text-xs font-bold px-1">✕</button>
+            </div>
+            {BIBLE_VERSIONS.map(v => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => { setVersaoId(v.id); setModalVersaoAberto(false); }}
+                className={`w-full text-left p-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                  versaoId === v.id ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 hover:bg-slate-900'
+                }`}
+              >
+                {v.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-2 bg-slate-950/60 p-1.5 rounded-2xl border border-slate-800">
           <button 
+            type="button"
             onClick={() => {
               setTestamento('VT');
               const primeiroVT = LIVROS_BIBLIA.find(l => l.testamento === 'VT');
@@ -207,6 +237,7 @@ export default function Biblia({ onNavigate, userName }) {
             Antigo Testamento
           </button>
           <button 
+            type="button"
             onClick={() => {
               setTestamento('NT');
               const primeiroNT = LIVROS_BIBLIA.find(l => l.testamento === 'NT');
@@ -222,36 +253,78 @@ export default function Biblia({ onNavigate, userName }) {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl">
+          {/* Seletor de Livro Customizado */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl relative">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Livro</label>
-            <select 
-              value={livro.id}
-              onChange={(e) => {
-                const l = LIVROS_BIBLIA.find(item => item.id === e.target.value);
-                setLivro(l);
-                setCapitulo(1);
-              }}
-              className="w-full bg-slate-900 border border-slate-700 text-xs text-white rounded-xl p-2 focus:outline-none cursor-pointer"
+            <button
+              type="button"
+              onClick={() => { setModalLivroAberto(!modalLivroAberto); setModalCapituloAberto(false); setModalVersaoAberto(false); }}
+              className="w-full bg-slate-900 border border-slate-700 text-xs text-white rounded-xl p-2 flex items-center justify-between focus:outline-none cursor-pointer"
             >
-              {livrosFiltrados.map(l => (
-                <option key={l.id} value={l.id}>{l.nome}</option>
-              ))}
-            </select>
+              <span className="truncate">{livro.nome}</span>
+              <span className="text-amber-400 text-[10px] font-bold ml-1">▼</span>
+            </button>
           </div>
 
-          <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl">
+          {/* Seletor de Capítulo Customizado */}
+          <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-2xl relative">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Capítulo</label>
-            <select 
-              value={capitulo}
-              onChange={(e) => setCapitulo(Number(e.target.value))}
-              className="w-full bg-slate-900 border border-slate-700 text-xs text-white rounded-xl p-2 focus:outline-none cursor-pointer"
+            <button
+              type="button"
+              onClick={() => { setModalCapituloAberto(!modalCapituloAberto); setModalLivroAberto(false); setModalVersaoAberto(false); }}
+              className="w-full bg-slate-900 border border-slate-700 text-xs text-white rounded-xl p-2 flex items-center justify-between focus:outline-none cursor-pointer"
             >
-              {Array.from({ length: livro.capitulos }, (_, i) => i + 1).map(num => (
-                <option key={num} value={num}>Cap. {num}</option>
-              ))}
-            </select>
+              <span>Cap. {capitulo}</span>
+              <span className="text-amber-400 text-[10px] font-bold ml-1">▼</span>
+            </button>
           </div>
         </div>
+
+        {/* Modal/Lista flutuante de Livros */}
+        {modalLivroAberto && (
+          <div className="bg-slate-950 border border-amber-500/50 rounded-2xl p-3 space-y-1.5 shadow-xl max-h-52 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex justify-between items-center pb-1 border-b border-slate-800 mb-1">
+              <span className="text-[10px] font-bold text-amber-400 uppercase">Escolha o Livro</span>
+              <button type="button" onClick={() => setModalLivroAberto(false)} className="text-slate-400 text-xs font-bold px-1">✕</button>
+            </div>
+            {livrosFiltrados.map(l => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => { setLivro(l); setCapitulo(1); setModalLivroAberto(false); }}
+                className={`w-full text-left p-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                  livro.id === l.id ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-300 hover:bg-slate-900'
+                }`}
+              >
+                {l.nome}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Modal/Lista flutuante de Capítulos */}
+        {modalCapituloAberto && (
+          <div className="bg-slate-950 border border-amber-500/50 rounded-2xl p-3 space-y-1.5 shadow-xl max-h-52 overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex justify-between items-center pb-1 border-b border-slate-800 mb-1">
+              <span className="text-[10px] font-bold text-amber-400 uppercase">Escolha o Capítulo</span>
+              <button type="button" onClick={() => setModalCapituloAberto(false)} className="text-slate-400 text-xs font-bold px-1">✕</button>
+            </div>
+            <div className="grid grid-cols-5 gap-1.5">
+              {Array.from({ length: livro.capitulos }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => { setCapitulo(num); setModalCapituloAberto(false); }}
+                  className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+                    capitulo === num ? 'bg-amber-500 text-slate-950 shadow-lg' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex justify-between items-center border-b border-slate-800 pb-2">

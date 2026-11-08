@@ -12,12 +12,18 @@ function getYouTubeEmbedUrl(url) {
   } else if (linkLimpo.includes('/embed/')) {
     videoId = linkLimpo.split('/embed/')[1]?.split('?')[0];
   }
-  return videoId ? `https://www.youtube.com/embed/${videoId}?cc_load_policy=0&rel=0` : '';
+  // Parâmetros blindados contra legendas automáticas: cc_load_policy=0 e iv_load_policy=3
+  return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&cc_load_policy=0&iv_load_policy=3&hl=pt` : '';
 }
 
 export default function Home({ onNavigate, userName }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [fotoPerfil, setFotoPerfil] = useState(null);
+
+  // Estados para os conteúdos diários vindos do Supabase
+  const [citacaoHoje, setCitacaoHoje] = useState(null);
+  const [reflexaoHoje, setReflexaoHoje] = useState(null);
+  const [oracaoHoje, setOracaoHoje] = useState(null);
 
   const getIniciais = (nome) => {
     if (!nome) return 'RF';
@@ -31,7 +37,7 @@ export default function Home({ onNavigate, userName }) {
   const iniciaisUsuario = getIniciais(userName || 'Raquel Fortunato');
 
   useEffect(() => {
-    async function checkUserAdminEPerfil() {
+    async function carregarDadosHome() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -53,12 +59,36 @@ export default function Home({ onNavigate, userName }) {
             }
           }
         }
+
+        // Carrega a Citação do Dia mais recente
+        const { data: citData } = await supabase
+          .from('citacao_dia')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (citData && citData.length > 0) setCitacaoHoje(citData[0]);
+
+        // Carrega a Reflexão do Dia mais recente
+        const { data: refData } = await supabase
+          .from('reflexao_dia')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (refData && refData.length > 0) setReflexaoHoje(refData[0]);
+
+        // Carrega a Oração do Dia mais recente
+        const { data: orcData } = await supabase
+          .from('oracao_dia')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (orcData && orcData.length > 0) setOracaoHoje(orcData[0]);
+
       } catch (error) {
-        console.error("Erro ao verificar admin ou perfil:", error);
-        setIsAdmin(false);
+        console.error("Erro ao carregar dados da Home:", error);
       }
     }
-    checkUserAdminEPerfil();
+    carregarDadosHome();
   }, []);
 
   return (
@@ -95,34 +125,67 @@ export default function Home({ onNavigate, userName }) {
           </div>
         </div>
 
+        {/* CITAÇÃO DO DIA */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">💬 CITAÇÃO DIÁRIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Aguardando conteúdo</span>
+            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
+              {citacaoHoje ? 'Publicado' : 'Aguardando conteúdo'}
+            </span>
           </div>
-          <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center text-slate-400 text-xs italic">
-            "Citação do dia..."
+          <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center text-slate-200 text-xs italic">
+            {citacaoHoje ? `"${citacaoHoje.conteudo}"` : '"Citação do dia..."'}
           </div>
         </div>
 
+        {/* REFLEXÃO DO DIA */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🌿 REFLEXÃO DO DIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Aguardando vídeo</span>
+            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
+              {reflexaoHoje ? 'Vídeo Disponível' : 'Aguardando vídeo'}
+            </span>
           </div>
-          <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
-            Nenhum vídeo enviado ainda
-          </div>
+          {reflexaoHoje && getYouTubeEmbedUrl(reflexaoHoje.link) ? (
+            <div className="w-full h-44 rounded-xl overflow-hidden border border-slate-800">
+              <iframe
+                src={getYouTubeEmbedUrl(reflexaoHoje.link)}
+                title="Reflexão do Dia"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          ) : (
+            <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
+              Nenhum vídeo enviado ainda
+            </div>
+          )}
         </div>
 
+        {/* ORAÇÃO DO DIA */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🙏 ORAÇÃO DO DIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Aguardando áudio</span>
+            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
+              {oracaoHoje ? 'Vídeo Disponível' : 'Aguardando vídeo'}
+            </span>
           </div>
-          <div className="h-20 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
-            Nenhum áudio enviado ainda
-          </div>
+          {oracaoHoje && getYouTubeEmbedUrl(oracaoHoje.link) ? (
+            <div className="w-full h-44 rounded-xl overflow-hidden border border-slate-800">
+              <iframe
+                src={getYouTubeEmbedUrl(oracaoHoje.link)}
+                title="Oração do Dia"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          ) : (
+            <div className="h-20 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
+              Nenhum vídeo enviado ainda
+            </div>
+          )}
         </div>
 
         <div className="pt-3 border-t border-slate-800">
