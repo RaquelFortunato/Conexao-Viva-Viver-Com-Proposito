@@ -11,6 +11,8 @@ function getYouTubeEmbedUrl(url) {
     videoId = linkLimpo.split('youtu.be/')[1]?.split('?')[0];
   } else if (linkLimpo.includes('/embed/')) {
     videoId = linkLimpo.split('/embed/')[1]?.split('?')[0];
+  } else if (linkLimpo.includes('/shorts/')) {
+    videoId = linkLimpo.split('/shorts/')[1]?.split('?')[0];
   }
   // Parâmetros blindados contra legendas automáticas: cc_load_policy=0 e iv_load_policy=3
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&cc_load_policy=0&iv_load_policy=3&hl=pt` : '';
@@ -138,7 +140,7 @@ export default function Home({ onNavigate, userName }) {
           </div>
         </div>
 
-        {/* REFLEXÃO DO DIA */}
+        {/* REFLEXÃO DO DIA (FORMATO VERTICAL / SHORTS) */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🌿 REFLEXÃO DO DIA</span>
@@ -147,14 +149,16 @@ export default function Home({ onNavigate, userName }) {
             </span>
           </div>
           {reflexaoHoje && getYouTubeEmbedUrl(reflexaoHoje.link) ? (
-            <div className="w-full h-44 rounded-xl overflow-hidden border border-slate-800">
-              <iframe
-                src={getYouTubeEmbedUrl(reflexaoHoje.link)}
-                title="Reflexão do Dia"
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+            <div className="flex justify-center">
+              <div className="w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg">
+                <iframe
+                  src={getYouTubeEmbedUrl(reflexaoHoje.link)}
+                  title="Reflexão do Dia"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           ) : (
             <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
@@ -163,7 +167,7 @@ export default function Home({ onNavigate, userName }) {
           )}
         </div>
 
-        {/* ORAÇÃO DO DIA */}
+        {/* ORAÇÃO DO DIA (FORMATO VERTICAL / SHORTS) */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-400 tracking-wider">🙏 ORAÇÃO DO DIA</span>
@@ -172,14 +176,16 @@ export default function Home({ onNavigate, userName }) {
             </span>
           </div>
           {oracaoHoje && getYouTubeEmbedUrl(oracaoHoje.link) ? (
-            <div className="w-full h-44 rounded-xl overflow-hidden border border-slate-800">
-              <iframe
-                src={getYouTubeEmbedUrl(oracaoHoje.link)}
-                title="Oração do Dia"
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+            <div className="flex justify-center">
+              <div className="w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg">
+                <iframe
+                  src={getYouTubeEmbedUrl(oracaoHoje.link)}
+                  title="Oração do Dia"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           ) : (
             <div className="h-20 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">

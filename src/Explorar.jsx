@@ -11,6 +11,8 @@ function getYouTubeEmbedUrl(url) {
     videoId = linkLimpo.split('youtu.be/')[1]?.split('?')[0];
   } else if (linkLimpo.includes('/embed/')) {
     videoId = linkLimpo.split('/embed/')[1]?.split('?')[0];
+  } else if (linkLimpo.includes('/shorts/')) {
+    videoId = linkLimpo.split('/shorts/')[1]?.split('?')[0];
   }
   // Parâmetros blindados contra legendas automáticas: cc_load_policy=0 e iv_load_policy=3
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&cc_load_policy=0&iv_load_policy=3&hl=pt` : '';
@@ -275,7 +277,7 @@ export default function Explorar({ onNavigate, userName }) {
             </div>
           </div>
         ) : tipoVisualizacao === 'videos_reflexao' || tipoVisualizacao === 'videos_mensagem' || tipoVisualizacao === 'videos_louvor' ? (
-          /* VÍDEOS (MENSAGENS / REFLEXÕES / LOUVORES) */
+          /* VÍDEOS (MENSAGENS / REFLEXÕES / LOUVORES - FORMATO VERTICAL / SHORTS) */
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
               <h2 className="text-base font-bold text-amber-400 flex items-center gap-2">
@@ -292,27 +294,29 @@ export default function Explorar({ onNavigate, userName }) {
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[70vh] overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
               {(tipoVisualizacao === 'videos_reflexao' ? listaReflexoes : 
                 tipoVisualizacao === 'videos_mensagem' ? listaMensagens : listaLouvores).length === 0 ? (
                 <p className="text-sm text-slate-400 text-center py-8">Nenhum vídeo encontrado.</p>
               ) : (
                 (tipoVisualizacao === 'videos_reflexao' ? listaReflexoes : 
                  tipoVisualizacao === 'videos_mensagem' ? listaMensagens : listaLouvores).map((item) => (
-                  <div key={item.id} className="bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl space-y-2 shadow-inner">
+                  <div key={item.id} className="bg-slate-950/80 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-inner">
                     <div className="flex justify-between items-center">
                       <h3 className="text-xs font-bold text-white">{item.titulo || (tipoVisualizacao === 'videos_reflexao' ? 'Reflexão' : tipoVisualizacao === 'videos_mensagem' ? 'Mensagem' : 'Louvor')}</h3>
                       <span className="text-[10px] text-slate-400">{new Date(item.created_at).toLocaleDateString()}</span>
                     </div>
                     {item.link && (
-                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
-                        <iframe
-                          className="w-full h-full border-0"
-                          src={getYouTubeEmbedUrl(item.link)}
-                          title="Vídeo"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
+                      <div className="flex justify-center">
+                        <div className="w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg">
+                          <iframe
+                            className="w-full h-full border-0"
+                            src={getYouTubeEmbedUrl(item.link)}
+                            title="Vídeo"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        </div>
                       </div>
                     )}
                   </div>
