@@ -14,7 +14,6 @@ function getYouTubeEmbedUrl(url) {
   } else if (linkLimpo.includes('/shorts/')) {
     videoId = linkLimpo.split('/shorts/')[1]?.split('?')[0];
   }
-  // Parâmetros blindados contra legendas automáticas: cc_load_policy=0 e iv_load_policy=3
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&cc_load_policy=0&iv_load_policy=3&hl=pt` : '';
 }
 
@@ -22,7 +21,6 @@ export default function Home({ onNavigate, userName }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [fotoPerfil, setFotoPerfil] = useState(null);
 
-  // Estados para os conteúdos diários vindos do Supabase
   const [citacaoHoje, setCitacaoHoje] = useState(null);
   const [reflexaoHoje, setReflexaoHoje] = useState(null);
   const [oracaoHoje, setOracaoHoje] = useState(null);
@@ -62,7 +60,6 @@ export default function Home({ onNavigate, userName }) {
           }
         }
 
-        // Carrega a Citação do Dia mais recente
         const { data: citData } = await supabase
           .from('citacao_dia')
           .select('*')
@@ -70,7 +67,6 @@ export default function Home({ onNavigate, userName }) {
           .limit(1);
         if (citData && citData.length > 0) setCitacaoHoje(citData[0]);
 
-        // Carrega a Reflexão do Dia mais recente
         const { data: refData } = await supabase
           .from('reflexao_dia')
           .select('*')
@@ -78,7 +74,6 @@ export default function Home({ onNavigate, userName }) {
           .limit(1);
         if (refData && refData.length > 0) setReflexaoHoje(refData[0]);
 
-        // Carrega a Oração do Dia mais recente
         const { data: orcData } = await supabase
           .from('oracao_dia')
           .select('*')
@@ -94,14 +89,20 @@ export default function Home({ onNavigate, userName }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
-      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
+    <div className="min-h-screen bg-[#070B14] text-white p-4 py-8 flex flex-col items-center relative overflow-y-auto">
+      
+      {/* Brilho ambiental sutil ao fundo */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      {/* TELA PRINCIPAL ARREDONDADA E UNIFICADA (ESTILO GOOGLE SITES) */}
+      <div className="w-full max-w-md bg-[#0E1525] border border-slate-800/80 p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-md space-y-6 z-10 my-auto">
         
-        <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner">
+        {/* TOPO: PERFIL E SAUDAÇÃO */}
+        <div className="flex items-center justify-between bg-[#070B14] border border-slate-800/60 p-4 rounded-2xl shadow-inner">
           <div>
-            <h1 className="text-sm font-bold text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-serif font-bold text-white flex items-center gap-1.5">
               <span>Conexão Viva</span>
-              <span className="text-amber-400 text-xs font-normal">• Viver com Propósito</span>
+              <span className="text-amber-400 text-[10px] font-bold tracking-widest uppercase">• Viver com Propósito</span>
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">Tela Inicial</p>
           </div>
@@ -114,43 +115,40 @@ export default function Home({ onNavigate, userName }) {
           </div>
         </div>
 
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2">
-          <div className="flex items-center justify-between text-xs text-amber-400 font-semibold tracking-wider">
-            <span>🟡 DEVOCIONAL DE HOJE</span>
-            <span className="text-slate-400 font-normal">Hoje</span>
+        {/* DEVOCIONAL DE HOJE (FLUIDO E LIMPO, SEM CAIXAS SEPARADAS) */}
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-amber-400 tracking-wider">DEVOCIONAL DE HOJE</span>
+            <span className="text-slate-400 font-normal text-[10px]">Hoje</span>
           </div>
-          <div>
-            <h2 className="text-base font-bold text-white">Paz e Renovação Interior</h2>
-            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+          <div className="space-y-1 px-1">
+            <h2 className="text-base font-serif font-bold text-white">Paz e Renovação Interior</h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
               Conecte seu coração ao propósito divino para a sua jornada hoje.
             </p>
           </div>
         </div>
 
-        {/* CITAÇÃO DO DIA */}
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400 tracking-wider">💬 CITAÇÃO DIÁRIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
-              {citacaoHoje ? 'Publicado' : 'Aguardando conteúdo'}
-            </span>
-          </div>
-          <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center text-slate-200 text-xs italic">
-            {citacaoHoje ? `"${citacaoHoje.conteudo}"` : '"Citação do dia..."'}
+        <div className="border-t border-slate-800/50 my-2" />
+
+        {/* CITAÇÃO DO DIA (TÍTULO FORA, TEXTO COM ACABAMENTO ELEGANTE) */}
+        <div className="space-y-2">
+          <h3 className="text-xs font-bold text-amber-400 tracking-wider px-1">CITAÇÃO DO DIA</h3>
+          <div className="bg-[#070B14] border border-slate-800/60 p-5 rounded-2xl shadow-inner">
+            <p className="font-serif italic text-slate-200 text-sm leading-relaxed text-center">
+              {citacaoHoje ? `"${citacaoHoje.conteudo}"` : '"Aquietai-vos e sabeis que eu sou Deus; serei exaltado entre as nações; serei exaltado sobre a terra."'}
+            </p>
           </div>
         </div>
 
-        {/* REFLEXÃO DO DIA (FORMATO VERTICAL / SHORTS) */}
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400 tracking-wider">🌿 REFLEXÃO DO DIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
-              {reflexaoHoje ? 'Vídeo Disponível' : 'Aguardando vídeo'}
-            </span>
-          </div>
-          {reflexaoHoje && getYouTubeEmbedUrl(reflexaoHoje.link) ? (
-            <div className="flex justify-center">
-              <div className="w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg">
+        <div className="border-t border-slate-800/50 my-2" />
+
+        {/* REFLEXÃO DO DIA (TÍTULO ISOLADO FORA, VÍDEO VERTICAL DIRETO) */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold text-amber-400 tracking-wider px-1">REFLEXÃO DO DIA</h3>
+          <div className="flex justify-center">
+            <div className="w-56 h-96 rounded-2xl overflow-hidden bg-black shadow-xl flex items-center justify-center border border-slate-800/60">
+              {reflexaoHoje && getYouTubeEmbedUrl(reflexaoHoje.link) ? (
                 <iframe
                   src={getYouTubeEmbedUrl(reflexaoHoje.link)}
                   title="Reflexão do Dia"
@@ -158,26 +156,23 @@ export default function Home({ onNavigate, userName }) {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 ></iframe>
-              </div>
+              ) : (
+                <div className="text-slate-500 text-xs text-center p-4">
+                  Vídeo em breve
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="h-28 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
-              Nenhum vídeo enviado ainda
-            </div>
-          )}
+          </div>
         </div>
 
-        {/* ORAÇÃO DO DIA (FORMATO VERTICAL / SHORTS) */}
-        <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-400 tracking-wider">🙏 ORAÇÃO DO DIA</span>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
-              {oracaoHoje ? 'Vídeo Disponível' : 'Aguardando vídeo'}
-            </span>
-          </div>
-          {oracaoHoje && getYouTubeEmbedUrl(oracaoHoje.link) ? (
-            <div className="flex justify-center">
-              <div className="w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg">
+        <div className="border-t border-slate-800/50 my-2" />
+
+        {/* ORAÇÃO DO DIA (TÍTULO ISOLADO FORA, VÍDEO VERTICAL DIRETO) */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold text-amber-400 tracking-wider px-1">ORAÇÃO DO DIA</h3>
+          <div className="flex justify-center">
+            <div className="w-56 h-96 rounded-2xl overflow-hidden bg-black shadow-xl flex items-center justify-center border border-slate-800/60">
+              {oracaoHoje && getYouTubeEmbedUrl(oracaoHoje.link) ? (
                 <iframe
                   src={getYouTubeEmbedUrl(oracaoHoje.link)}
                   title="Oração do Dia"
@@ -185,24 +180,25 @@ export default function Home({ onNavigate, userName }) {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 ></iframe>
-              </div>
+              ) : (
+                <div className="text-slate-500 text-xs text-center p-4">
+                  Vídeo em breve
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="h-20 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
-              Nenhum vídeo enviado ainda
-            </div>
-          )}
+          </div>
         </div>
 
-        <div className="pt-3 border-t border-slate-800">
-          <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center`}>
-            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-amber-500 text-slate-950 rounded-xl text-[9px] font-bold shadow-lg cursor-pointer">Home</button>
-            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Bíblia</button>
-            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Planos</button>
-            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Explorar</button>
-            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer">Config</button>
+        {/* MENU DE NAVEGAÇÃO INFERIOR */}
+        <div className="pt-3 border-t border-slate-800/80">
+          <div className={`grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} gap-1 text-center bg-[#070B14] p-2 rounded-2xl border border-slate-800/60`}>
+            <button onClick={() => onNavigate && onNavigate('home')} className="p-2 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 rounded-xl text-[9px] font-bold shadow-md cursor-pointer">Home</button>
+            <button onClick={() => onNavigate && onNavigate('biblia')} className="p-2 bg-transparent border-0 text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer transition-all">Bíblia</button>
+            <button onClick={() => onNavigate && onNavigate('planos')} className="p-2 bg-transparent border-0 text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer transition-all">Planos</button>
+            <button onClick={() => onNavigate && onNavigate('explorar')} className="p-2 bg-transparent border-0 text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer transition-all">Explorar</button>
+            <button onClick={() => onNavigate && onNavigate('config')} className="p-2 bg-transparent border-0 text-slate-400 hover:text-white text-[9px] font-medium cursor-pointer transition-all">Config</button>
             {isAdmin && (
-              <button onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-slate-950/60 border border-slate-800 rounded-xl text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer">Admin</button>
+              <button onClick={() => onNavigate && onNavigate('admin')} className="p-2 bg-transparent border-0 text-amber-400 hover:text-white text-[9px] font-bold cursor-pointer transition-all">Admin</button>
             )}
           </div>
         </div>
