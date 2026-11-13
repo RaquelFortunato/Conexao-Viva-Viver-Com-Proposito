@@ -1,0 +1,52 @@
+name: Gerar APK e Publicar
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar codigo do repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Compilar o projeto web (Build)
+        run: npm run build
+
+      - name: Configurar ambiente Android (Java)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Adicionar plataforma Android com Capacitor
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Gerar o APK de instalacao
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Publicar APK nos Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          tag_name: v1.0.${{ github.run_number }}
+          name: Versão Automática ${{ github.run_number }}
+          body: "APK gerado automaticamente pelo GitHub Actions para teste e instalação direta."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
