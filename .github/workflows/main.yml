@@ -1,4 +1,4 @@
-Name: Gerar APK e Publicar
+name: Gerar APK e Publicar
 
 on:
   push:
