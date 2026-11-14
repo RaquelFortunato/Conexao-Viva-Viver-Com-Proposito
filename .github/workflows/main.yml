@@ -1,4 +1,4 @@
-name: Gerar APK e Publicar
+Name: Gerar APK e Publicar
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Instalar dependencias
