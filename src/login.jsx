@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './data/supabase.js'; 
+import { supabase } from './data/supabase.js';
 
 export default function Login({ onLoginSuccess }) {
   const [isCadastro, setIsCadastro] = useState(true);
@@ -7,7 +7,7 @@ export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
-  
+
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,11 +22,11 @@ export default function Login({ onLoginSuccess }) {
         const { data, error } = await supabase
           .from('app_config')
           .select('key, value');
-        
+
         if (!error && data) {
           const logoObj = data.find(item => item.key === 'app_logo');
           const bannerObj = data.find(item => item.key === 'app_banner');
-          
+
           if (logoObj && logoObj.value) {
             setCustomLogo(logoObj.value);
             localStorage.setItem('app_logo_cache', logoObj.value);
@@ -93,7 +93,7 @@ export default function Login({ onLoginSuccess }) {
         if (authError) throw authError;
 
         if (!data.user) {
-           throw new Error("Não foi possível criar a conta. Tente outro e-mail.");
+          throw new Error("Não foi possível criar a conta. Tente outro e-mail.");
         }
 
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -116,8 +116,8 @@ export default function Login({ onLoginSuccess }) {
         }
 
         const userNameFromDb = signInData.user.user_metadata?.full_name || nome || email.split('@')[0];
-        onLoginSuccess(email, userNameFromDb, true); 
-        
+        onLoginSuccess(email, userNameFromDb, true);
+
       } else {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -145,13 +145,13 @@ export default function Login({ onLoginSuccess }) {
         }
 
         const userNameFromDb = data.user.user_metadata?.full_name || email.split('@')[0];
-        onLoginSuccess(email, userNameFromDb, false); 
+        onLoginSuccess(email, userNameFromDb, false);
       }
 
     } catch (err) {
       console.error(err);
       let message = err.message;
-      
+
       if (message.includes("Invalid login credentials")) {
         message = "E-mail ou senha incorretos.";
       } else if (message.includes("Email not confirmed")) {
@@ -159,7 +159,7 @@ export default function Login({ onLoginSuccess }) {
       } else if (message.includes("User already registered")) {
         message = "Este e-mail já possui uma conta. Tente entrar.";
       }
-      
+
       setError(message);
     } finally {
       setLoading(false);
@@ -168,31 +168,31 @@ export default function Login({ onLoginSuccess }) {
 
   return (
     <div className="min-h-screen bg-[#0E1525] text-white flex flex-col items-center justify-center p-0 sm:p-4 relative overflow-y-auto">
-      
+
       {/* Brilho ambiental sutil */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* TELA INTEGRADA DE PONTA A PONTA (ESTILO NATIVO CONTÍNUO) */}
       <div className="w-full max-w-md min-h-screen sm:min-h-0 bg-[#0E1525] sm:rounded-3xl border-0 sm:border border-slate-800/80 shadow-none sm:shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-md z-10 overflow-hidden my-auto flex flex-col">
-        
+
         {/* BANNER DEITADO NO TOPO */}
         <div className="relative w-full h-36 bg-slate-900 shrink-0">
           {customBanner && (
-            <img 
-              src={customBanner} 
-              alt="Banner Conexão Viva" 
+            <img
+              src={customBanner}
+              alt="Banner Conexão Viva"
               className="w-full h-full object-cover opacity-75"
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0E1525] via-transparent to-transparent" />
-          
+
           {/* Logo da bolinha sobreposta na bordinha do banner */}
           <div className="absolute -bottom-4 left-6 flex items-end gap-3">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 p-0.5 shadow-xl flex items-center justify-center overflow-hidden border-2 border-[#0E1525]">
               {customLogo && (
-                <img 
-                  src={customLogo} 
-                  alt="Logo Conexão Viva" 
+                <img
+                  src={customLogo}
+                  alt="Logo Conexão Viva"
                   className="w-full h-full object-cover rounded-2xl"
                 />
               )}
@@ -214,8 +214,8 @@ export default function Login({ onLoginSuccess }) {
                 type="button"
                 onClick={() => { setIsCadastro(false); setError(null); }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                  !isCadastro 
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold shadow' 
+                  !isCadastro
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -226,8 +226,8 @@ export default function Login({ onLoginSuccess }) {
                 type="button"
                 onClick={() => { setIsCadastro(true); setError(null); }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                  isCadastro 
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold shadow' 
+                  isCadastro
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -276,9 +276,9 @@ export default function Login({ onLoginSuccess }) {
                     {isCadastro ? 'Criar Senha' : 'Senha'}
                   </label>
                   {!isCadastro && (
-                    <button 
-                      type="button" 
-                      onClick={handleEsqueciSenha} 
+                    <button
+                      type="button"
+                      onClick={handleEsqueciSenha}
                       className="text-xs text-amber-400 hover:underline bg-transparent border-0 cursor-pointer p-0"
                     >
                       Esqueci minha senha
