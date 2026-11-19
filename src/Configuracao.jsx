@@ -3,7 +3,7 @@ import { supabase } from './data/supabase';
 
 export default function Configuracao({ onNavigate, userEmail, userName, onLogout }) {
   const [isAdmin, setIsAdmin] = useState(false);
-  
+
   const [nome, setNome] = useState(userName || '');
   const [email, setEmail] = useState(userEmail || '');
   const [senhaAtual, setSenhaAtual] = useState('');
@@ -96,7 +96,7 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
       alert('Por favor, digite a nova senha.');
       return;
     }
-    
+
     try {
       const { error } = await supabase.auth.updateUser({ password: novaSenha });
       if (error) {
@@ -166,7 +166,7 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center">
       {/* max-w-md fixado para alinhar exatamente com a Bíblia e Explorar */}
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
-        
+
         {/* Cabeçalho */}
         <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner">
           <div>
@@ -188,7 +188,7 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
         {/* Perfil */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-4">
           <h2 className="text-xs font-bold text-amber-400 tracking-wider">👤 SEU PERFIL E FOTO</h2>
-          
+
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full border-2 border-amber-400 overflow-hidden bg-slate-800 flex items-center justify-center text-amber-400 font-bold text-base shadow-md">
               {fotoPerfil ? (
@@ -290,16 +290,16 @@ export default function Configuracao({ onNavigate, userEmail, userName, onLogout
         {/* Ações */}
         <div className="bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner space-y-2">
           <h2 className="text-xs font-bold text-amber-400 tracking-wider mb-2">🌐 OUTRAS AÇÕES</h2>
-          <button 
+          <button
             type="button"
-            onClick={handleSairConta} 
+            onClick={handleSairConta}
             className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-medium py-2 rounded-xl transition-all cursor-pointer"
           >
             🚪 Sair da Conta
           </button>
-          <button 
+          <button
             type="button"
-            onClick={handleExcluirConta} 
+            onClick={handleExcluirConta}
             className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium py-2 rounded-xl transition-all cursor-pointer"
           >
             ⚠️ Excluir Conta Permanentemente
