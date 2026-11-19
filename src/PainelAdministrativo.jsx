@@ -401,7 +401,7 @@ export default function Admin({ onNavigate }) {
               <span className="text-[11px] font-semibold text-white break-all line-clamp-2">
                 {audioPlaylist ? audioPlaylist.name : 'Toque para selecionar áudio MP3 / WAV'}
               </span>
-              <input type="file" accept="audio/mp3,audio/wav" onChange={(e) => setAudioPlaylist(e.target.files[0])} className="hidden" />
+              <input type="file" accept="audio/*" onChange={(e) => setAudioPlaylist(e.target.files[0])} className="hidden" />
             </label>
             <button
               type="button"
