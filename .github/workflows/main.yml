@@ -35,8 +35,16 @@ jobs:
 
       - name: Adicionar plataforma Android com Capacitor
         run: |
-          npx cap add android
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
           npx cap sync android
+
+      - name: Gerar icones do aplicativo a partir de assets/icon.png
+        run: |
+          if [ -f "assets/icon.png" ]; then
+            npx @capacitor/assets generate --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#0f172a' --android --assetPath assets
+          fi
 
       - name: Gerar o APK de instalacao
         run: |
