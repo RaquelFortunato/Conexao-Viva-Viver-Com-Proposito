@@ -24,7 +24,24 @@ export default function App() {
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
 
-  const definirProximaEtapaComSession = (session, nomeDefinido) => {
+  const buscarNomeEmSegundoPlano = async (session) => {
+    if (!session?.user) return;
+    try {
+      const { data: perfil } = await supabase
+        .from('perfis_usuario')
+        .select('nome')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (perfil?.nome) {
+        setUserName(perfil.nome);
+      }
+    } catch (e) {
+      // Mantém o nome já carregado nos metadados
+    }
+  };
+
+  const aplicarSessaoImediata = (session) => {
     if (!session?.user) {
       setUserEmail('');
       setUserName('');
@@ -33,66 +50,43 @@ export default function App() {
     }
 
     const emailUsuario = session.user.email || '';
+    const nomeInicial =
+      session.user.user_metadata?.nome ||
+      session.user.user_metadata?.full_name ||
+      session.user.user_metadata?.name ||
+      '';
+
     setUserEmail(emailUsuario);
-    if (nomeDefinido) setUserName(nomeDefinido);
+    if (nomeInicial) setUserName(nomeInicial);
 
     if (localStorage.getItem('mostrar_welcome_novo_cadastro') === 'true') {
       setEtapaAuth('welcome');
     } else {
       setEtapaAuth('app');
     }
-  };
 
-  const carregarDadosUsuario = async (session) => {
-    if (!session?.user) {
-      definirProximaEtapaComSession(null, '');
-      return;
-    }
-
-    let nomeUsuario =
-      session.user.user_metadata?.nome ||
-      session.user.user_metadata?.full_name ||
-      session.user.user_metadata?.name ||
-      '';
-
-    // Define um limite de 4 segundos para não travar em "Carregando..."
-    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 4000));
-
-    try {
-      const perfilPromise = supabase
-        .from('perfis_usuario')
-        .select('nome')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      const resultado = await Promise.race([perfilPromise, timeoutPromise]);
-      if (resultado && resultado.data?.nome) {
-        nomeUsuario = resultado.data.nome;
-      }
-    } catch (e) {
-      // Segue normalmente mesmo se falhar a busca do perfil
-    }
-
-    definirProximaEtapaComSession(session, nomeUsuario);
+    buscarNomeEmSegundoPlano(session);
   };
 
   useEffect(() => {
     let ativo = true;
 
-    // Trava de segurança geral: em até 5 segundos nunca fica preso em "carregando"
-    const travaSeguranca = setTimeout(() => {
+    // Se o Supabase não responder em 1,5s, libera a tela de login na mesma hora
+    const destravarRapido = setTimeout(() => {
       if (!ativo) return;
       setEtapaAuth((atual) => (atual === 'carregando' ? 'login' : atual));
-    }, 5000);
+    }, 1500);
 
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {
         if (!ativo) return;
-        carregarDadosUsuario(session);
+        clearTimeout(destravarRapido);
+        aplicarSessaoImediata(session);
       })
       .catch(() => {
         if (!ativo) return;
+        clearTimeout(destravarRapido);
         setEtapaAuth('login');
       });
 
@@ -100,8 +94,9 @@ export default function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!ativo) return;
+      clearTimeout(destravarRapido);
       if (session) {
-        carregarDadosUsuario(session);
+        aplicarSessaoImediata(session);
       } else {
         setUserEmail('');
         setUserName('');
@@ -111,7 +106,7 @@ export default function App() {
 
     return () => {
       ativo = false;
-      clearTimeout(travaSeguranca);
+      clearTimeout(destravarRapido);
       subscription.unsubscribe();
     };
   }, []);
