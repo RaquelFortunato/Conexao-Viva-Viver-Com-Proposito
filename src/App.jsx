@@ -23,103 +23,125 @@ export default function App() {
   const [paginaAtual, setPaginaAtual] = useState('home');
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
-  const [aguardandoWelcome, setAguardandoWelcome] = useState(false);
 
-  const carregarDadosUsuario = async (session, manterWelcome = false) => {
+  const definirProximaEtapaComSession = (session, nomeDefinido) => {
     if (!session?.user) {
       setUserEmail('');
       setUserName('');
-      setAguardandoWelcome(false);
       setEtapaAuth('login');
       return;
     }
 
     const emailUsuario = session.user.email || '';
+    setUserEmail(emailUsuario);
+    if (nomeDefinido) setUserName(nomeDefinido);
+
+    if (localStorage.getItem('mostrar_welcome_novo_cadastro') === 'true') {
+      setEtapaAuth('welcome');
+    } else {
+      setEtapaAuth('app');
+    }
+  };
+
+  const carregarDadosUsuario = async (session) => {
+    if (!session?.user) {
+      definirProximaEtapaComSession(null, '');
+      return;
+    }
+
     let nomeUsuario =
       session.user.user_metadata?.nome ||
       session.user.user_metadata?.full_name ||
       session.user.user_metadata?.name ||
       '';
 
+    // Define um limite de 4 segundos para não travar em "Carregando..."
+    const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 4000));
+
     try {
-      const { data: perfil } = await supabase
+      const perfilPromise = supabase
         .from('perfis_usuario')
         .select('nome')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (perfil?.nome) {
-        nomeUsuario = perfil.nome;
+      const resultado = await Promise.race([perfilPromise, timeoutPromise]);
+      if (resultado && resultado.data?.nome) {
+        nomeUsuario = resultado.data.nome;
       }
     } catch (e) {
-      // Se não encontrar na tabela perfis_usuario, segue com o que já tem
+      // Segue normalmente mesmo se falhar a busca do perfil
     }
 
-    setUserEmail(emailUsuario);
-    if (nomeUsuario) setUserName(nomeUsuario);
-
-    if (manterWelcome) {
-      setEtapaAuth('welcome');
-    } else {
-      setEtapaAuth('app');
-    }
+    definirProximaEtapaComSession(session, nomeUsuario);
   };
 
   useEffect(() => {
     let ativo = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Trava de segurança geral: em até 5 segundos nunca fica preso em "carregando"
+    const travaSeguranca = setTimeout(() => {
       if (!ativo) return;
-      carregarDadosUsuario(session, false);
-    });
+      setEtapaAuth((atual) => (atual === 'carregando' ? 'login' : atual));
+    }, 5000);
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!ativo) return;
+        carregarDadosUsuario(session);
+      })
+      .catch(() => {
+        if (!ativo) return;
+        setEtapaAuth('login');
+      });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!ativo) return;
       if (session) {
-        carregarDadosUsuario(session, aguardandoWelcome);
+        carregarDadosUsuario(session);
       } else {
         setUserEmail('');
         setUserName('');
-        setAguardandoWelcome(false);
         setEtapaAuth('login');
       }
     });
 
     return () => {
       ativo = false;
+      clearTimeout(travaSeguranca);
       subscription.unsubscribe();
     };
-  }, [aguardandoWelcome]);
+  }, []);
 
   const handleLoginSuccess = (emailDigitado, nomeDigitado, isCadastro) => {
     if (emailDigitado) setUserEmail(emailDigitado);
     if (nomeDigitado) setUserName(nomeDigitado);
 
-    if (isCadastro) {
-      setAguardandoWelcome(true);
+    if (isCadastro || localStorage.getItem('mostrar_welcome_novo_cadastro') === 'true') {
+      localStorage.setItem('mostrar_welcome_novo_cadastro', 'true');
       setEtapaAuth('welcome');
     } else {
-      setAguardandoWelcome(false);
       setEtapaAuth('app');
       setPaginaAtual('home');
     }
   };
 
   const handleWelcomeContinue = () => {
-    setAguardandoWelcome(false);
+    localStorage.removeItem('mostrar_welcome_novo_cadastro');
     setEtapaAuth('app');
     setPaginaAtual('home');
   };
 
   const handleLogout = async () => {
+    localStorage.removeItem('mostrar_welcome_novo_cadastro');
     try {
       await supabase.auth.signOut();
     } catch (e) {}
     setUserEmail('');
     setUserName('');
-    setAguardandoWelcome(false);
     setPaginaAtual('home');
     setEtapaAuth('login');
   };
