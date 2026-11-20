@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase'; 
 
-const LINK_DOWNLOAD_APP = 'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.28/app-debug.apk';
-
 function getYouTubeEmbedUrl(url) {
   if (!url) return '';
   let linkLimpo = url.replace('ww.youtube.com', 'www.youtube.com');
@@ -157,7 +155,7 @@ export default function Explorar({ onNavigate, userName }) {
   };
 
   const handleCompartilharApp = () => {
-    const texto = `🌟 Olá! Conheça o *Conexão Viva - Viver com Propósito*, um aplicativo incrível para fortalecer sua fé, ler a Palavra, acompanhar planos bíblicos, hinos e muito mais! 📖✨\n\nBaixe agora e venha caminhar conosco:\n${LINK_DOWNLOAD_APP}`;
+    const texto = `🌟 Olá! Conheça o *Conexão Viva - Viver com Propósito*, um aplicativo incrível para fortalecer sua fé, ler a Palavra, acompanhar planos bíblicos, hinos e muito mais! 📖✨\n\nBaixe agora e venha caminhar conosco: ${window.location.origin}`;
     const urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
     window.open(urlWhatsApp, '_blank');
   };
@@ -165,19 +163,19 @@ export default function Explorar({ onNavigate, userName }) {
   const isFormatoShort = tipoVisualizacao === 'videos_reflexao';
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-slate-950 text-white px-3 py-6 flex flex-col items-center relative">
-      <div className="w-full max-w-md mx-auto bg-slate-900/95 border border-slate-800 p-4 rounded-3xl shadow-2xl space-y-5 overflow-hidden">
+    <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center relative">
+      <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
         
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between gap-2 bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner">
-          <div className="min-w-0">
-            <h1 className="text-sm font-bold text-white flex flex-wrap items-center gap-1.5">
+        <div className="flex items-center justify-between bg-slate-950/60 border border-slate-800 p-4 rounded-2xl shadow-inner">
+          <div>
+            <h1 className="text-sm font-bold text-white flex items-center gap-1.5">
               <span>Conexão Viva</span>
               <span className="text-amber-400 text-xs font-normal">• Viver com Propósito</span>
             </h1>
             <p className="text-base font-bold text-amber-400 mt-0.5">Explorar</p>
           </div>
-          <div className="w-10 h-10 shrink-0 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 overflow-hidden bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-sm shadow">
             {fotoPerfil ? (
               <img src={fotoPerfil} alt="Perfil" className="w-full h-full object-cover" />
             ) : (
@@ -188,23 +186,23 @@ export default function Explorar({ onNavigate, userName }) {
 
         {/* FÁBULAS */}
         {tipoVisualizacao === 'fabulas' ? (
-          <div className="space-y-3 w-full min-w-0">
-            <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-800">
-              <h2 className="text-base font-bold text-amber-400 flex items-center gap-1.5 truncate">📖 Histórias</h2>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">📖 Histórias</h2>
               <button 
                 type="button"
                 onClick={() => { setTipoVisualizacao(null); setFabulaSelecionada(null); }}
-                className="text-xs shrink-0 text-slate-300 hover:text-white bg-slate-800 px-3 py-2 rounded-xl cursor-pointer transition"
+                className="text-xs text-slate-300 hover:text-white bg-slate-800 px-4 py-2 rounded-xl cursor-pointer transition"
               >
                 ← Voltar à Lista
               </button>
             </div>
 
             {fabulaSelecionada ? (
-              <div className="bg-slate-950/80 border border-slate-700 p-4 rounded-2xl space-y-4 shadow-lg w-full min-w-0">
-                <h3 className="text-lg font-bold text-white leading-snug break-words">{fabulaSelecionada.titulo}</h3>
+              <div className="bg-slate-950/80 border border-slate-700 p-5 rounded-2xl space-y-4 shadow-lg">
+                <h3 className="text-xl font-bold text-white leading-tight">{fabulaSelecionada.titulo}</h3>
                 <div className="max-h-[60vh] overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
-                  <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-line font-serif italic opacity-90 break-words">
+                  <p className="text-base text-slate-200 leading-relaxed whitespace-pre-line font-serif italic opacity-90">
                     {fabulaSelecionada.conteudo}
                   </p>
                 </div>
@@ -217,7 +215,7 @@ export default function Explorar({ onNavigate, userName }) {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 max-h-[70vh] overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full">
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
                 {listaFabulas.length === 0 ? (
                   <p className="text-sm text-slate-400 text-center py-8">Nenhuma fábula encontrada.</p>
                 ) : (
@@ -225,17 +223,13 @@ export default function Explorar({ onNavigate, userName }) {
                     <div 
                       key={fabula.id}
                       onClick={() => setFabulaSelecionada(fabula)}
-                      className="group w-full min-w-0 bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer shadow-sm"
+                      className="group bg-slate-950/60 border border-slate-800 p-4 rounded-2xl hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer shadow-sm"
                     >
-                      <div className="flex items-start justify-between gap-2 min-w-0">
-                        <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition leading-snug break-words flex-1 min-w-0">
-                          {fabula.titulo}
-                        </h3>
-                        <span className="text-amber-500/30 group-hover:text-amber-500 transition shrink-0">›</span>
+                      <div className="flex items-start justify-between">
+                        <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition line-clamp-1">{fabula.titulo}</h3>
+                        <span className="text-amber-500/30 group-hover:text-amber-500 transition ml-2">›</span>
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-1.5 line-clamp-2 break-words">
-                        {fabula.conteudo}
-                      </p>
+                      <p className="text-[11px] text-slate-400 truncate mt-1 line-clamp-2">{fabula.conteudo}</p>
                     </div>
                   ))
                 )}

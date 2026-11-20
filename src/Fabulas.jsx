@@ -77,7 +77,7 @@ export default function Fabulas({ onNavigate }) {
             {/* Título e Índice */}
             <div className="border-b border-slate-800 pb-4">
                <span className="block text-xs text-slate-500 uppercase mb-1">História {indiceAtual + 1} de {listaFabulas.length}</span>
-               <h2 className="text-xl font-bold text-white mt-2 leading-tight font-serif break-words">
+               <h2 className="text-xl font-bold text-white mt-2 leading-tight font-serif">
                  {fabaSelecionada.titulo || "Sem Título"}
                </h2>
             </div>
@@ -127,6 +127,8 @@ export default function Fabulas({ onNavigate }) {
                 const filtradas = listaFabulas.filter(f => 
                   (f.titulo || '').toLowerCase().includes(termo)
                 );
+                // Nota: Em produção idealizaríamos um estado separado para busca dinâmica aqui
+                // Por simplicidade neste exemplo, mantemos a lista completa abaixo
               }}
               className="hidden" 
             />
@@ -145,7 +147,7 @@ export default function Fabulas({ onNavigate }) {
                   
                   {/* Texto Resumo */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-white break-words leading-snug group-hover:text-amber-400">
+                    <h4 className="text-sm font-bold text-white truncate group-hover:text-amber-400">
                       {faba.titulo}
                     </h4>
                     <p className="text-[11px] text-slate-400 line-clamp-2 mt-1 leading-snug">
@@ -154,7 +156,7 @@ export default function Fabulas({ onNavigate }) {
                   </div>
 
                   {/* Setinha */}
-                  <svg className="w-5 h-5 text-slate-600 group-hover:text-amber-400 transform group-hover:translate-x-1 transition-all mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-slate-600 group-hover:text-amber-400 transform group-hover:translate-x-1 transition-all mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
