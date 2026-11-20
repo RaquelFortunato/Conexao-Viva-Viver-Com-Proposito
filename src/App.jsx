@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from './data/supabase';
+import React, { useState } from 'react';
 import Login from './login';
 import Welcome from './Welcome';
 import Home from './Home';
@@ -19,71 +18,10 @@ import Fabulas from './Fabulas';
 import PlaylistsMusica from './PlaylistsMusica';
 
 export default function App() {
-  const [etapaAuth, setEtapaAuth] = useState('carregando');
+  const [etapaAuth, setEtapaAuth] = useState('login');
   const [paginaAtual, setPaginaAtual] = useState('home');
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
-
-  const carregarDadosUsuario = async (session) => {
-    if (!session?.user) {
-      setUserEmail('');
-      setUserName('');
-      setEtapaAuth('login');
-      return;
-    }
-
-    const emailUsuario = session.user.email || '';
-    let nomeUsuario =
-      session.user.user_metadata?.nome ||
-      session.user.user_metadata?.full_name ||
-      session.user.user_metadata?.name ||
-      '';
-
-    try {
-      const { data: perfil } = await supabase
-        .from('perfis_usuario')
-        .select('nome')
-        .eq('id', session.user.id)
-        .single();
-
-      if (perfil?.nome) {
-        nomeUsuario = perfil.nome;
-      }
-    } catch (e) {
-      // Se não encontrar na tabela perfis_usuario, segue com o que já tem
-    }
-
-    setUserEmail(emailUsuario);
-    if (nomeUsuario) setUserName(nomeUsuario);
-    setEtapaAuth('app');
-  };
-
-  useEffect(() => {
-    let ativo = true;
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!ativo) return;
-      carregarDadosUsuario(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!ativo) return;
-      if (session) {
-        carregarDadosUsuario(session);
-      } else {
-        setUserEmail('');
-        setUserName('');
-        setEtapaAuth('login');
-      }
-    });
-
-    return () => {
-      ativo = false;
-      subscription.unsubscribe();
-    };
-  }, []);
 
   const handleLoginSuccess = (emailDigitado, nomeDigitado, isCadastro) => {
     if (emailDigitado) setUserEmail(emailDigitado);
@@ -102,10 +40,7 @@ export default function App() {
     setPaginaAtual('home');
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {}
+  const handleLogout = () => {
     setUserEmail('');
     setUserName('');
     setPaginaAtual('home');
@@ -113,14 +48,6 @@ export default function App() {
   };
 
   console.log("Etapa Auth:", etapaAuth, "| Página Atual:", paginaAtual, "| Usuário:", userName);
-
-  if (etapaAuth === 'carregando') {
-    return (
-      <div className="w-full min-h-screen bg-slate-950 text-amber-400 font-sans flex justify-center items-center text-sm">
-        Carregando...
-      </div>
-    );
-  }
 
   if (etapaAuth === 'login') {
     return <Login onLoginSuccess={handleLoginSuccess} />;

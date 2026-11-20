@@ -160,8 +160,6 @@ export default function Explorar({ onNavigate, userName }) {
     window.open(urlWhatsApp, '_blank');
   };
 
-  const isFormatoShort = tipoVisualizacao === 'videos_reflexao';
-
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center relative">
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
@@ -279,7 +277,7 @@ export default function Explorar({ onNavigate, userName }) {
             </div>
           </div>
         ) : tipoVisualizacao === 'videos_reflexao' || tipoVisualizacao === 'videos_mensagem' || tipoVisualizacao === 'videos_louvor' ? (
-          /* VÍDEOS: REFLEXÕES (SHORT) / MENSAGENS & LOUVORES (FORMATO NORMAL 16:9) */
+          /* VÍDEOS (MENSAGENS / REFLEXÕES / LOUVORES - FORMATO VERTICAL / SHORTS) */
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
               <h2 className="text-base font-bold text-amber-400 flex items-center gap-2">
@@ -309,18 +307,12 @@ export default function Explorar({ onNavigate, userName }) {
                       <span className="text-[10px] text-slate-400">{new Date(item.created_at).toLocaleDateString()}</span>
                     </div>
                     {item.link && (
-                      <div className={isFormatoShort ? 'flex justify-center' : 'w-full'}>
-                        <div
-                          className={
-                            isFormatoShort
-                              ? 'w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg'
-                              : 'w-full aspect-video rounded-xl overflow-hidden border border-slate-800 bg-black shadow-lg'
-                          }
-                        >
+                      <div className="flex justify-center">
+                        <div className="w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg">
                           <iframe
                             className="w-full h-full border-0"
                             src={getYouTubeEmbedUrl(item.link)}
-                            title={item.titulo || 'Vídeo'}
+                            title="Vídeo"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                           ></iframe>
