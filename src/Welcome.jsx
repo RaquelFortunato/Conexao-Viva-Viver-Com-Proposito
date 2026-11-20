@@ -3,66 +3,96 @@ import { supabase } from './data/supabase.js';
 import logoImg from './assets/Whatslogo.jpeg';
 import fotoPerfil from './assets/Whatsadministradora.jpeg';
 
+function testarImagem(url) {
+  return new Promise((resolve) => {
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      resolve(false);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url.trim();
+  });
+}
+
 export default function Welcome({ onContinue }) {
-  // Estados para buscar as imagens de marca (logo, banner e foto do responsável) do Supabase
   const [customLogo, setCustomLogo] = useState(null);
   const [customBanner, setCustomBanner] = useState(null);
   const [customFoto, setCustomFoto] = useState(null);
 
   useEffect(() => {
+    let ativo = true;
+
     async function fetchBrandAssets() {
       try {
         const { data, error } = await supabase
           .from('app_config')
           .select('key, value');
-        
-        if (!error && data) {
-          const logoObj = data.find(item => item.key === 'app_logo');
-          const bannerObj = data.find(item => item.key === 'app_banner');
-          const fotoObj = data.find(item => item.key === 'foto_responsavel');
-          
-          if (logoObj && logoObj.value) setCustomLogo(logoObj.value);
-          if (bannerObj && bannerObj.value) setCustomBanner(bannerObj.value);
-          if (fotoObj && fotoObj.value) setCustomFoto(fotoObj.value);
+
+        if (!ativo || error || !data) return;
+
+        const logoObj = data.find((item) => item.key === 'app_logo');
+        const bannerObj = data.find((item) => item.key === 'app_banner');
+        const fotoObj = data.find((item) => item.key === 'foto_responsavel');
+
+        if (logoObj?.value && (await testarImagem(logoObj.value)) && ativo) {
+          setCustomLogo(logoObj.value.trim());
+        }
+        if (bannerObj?.value && (await testarImagem(bannerObj.value)) && ativo) {
+          setCustomBanner(bannerObj.value.trim());
+        }
+        if (fotoObj?.value && (await testarImagem(fotoObj.value)) && ativo) {
+          setCustomFoto(fotoObj.value.trim());
         }
       } catch (err) {
         console.log('Usando imagem padrão local para assets');
       }
     }
+
     fetchBrandAssets();
+
+    return () => {
+      ativo = false;
+    };
   }, []);
 
-  const activeLogo = customLogo && customLogo.trim() !== '' ? customLogo : logoImg;
-  const activeBanner = customBanner && customBanner.trim() !== '' ? customBanner : logoImg;
-  const activeFoto = customFoto && customFoto.trim() !== '' ? customFoto : fotoPerfil;
+  const activeLogo = customLogo || logoImg;
+  const activeBanner = customBanner || logoImg;
+  const activeFoto = customFoto || fotoPerfil;
 
   return (
     <div className="min-h-screen bg-[#070B14] text-white flex flex-col items-center justify-center px-4 py-8 relative overflow-y-auto">
-      
       {/* Brilho ambiental sutil */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Container Principal do App - Mesma largura da tela de login, expandido verticalmente */}
+      {/* Container Principal do App */}
       <div className="w-full max-w-md bg-[#0E1525]/95 rounded-3xl border border-slate-800/80 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-md z-10 overflow-hidden my-auto flex flex-col">
-        
         {/* BANNER DEITADO NO TOPO COM A LOGO SOBREPOSTA */}
         <div className="relative w-full h-32 shrink-0 bg-slate-900">
-          <img 
-            src={activeBanner} 
-            alt="Banner Conexão Viva" 
+          <img
+            src={activeBanner}
+            alt="Banner Conexão Viva"
             className="w-full h-full object-cover opacity-60"
+            onError={(e) => {
+              if (e.currentTarget.src !== logoImg) {
+                e.currentTarget.src = logoImg;
+              }
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0E1525] via-transparent to-transparent" />
-          
+
           {/* Logo sobreposta no canto do Banner */}
           <div className="absolute -bottom-4 left-6 flex items-end gap-3">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 p-0.5 shadow-xl flex items-center justify-center overflow-hidden border-2 border-[#0E1525]">
-              <img 
-                src={activeLogo} 
-                alt="Logo Conexão Viva" 
+              <img
+                src={activeLogo}
+                alt="Logo Conexão Viva"
                 className="w-full h-full object-cover rounded-2xl"
                 onError={(e) => {
-                  e.target.src = logoImg;
+                  if (e.currentTarget.src !== logoImg) {
+                    e.currentTarget.src = logoImg;
+                  }
                 }}
               />
             </div>
@@ -71,7 +101,6 @@ export default function Welcome({ onContinue }) {
 
         {/* CONTEÚDO EXPANDIDO E CONFORTÁVEL */}
         <div className="p-6 pt-7 text-center flex-1 space-y-6">
-          
           {/* Título de Boas-Vindas */}
           <div>
             <h2 className="text-xl font-serif font-semibold text-white">
@@ -84,15 +113,16 @@ export default function Welcome({ onContinue }) {
 
           {/* CARD DA CRIADORA: FOTO RETRATO VERTICAL GRANDE + MENSAGEM */}
           <div className="bg-[#070B14] border border-slate-800/80 rounded-2xl p-5 text-center shadow-inner relative overflow-hidden space-y-4">
-            
-            {/* Foto Retrato Vertical com Altura Ampla (Mostrando o corpo/rosto completo) */}
+            {/* Foto Retrato Vertical com Altura Ampla */}
             <div className="w-full h-72 sm:h-80 rounded-xl overflow-hidden border border-amber-500/30 shadow-lg bg-slate-950 flex items-center justify-center">
-              <img 
-                src={activeFoto} 
-                alt="Raquel Fortunato" 
+              <img
+                src={activeFoto}
+                alt="Raquel Fortunato"
                 className="w-full h-full object-cover rounded-xl object-top"
                 onError={(e) => {
-                  e.target.src = fotoPerfil;
+                  if (e.currentTarget.src !== fotoPerfil) {
+                    e.currentTarget.src = fotoPerfil;
+                  }
                 }}
               />
             </div>
@@ -122,9 +152,7 @@ export default function Welcome({ onContinue }) {
               Ao continuar, você concorda com nossos <span className="underline cursor-pointer text-slate-400">Termos de Uso</span>.
             </p>
           </div>
-
         </div>
-
       </div>
     </div>
   );
