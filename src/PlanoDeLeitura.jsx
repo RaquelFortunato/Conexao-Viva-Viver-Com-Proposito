@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase';
 import { PLANOS_LEITURA } from './data/PlanosData';
 
+const LINK_DOWNLOAD_APP = 'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.28/app-debug.apk';
+
 export default function PlanoDeLeitura({ onNavigate, userName }) {
   const [abaAtivaPlano, setAbaAtivaPlano] = useState('catalogo'); // 'catalogo', 'detalhe'
   const [planoAtivo, setPlanoAtivo] = useState(null);
@@ -68,9 +70,10 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
     setAbaAtivaPlano('detalhe');
   };
 
-  // Função para convidar via WhatsApp otimizada para celular
+  // Função para convidar via WhatsApp otimizada para celular em todos os planos
   const handleConvidarAmigo = (plano) => {
-    const textoMensagem = `Olá! 👋 Eu comecei o plano de leitura "${plano.titulo}" no aplicativo Conexão Viva e gostaria muito de convidar você para fazer essa *Leitura Conjunta* comigo! Vamos ler e nos fortalecer juntos na Palavra? 📖✨`;
+    const nomePlano = plano?.titulo || plano?.nome || 'Plano de Leitura';
+    const textoMensagem = `Olá! 👋 Eu comecei o plano de leitura "${nomePlano}" no aplicativo Conexão Viva e gostaria muito de convidar você para fazer essa *Leitura Conjunta* comigo! Vamos ler e nos fortalecer juntos na Palavra? 📖✨\n\nBaixe o aplicativo aqui e abra a aba *Planos* para fazermos juntos:\n${LINK_DOWNLOAD_APP}`;
     
     const urlApp = `whatsapp://send?text=${encodeURIComponent(textoMensagem)}`;
     const urlWeb = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoMensagem)}`;

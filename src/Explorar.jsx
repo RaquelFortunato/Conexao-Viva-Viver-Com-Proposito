@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase'; 
 
+const LINK_DOWNLOAD_APP = 'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.28/app-debug.apk';
+
 function getYouTubeEmbedUrl(url) {
   if (!url) return '';
   let linkLimpo = url.replace('ww.youtube.com', 'www.youtube.com');
@@ -155,7 +157,7 @@ export default function Explorar({ onNavigate, userName }) {
   };
 
   const handleCompartilharApp = () => {
-    const texto = `🌟 Olá! Conheça o *Conexão Viva - Viver com Propósito*, um aplicativo incrível para fortalecer sua fé, ler a Palavra, acompanhar planos bíblicos, hinos e muito mais! 📖✨\n\nBaixe agora e venha caminhar conosco: ${window.location.origin}`;
+    const texto = `🌟 Olá! Conheça o *Conexão Viva - Viver com Propósito*, um aplicativo incrível para fortalecer sua fé, ler a Palavra, acompanhar planos bíblicos, hinos e muito mais! 📖✨\n\nBaixe agora e venha caminhar conosco:\n${LINK_DOWNLOAD_APP}`;
     const urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
     window.open(urlWhatsApp, '_blank');
   };
