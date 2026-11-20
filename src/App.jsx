@@ -23,11 +23,13 @@ export default function App() {
   const [paginaAtual, setPaginaAtual] = useState('home');
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
+  const [aguardandoWelcome, setAguardandoWelcome] = useState(false);
 
-  const carregarDadosUsuario = async (session) => {
+  const carregarDadosUsuario = async (session, manterWelcome = false) => {
     if (!session?.user) {
       setUserEmail('');
       setUserName('');
+      setAguardandoWelcome(false);
       setEtapaAuth('login');
       return;
     }
@@ -55,7 +57,12 @@ export default function App() {
 
     setUserEmail(emailUsuario);
     if (nomeUsuario) setUserName(nomeUsuario);
-    setEtapaAuth('app');
+
+    if (manterWelcome) {
+      setEtapaAuth('welcome');
+    } else {
+      setEtapaAuth('app');
+    }
   };
 
   useEffect(() => {
@@ -63,7 +70,7 @@ export default function App() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!ativo) return;
-      carregarDadosUsuario(session);
+      carregarDadosUsuario(session, false);
     });
 
     const {
@@ -71,10 +78,11 @@ export default function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!ativo) return;
       if (session) {
-        carregarDadosUsuario(session);
+        carregarDadosUsuario(session, aguardandoWelcome);
       } else {
         setUserEmail('');
         setUserName('');
+        setAguardandoWelcome(false);
         setEtapaAuth('login');
       }
     });
@@ -83,21 +91,24 @@ export default function App() {
       ativo = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [aguardandoWelcome]);
 
   const handleLoginSuccess = (emailDigitado, nomeDigitado, isCadastro) => {
     if (emailDigitado) setUserEmail(emailDigitado);
     if (nomeDigitado) setUserName(nomeDigitado);
 
     if (isCadastro) {
+      setAguardandoWelcome(true);
       setEtapaAuth('welcome');
     } else {
+      setAguardandoWelcome(false);
       setEtapaAuth('app');
       setPaginaAtual('home');
     }
   };
 
   const handleWelcomeContinue = () => {
+    setAguardandoWelcome(false);
     setEtapaAuth('app');
     setPaginaAtual('home');
   };
@@ -108,6 +119,7 @@ export default function App() {
     } catch (e) {}
     setUserEmail('');
     setUserName('');
+    setAguardandoWelcome(false);
     setPaginaAtual('home');
     setEtapaAuth('login');
   };
