@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase'; 
 
-const LINK_DOWNLOAD_APP = 'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.28/app-debug.apk';
+const LINK_DOWNLOAD_APP = 'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.31/Conexao-Viva-Viver-Com-Proposito.apk';
 
 function getYouTubeEmbedUrl(url) {
   if (!url) return '';
