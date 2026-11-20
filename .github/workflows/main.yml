@@ -51,11 +51,12 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../app-conexao-viva-viver-com-proposito.apk
 
       - name: Publicar APK nos Releases
         uses: softprops/action-gh-release@v1
         with:
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: app-conexao-viva-viver-com-proposito.apk
           tag_name: v1.0.${{ github.run_number }}
           name: Versão Automática ${{ github.run_number }}
           body: "APK gerado automaticamente pelo GitHub Actions para teste e instalação direta."
