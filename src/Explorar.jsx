@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase'; 
 
+const APK_DOWNLOAD_URL =
+  'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.40/app-conexao-viva-viver-com-proposito.apk';
+
 function getYouTubeEmbedUrl(url) {
   if (!url) return '';
   let linkLimpo = url.replace('ww.youtube.com', 'www.youtube.com');
@@ -155,10 +158,12 @@ export default function Explorar({ onNavigate, userName }) {
   };
 
   const handleCompartilharApp = () => {
-    const texto = `🌟 Olá! Conheça o *Conexão Viva - Viver com Propósito*, um aplicativo incrível para fortalecer sua fé, ler a Palavra, acompanhar planos bíblicos, hinos e muito mais! 📖✨\n\nBaixe agora e venha caminhar conosco: ${window.location.origin}`;
+    const texto = `🌟 Olá! Conheça o *Conexão Viva - Viver com Propósito*, um aplicativo incrível para fortalecer sua fé, ler a Palavra, acompanhar planos bíblicos, hinos e muito mais! 📖✨\n\nBaixe agora e venha caminhar conosco: ${APK_DOWNLOAD_URL}`;
     const urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
     window.open(urlWhatsApp, '_blank');
   };
+
+  const isHorizontalVideo = tipoVisualizacao === 'videos_mensagem' || tipoVisualizacao === 'videos_louvor';
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center relative">
@@ -224,8 +229,8 @@ export default function Explorar({ onNavigate, userName }) {
                       className="group bg-slate-950/60 border border-slate-800 p-4 rounded-2xl hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer shadow-sm"
                     >
                       <div className="flex items-start justify-between">
-                        <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition line-clamp-1">{fabula.titulo}</h3>
-                        <span className="text-amber-500/30 group-hover:text-amber-500 transition ml-2">›</span>
+                        <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition break-words">{fabula.titulo}</h3>
+                        <span className="text-amber-500/30 group-hover:text-amber-500 transition ml-2 shrink-0">›</span>
                       </div>
                       <p className="text-[11px] text-slate-400 truncate mt-1 line-clamp-2">{fabula.conteudo}</p>
                     </div>
@@ -277,7 +282,7 @@ export default function Explorar({ onNavigate, userName }) {
             </div>
           </div>
         ) : tipoVisualizacao === 'videos_reflexao' || tipoVisualizacao === 'videos_mensagem' || tipoVisualizacao === 'videos_louvor' ? (
-          /* VÍDEOS (MENSAGENS / REFLEXÕES / LOUVORES - FORMATO VERTICAL / SHORTS) */
+          /* VÍDEOS (MENSAGENS / REFLEXÕES / LOUVORES) */
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
               <h2 className="text-base font-bold text-amber-400 flex items-center gap-2">
@@ -307,10 +312,17 @@ export default function Explorar({ onNavigate, userName }) {
                       <span className="text-[10px] text-slate-400">{new Date(item.created_at).toLocaleDateString()}</span>
                     </div>
                     {item.link && (
-                      <div className="flex justify-center">
-                        <div className="w-56 h-96 rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg">
+                      <div className="flex justify-center w-full">
+                        <div
+                          style={isHorizontalVideo
+                            ? { width: '100%', aspectRatio: '16 / 9' }
+                            : { width: '14rem', height: '24rem' }
+                          }
+                          className="rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg"
+                        >
                           <iframe
-                            className="w-full h-full border-0"
+                            style={{ width: '100%', height: '100%' }}
+                            className="border-0 block"
                             src={getYouTubeEmbedUrl(item.link)}
                             title="Vídeo"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

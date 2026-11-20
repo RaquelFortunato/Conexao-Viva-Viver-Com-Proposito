@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase';
 import { PLANOS_LEITURA } from './data/PlanosData';
 
+const APK_DOWNLOAD_URL =
+  'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.40/app-conexao-viva-viver-com-proposito.apk';
+
 export default function PlanoDeLeitura({ onNavigate, userName }) {
   const [abaAtivaPlano, setAbaAtivaPlano] = useState('catalogo'); // 'catalogo', 'detalhe'
   const [planoAtivo, setPlanoAtivo] = useState(null);
@@ -53,6 +56,25 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
     carregarDadosEVerificarAdmin();
   }, []);
 
+  // Abre automaticamente o plano indicado na URL (ex.: ?plano=1 ou #plano=1), se existir
+  useEffect(() => {
+    if (!Array.isArray(PLANOS_LEITURA) || PLANOS_LEITURA.length === 0) return;
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const planoParam = searchParams.get('plano') || hashParams.get('plano');
+
+    if (planoParam) {
+      const encontrado = PLANOS_LEITURA.find(
+        (p) => String(p.id) === String(planoParam) || String(p.slug || '') === String(planoParam)
+      );
+      if (encontrado) {
+        setPlanoAtivo(encontrado);
+        setAbaAtivaPlano('detalhe');
+      }
+    }
+  }, []);
+
   const toggleDia = (planoId, diaNum) => {
     setDiasConcluidos(prev => ({
       ...prev,
@@ -70,8 +92,18 @@ export default function PlanoDeLeitura({ onNavigate, userName }) {
 
   // Função para convidar via WhatsApp otimizada para celular
   const handleConvidarAmigo = (plano) => {
-    const textoMensagem = `Olá! 👋 Eu comecei o plano de leitura "${plano.titulo}" no aplicativo Conexão Viva e gostaria muito de convidar você para fazer essa *Leitura Conjunta* comigo! Vamos ler e nos fortalecer juntos na Palavra? 📖✨`;
-    
+    const origemAtual = window.location.origin;
+    const isLocal = !origemAtual || origemAtual.includes('localhost') || origemAtual.includes('127.0.0.1');
+    const linkDiretoPlano = isLocal
+      ? APK_DOWNLOAD_URL
+      : `${origemAtual}${window.location.pathname}?plano=${encodeURIComponent(plano.id)}`;
+
+    const textoMensagem =
+      `Olá! 👋 Eu comecei o plano de leitura "${plano.titulo}" no aplicativo Conexão Viva - Viver com Propósito e gostaria muito de convidar você para fazer essa *Leitura Conjunta* comigo! Vamos ler e nos fortalecer juntos na Palavra? 📖✨\n\n` +
+      `📖 Plano: ${plano.titulo}\n` +
+      `📲 Baixe o aplicativo: ${APK_DOWNLOAD_URL}\n` +
+      `🔗 Abrir plano: ${linkDiretoPlano}`;
+
     const urlApp = `whatsapp://send?text=${encodeURIComponent(textoMensagem)}`;
     const urlWeb = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoMensagem)}`;
 

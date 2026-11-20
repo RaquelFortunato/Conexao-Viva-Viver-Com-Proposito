@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from './data/supabase';
 import Login from './login';
 import Welcome from './Welcome';
 import Home from './Home';
@@ -18,14 +19,97 @@ import Fabulas from './Fabulas';
 import PlaylistsMusica from './PlaylistsMusica';
 
 export default function App() {
-  const [etapaAuth, setEtapaAuth] = useState('login');
+  const [etapaAuth, setEtapaAuth] = useState('carregando');
   const [paginaAtual, setPaginaAtual] = useState('home');
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
 
+  // Verifica se o usuário já está logado ao abrir o aplicativo
+  useEffect(() => {
+    let montado = true;
+
+    async function verificarSessaoSalva() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user && montado) {
+          const emailSalvo = session.user.email || localStorage.getItem('cv_user_email') || '';
+          const nomeSalvo =
+            session.user.user_metadata?.nome ||
+            session.user.user_metadata?.name ||
+            session.user.user_metadata?.full_name ||
+            localStorage.getItem('cv_user_name') ||
+            '';
+
+          setUserEmail(emailSalvo);
+          setUserName(nomeSalvo);
+          setEtapaAuth('app');
+          return;
+        }
+
+        // Fallback caso a sessão esteja salva localmente
+        const emailLocal = localStorage.getItem('cv_user_email');
+        if (emailLocal && montado) {
+          setUserEmail(emailLocal);
+          setUserName(localStorage.getItem('cv_user_name') || '');
+          setEtapaAuth('app');
+          return;
+        }
+
+        if (montado) {
+          setEtapaAuth('login');
+        }
+      } catch (err) {
+        console.error('Erro ao verificar sessão salva:', err);
+        if (montado) {
+          setEtapaAuth('login');
+        }
+      }
+    }
+
+    verificarSessaoSalva();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' && montado) {
+        localStorage.removeItem('cv_user_email');
+        localStorage.removeItem('cv_user_name');
+        setUserEmail('');
+        setUserName('');
+        setEtapaAuth('login');
+      } else if (session?.user && montado) {
+        const email = session.user.email || '';
+        const nome =
+          session.user.user_metadata?.nome ||
+          session.user.user_metadata?.name ||
+          session.user.user_metadata?.full_name ||
+          localStorage.getItem('cv_user_name') ||
+          '';
+        if (email) {
+          setUserEmail(email);
+          localStorage.setItem('cv_user_email', email);
+        }
+        if (nome) {
+          setUserName(nome);
+          localStorage.setItem('cv_user_name', nome);
+        }
+      }
+    });
+
+    return () => {
+      montado = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+
   const handleLoginSuccess = (emailDigitado, nomeDigitado, isCadastro) => {
-    if (emailDigitado) setUserEmail(emailDigitado);
-    if (nomeDigitado) setUserName(nomeDigitado);
+    if (emailDigitado) {
+      setUserEmail(emailDigitado);
+      localStorage.setItem('cv_user_email', emailDigitado);
+    }
+    if (nomeDigitado) {
+      setUserName(nomeDigitado);
+      localStorage.setItem('cv_user_name', nomeDigitado);
+    }
 
     if (isCadastro) {
       setEtapaAuth('welcome');
@@ -40,7 +124,14 @@ export default function App() {
     setPaginaAtual('home');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error('Erro ao sair:', e);
+    }
+    localStorage.removeItem('cv_user_email');
+    localStorage.removeItem('cv_user_name');
     setUserEmail('');
     setUserName('');
     setPaginaAtual('home');
@@ -48,6 +139,14 @@ export default function App() {
   };
 
   console.log("Etapa Auth:", etapaAuth, "| Página Atual:", paginaAtual, "| Usuário:", userName);
+
+  if (etapaAuth === 'carregando') {
+    return (
+      <div className="w-full min-h-screen bg-slate-950 font-sans flex flex-col justify-center items-center text-amber-400 text-xs font-bold">
+        Carregando...
+      </div>
+    );
+  }
 
   if (etapaAuth === 'login') {
     return <Login onLoginSuccess={handleLoginSuccess} />;
