@@ -19,7 +19,8 @@ import Fabulas from './Fabulas';
 import PlaylistsMusica from './PlaylistsMusica';
 
 export default function App() {
-  const [etapaAuth, setEtapaAuth] = useState('carregando');
+  // Começa direto em 'login' para nunca travar na tela "Carregando..."
+  const [etapaAuth, setEtapaAuth] = useState('login');
   const [paginaAtual, setPaginaAtual] = useState('home');
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
@@ -36,9 +37,7 @@ export default function App() {
       if (perfil?.nome) {
         setUserName(perfil.nome);
       }
-    } catch (e) {
-      // Mantém o nome já carregado nos metadados
-    }
+    } catch (e) {}
   };
 
   const aplicarSessaoImediata = (session) => {
@@ -71,22 +70,16 @@ export default function App() {
   useEffect(() => {
     let ativo = true;
 
-    // Se o Supabase não responder em 1,5s, libera a tela de login na mesma hora
-    const destravarRapido = setTimeout(() => {
-      if (!ativo) return;
-      setEtapaAuth((atual) => (atual === 'carregando' ? 'login' : atual));
-    }, 1500);
-
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {
         if (!ativo) return;
-        clearTimeout(destravarRapido);
-        aplicarSessaoImediata(session);
+        if (session) {
+          aplicarSessaoImediata(session);
+        }
       })
       .catch(() => {
         if (!ativo) return;
-        clearTimeout(destravarRapido);
         setEtapaAuth('login');
       });
 
@@ -94,7 +87,6 @@ export default function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!ativo) return;
-      clearTimeout(destravarRapido);
       if (session) {
         aplicarSessaoImediata(session);
       } else {
@@ -106,7 +98,6 @@ export default function App() {
 
     return () => {
       ativo = false;
-      clearTimeout(destravarRapido);
       subscription.unsubscribe();
     };
   }, []);
@@ -141,16 +132,6 @@ export default function App() {
     setEtapaAuth('login');
   };
 
-  console.log("Etapa Auth:", etapaAuth, "| Página Atual:", paginaAtual, "| Usuário:", userName);
-
-  if (etapaAuth === 'carregando') {
-    return (
-      <div className="w-full min-h-screen bg-slate-950 text-amber-400 font-sans flex justify-center items-center text-sm">
-        Carregando...
-      </div>
-    );
-  }
-
   if (etapaAuth === 'login') {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
@@ -163,16 +144,9 @@ export default function App() {
     <div className="w-full min-h-screen bg-slate-950 font-sans flex flex-col justify-center items-center">
       <div className="w-full flex-1 flex justify-center items-center">
         {paginaAtual === 'home' && <Home onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-
-        {/* Repassando o userEmail e userName para o Explorar */}
         {paginaAtual === 'explorar' && <Explorar onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-
-        {/* Repassando o userEmail e userName para a Bíblia */}
         {paginaAtual === 'biblia' && <Biblia onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-
-        {/* Repassando o userEmail e userName para os Planos de Leitura */}
         {paginaAtual === 'planos' && <PlanoDeLeitura onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-
         {(paginaAtual === 'config' || paginaAtual === 'configuracao') && (
           <Configuracao
             onNavigate={setPaginaAtual}
@@ -181,36 +155,26 @@ export default function App() {
             onLogout={handleLogout}
           />
         )}
-
         {paginaAtual === 'admin' && <PainelAdministrativo onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
         {paginaAtual === 'jejum' && <JejumDaniel onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
         {paginaAtual === 'rotina' && <RotinaPrimeiroAmor onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
         {paginaAtual === 'desafioceleste' && <DesafioCeleste onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
         {paginaAtual === 'cantor-cristao' && <CantorCristao onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-
-        {/* ⬇️ ROTAS DA HARPA CRISTÃ (Mantive como estava antes) */}
         {(paginaAtual === 'HarpaCrista' || paginaAtual === 'harpa') && (
           <HarpaCrista onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
         )}
-
-        {/* ⬇️ NOVAS ROTAS ADICIONADAS AQUI */}
-        {/* Rota para Fábulas */}
         {paginaAtual === 'fabulas' && (
           <Fabulas onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
         )}
-
-        {/* Rota para Playlists de Música */}
         {paginaAtual === 'player-musica' && (
           <PlaylistsMusica onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
         )}
-
-        {/* Lista de todas as páginas válidas para evitar fallback para Home se estiver em uma delas */}
         {![
           'home', 'explorar', 'biblia', 'planos', 'config', 'configuracao',
           'admin', 'jejum', 'rotina', 'desafioceleste', 'cantor-cristao',
           'HarpaCrista', 'harpa',
-          'fabulas',       // <-- Adicionado aqui
-          'player-musica'  // <-- Adicionado aqui
+          'fabulas',
+          'player-musica'
         ].includes(paginaAtual) && <Home onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
       </div>
     </div>
