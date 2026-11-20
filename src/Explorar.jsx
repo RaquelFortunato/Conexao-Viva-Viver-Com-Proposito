@@ -4,6 +4,296 @@ import { supabase } from './data/supabase';
 const APK_DOWNLOAD_URL =
   'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.40/app-conexao-viva-viver-com-proposito.apk';
 
+const LISTA_FILMES_RECOMENDADOS = [
+  {
+    id: 1,
+    titulo: 'Mais que Vencedores',
+    capa: '',
+    corCapa: 'from-amber-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Um treinador de basquete precisa assumir a equipe de corrida cross-country com apenas uma atleta. Juntos, eles enfrentam limites físicos e emocionais e descobrem um novo propósito e identidade.'
+  },
+  {
+    id: 2,
+    titulo: 'O Céu é de Verdade',
+    capa: '',
+    corCapa: 'from-sky-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Baseado em uma história real, acompanha um menino que passa por uma cirurgia de emergência e compartilha experiências profundas que transformam a fé de sua família e de toda a comunidade.'
+  },
+  {
+    id: 3,
+    titulo: 'Deus Não Está Morto',
+    capa: '',
+    corCapa: 'from-amber-600/80 via-slate-900 to-slate-950',
+    sinopse: 'Um estudante universitário tem sua fé desafiada por um professor de filosofia e decide defender suas convicções em uma série de debates diante de toda a turma.'
+  },
+  {
+    id: 4,
+    titulo: 'Deus Não Está Morto 2',
+    capa: '',
+    corCapa: 'from-blue-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Uma professora de história enfrenta um processo judicial após responder a uma pergunta de uma aluna sobre Jesus em sala de aula, colocando em pauta coragem e liberdade de crença.'
+  },
+  {
+    id: 5,
+    titulo: 'Deus Não Está Morto 3: Luz na Escuridão',
+    capa: '',
+    corCapa: 'from-orange-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Após um incêndio atingir uma igreja dentro de um campus universitário, conflitos e disputas testam o perdão, a unidade e a postura diante das adversidades.'
+  },
+  {
+    id: 6,
+    titulo: 'O Peregrino',
+    capa: '',
+    corCapa: 'from-emerald-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Adaptação do clássico de John Bunyan que acompanha a jornada alegórica de Cristão rumo à Cidade Celestial, enfrentando tentações, medos e escolhas decisivas pelo caminho.'
+  },
+  {
+    id: 7,
+    titulo: 'Milagres no Paraíso',
+    capa: '',
+    corCapa: 'from-purple-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Inspirado em fatos reais, mostra a luta incansável de uma mãe pela cura da filha com uma doença grave, até que um acontecimento extraordinário muda completamente a história da família.'
+  },
+  {
+    id: 8,
+    titulo: 'Você Acredita?',
+    capa: '',
+    corCapa: 'from-rose-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Diferentes pessoas têm suas vidas entrelaçadas em meio a crises, perdas e dilemas, sendo confrontadas a viver na prática aquilo que afirmam crer.'
+  },
+  {
+    id: 9,
+    titulo: 'Quarto de Guerra',
+    capa: '',
+    corCapa: 'from-amber-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Com o casamento em crise, uma esposa aprende com uma senhora sábia o poder de transformar o lar e os relacionamentos por meio da oração constante e intencional.'
+  },
+  {
+    id: 10,
+    titulo: 'Amor de Redenção',
+    capa: '',
+    corCapa: 'from-red-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Ambientado na época da corrida do ouro na Califórnia, retrata uma história intensa de amor incondicional, cura interior e recomeço para quem carregava profundas feridas do passado.'
+  },
+  {
+    id: 11,
+    titulo: 'Entre a Cruz e o Punhal',
+    capa: '',
+    corCapa: 'from-stone-700/80 via-slate-900 to-slate-950',
+    sinopse: 'História real de David Wilkerson, um pastor que deixa sua rotina tranquila para levar esperança e transformação a jovens envolvidos com gangues em Nova York.'
+  },
+  {
+    id: 12,
+    titulo: 'O Caso de Cristo',
+    capa: '',
+    corCapa: 'from-cyan-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Baseado na trajetória real do jornalista investigativo Lee Strobel, que decide usar toda sua experiência para tentar refutar a fé cristã e acaba encontrando provas surpreendentes.'
+  },
+  {
+    id: 13,
+    titulo: 'Os Melhores Dois Anos',
+    capa: '',
+    corCapa: 'from-teal-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Acompanha jovens em missão longe de casa, vivendo desafios de convivência, superação pessoal e amadurecimento espiritual ao servir ao próximo.'
+  },
+  {
+    id: 14,
+    titulo: 'O Movimento de Jesus',
+    capa: '',
+    corCapa: 'from-yellow-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Baseado em fatos reais dos anos 1970, retrata um grande despertar espiritual entre jovens que buscavam sentido verdadeiro, acolhimento e renovação.'
+  },
+  {
+    id: 15,
+    titulo: 'O Milagre de Tyson',
+    capa: '',
+    corCapa: 'from-indigo-700/80 via-slate-900 to-slate-950',
+    sinopse: 'A emocionante história de um jovem com autismo que sonha em correr uma maratona e conta com a ajuda de um treinador para superar barreiras e unir sua família.'
+  },
+  {
+    id: 16,
+    titulo: '90 Minutos no Paraíso',
+    capa: '',
+    corCapa: 'from-sky-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Baseado em uma história real, narra a recuperação difícil e milagrosa de um homem após um grave acidente de carro e o impacto de sua experiência na vida de todos ao redor.'
+  },
+  {
+    id: 17,
+    titulo: 'Desafiando Gigantes',
+    capa: '',
+    corCapa: 'from-amber-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Um treinador de futebol americano enfrenta derrotas seguidas e problemas pessoais até decidir mudar sua visão, inspirando seus jogadores a darem o melhor com fé e coragem.'
+  },
+  {
+    id: 18,
+    titulo: 'Marca de Vida',
+    capa: '',
+    corCapa: 'from-emerald-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Ao completar 18 anos, um jovem adotado decide conhecer sua história de origem, embarcando em uma jornada emocionante sobre valor da vida, perdão e gratidão.'
+  },
+  {
+    id: 19,
+    titulo: 'A Forja',
+    capa: '',
+    corCapa: 'from-orange-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Um jovem sem rumo após terminar o ensino médio recebe o apoio de um mentor que o desafia a assumir responsabilidades, fortalecer o caráter e descobrir seu propósito.'
+  },
+  {
+    id: 20,
+    titulo: 'À Prova de Fogo',
+    capa: '',
+    corCapa: 'from-red-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Um capitão dos bombeiros, heroico no trabalho mas distante em casa, aceita um desafio de 40 dias para tentar resgatar seu casamento antes que seja tarde demais.'
+  },
+  {
+    id: 21,
+    titulo: 'Inferno em Chamas',
+    capa: '',
+    corCapa: 'from-amber-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Uma história marcante de coragem, entrega e confiança diante de perigos extremos, mostrando como a fé sustenta o coração nos momentos mais difíceis.'
+  },
+  {
+    id: 22,
+    titulo: 'Onde Estiver o Seu Coração',
+    capa: '',
+    corCapa: 'from-pink-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Drama sensível sobre laços familiares, recomeços e a descoberta do que realmente tem valor eterno quando tudo ao redor parece mudar.'
+  },
+  {
+    id: 23,
+    titulo: 'Não Temas',
+    capa: '',
+    corCapa: 'from-blue-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Retrata a luta contra o medo e a insegurança, mostrando como a confiança e a esperança ajudam a atravessar tempestades inesperadas.'
+  },
+  {
+    id: 24,
+    titulo: 'Renascido',
+    capa: '',
+    corCapa: 'from-violet-800/80 via-slate-900 to-slate-950',
+    sinopse: 'A jornada de transformação interior de alguém que encontra uma nova chance de recomeçar, deixando para trás erros e dores do passado.'
+  },
+  {
+    id: 25,
+    titulo: 'Novo Coração',
+    capa: '',
+    corCapa: 'from-rose-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Um drama emocionante sobre reconciliação, empatia e a capacidade de amar novamente mesmo após grandes decepções.'
+  },
+  {
+    id: 26,
+    titulo: 'Ponto de Decisão',
+    capa: '',
+    corCapa: 'from-slate-700 via-slate-900 to-slate-950',
+    sinopse: 'Diante de encruzilhadas decisivas, personagens precisam escolher entre o caminho mais fácil e aquilo que realmente honra seus princípios.'
+  },
+  {
+    id: 27,
+    titulo: 'Eu Só Posso Imaginar',
+    capa: '',
+    corCapa: 'from-indigo-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Inspirado na história real por trás de uma das canções mais conhecidas do mundo, mostra a difícil relação entre pai e filho e o poder restaurador do perdão.'
+  },
+  {
+    id: 28,
+    titulo: 'Milagre Azul',
+    capa: '',
+    corCapa: 'from-cyan-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Baseado em fatos reais, acompanha um grupo de crianças de um orfanato e seu tutor que participam de um torneio de pesca para tentar salvar o lar onde vivem.'
+  },
+  {
+    id: 29,
+    titulo: 'A Colheita da Fé',
+    capa: '',
+    corCapa: 'from-lime-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Uma história inspiradora sobre perseverança, trabalho honesto e confiança no tempo certo para colher os frutos daquilo que se planta com amor.'
+  },
+  {
+    id: 30,
+    titulo: 'Carta para Deus',
+    capa: '',
+    corCapa: 'from-sky-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Um garoto que enfrenta o câncer escreve cartas sinceras para Deus todos os dias, e suas palavras acabam tocando profundamente um carteiro em crise.'
+  },
+  {
+    id: 31,
+    titulo: 'Corajosos',
+    capa: '',
+    corCapa: 'from-blue-900/80 via-slate-900 to-slate-950',
+    sinopse: 'Quatro policiais enfrentam os perigos das ruas todos os dias, mas após uma tragédia percebem que seu maior desafio é serem pais presentes e íntegros dentro de casa.'
+  },
+  {
+    id: 32,
+    titulo: 'O Refúgio',
+    capa: '',
+    corCapa: 'from-teal-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Uma narrativa acolhedora sobre encontrar abrigo, paz e direção nos momentos em que o mundo parece agitado demais.'
+  },
+  {
+    id: 33,
+    titulo: 'Fé para o Impossível',
+    capa: '',
+    corCapa: 'from-amber-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Inspirado em acontecimentos reais, retrata a união de uma família e de amigos em oração diante de uma situação médica gravíssima.'
+  },
+  {
+    id: 34,
+    titulo: 'A Retenção',
+    capa: '',
+    corCapa: 'from-zinc-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Um drama envolvente sobre escolhas morais, pressão e a busca por justiça e verdade em meio a circunstâncias difíceis.'
+  },
+  {
+    id: 35,
+    titulo: 'A História Real de Bonhoeffer',
+    capa: '',
+    corCapa: 'from-stone-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Cinebiografia baseada na vida de Dietrich Bonhoeffer, pastor e teólogo alemão que teve a coragem de resistir ao regime nazista em defesa da verdade e do próximo.'
+  },
+  {
+    id: 36,
+    titulo: 'Cabrini',
+    capa: '',
+    corCapa: 'from-purple-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Baseado na vida de Francesca Cabrini, missionária que enfrenta preconceito e barreiras sociais em Nova York para garantir moradia, saúde e dignidade a crianças órfãs e imigrantes.'
+  },
+  {
+    id: 37,
+    titulo: 'Uma Vida de Esperança',
+    capa: '',
+    corCapa: 'from-emerald-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Uma história tocante que lembra como gestos simples de solidariedade e fé podem reacender a esperança em meio às provas da vida.'
+  },
+  {
+    id: 38,
+    titulo: 'A Visão',
+    capa: '',
+    corCapa: 'from-indigo-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Aborda a importância de enxergar além das circunstâncias imediatas, mantendo o foco no propósito e nos valores que realmente edificam.'
+  },
+  {
+    id: 39,
+    titulo: 'Som da Esperança',
+    capa: '',
+    corCapa: 'from-amber-600/80 via-slate-900 to-slate-950',
+    sinopse: 'Inspirado em fatos reais, mostra como uma comunidade inteira se mobiliza com amor e coragem para acolher crianças que precisavam de um lar.'
+  },
+  {
+    id: 40,
+    titulo: 'Som da Liberdade',
+    capa: '',
+    corCapa: 'from-yellow-800/80 via-slate-900 to-slate-950',
+    sinopse: 'Baseado em uma história real, acompanha um ex-agente federal que arrisca a própria vida em uma missão para resgatar crianças vítimas de tráfico humano.'
+  },
+  {
+    id: 41,
+    titulo: 'Se Eu Fosse Você',
+    capa: '',
+    corCapa: 'from-amber-700/80 via-slate-900 to-slate-950',
+    sinopse: 'Uma história envolvente sobre empatia, convivência e a chance de enxergar a vida e os sentimentos do outro a partir de um novo ponto de vista.'
+  }
+];
+
 function getYouTubeEmbedUrl(url) {
   if (!url) return '';
   let linkLimpo = url.replace('ww.youtube.com', 'www.youtube.com');
@@ -19,6 +309,43 @@ function getYouTubeEmbedUrl(url) {
   }
   // Parâmetros blindados contra legendas automáticas: cc_load_policy=0 e iv_load_policy=3
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&cc_load_policy=0&iv_load_policy=3&hl=pt` : '';
+}
+
+function CapaFilme({ filme, grande = false }) {
+  const [erroImagem, setErroImagem] = useState(false);
+
+  if (filme.capa && !erroImagem) {
+    return (
+      <img
+        src={filme.capa}
+        alt={filme.titulo}
+        onError={() => setErroImagem(true)}
+        className={grande
+          ? 'w-36 h-52 object-cover rounded-2xl border border-amber-500/40 shadow-xl mx-auto'
+          : 'w-16 h-24 object-cover rounded-xl border border-slate-700 shrink-0 shadow-md'
+        }
+      />
+    );
+  }
+
+  return (
+    <div
+      className={grande
+        ? `w-36 h-52 rounded-2xl border border-amber-500/40 bg-gradient-to-b ${filme.corCapa || 'from-amber-700/80 via-slate-900 to-slate-950'} p-3 flex flex-col justify-between items-center text-center shadow-xl mx-auto`
+        : `w-16 h-24 rounded-xl border border-slate-700 bg-gradient-to-b ${filme.corCapa || 'from-amber-700/80 via-slate-900 to-slate-950'} p-1.5 flex flex-col justify-between items-center text-center shrink-0 shadow-md`
+      }
+    >
+      <span className={grande ? 'text-xs text-amber-300/90 font-semibold tracking-widest uppercase' : 'text-[8px] text-amber-300/90 font-bold uppercase tracking-wider'}>
+        🎬 Filme
+      </span>
+      <span className={grande ? 'text-xs font-bold text-white leading-snug line-clamp-4' : 'text-[9px] font-bold text-white leading-tight line-clamp-3'}>
+        {filme.titulo}
+      </span>
+      <span className={grande ? 'text-[10px] text-amber-400/80' : 'text-[8px] text-amber-400/80'}>
+        ★★★
+      </span>
+    </div>
+  );
 }
 
 export default function Explorar({ onNavigate, userName }) {
@@ -37,6 +364,8 @@ export default function Explorar({ onNavigate, userName }) {
   
   const [carregandoDados, setCarregandoDados] = useState(false);
   const [fabulaSelecionada, setFabulaSelecionada] = useState(null);
+  const [filmeSelecionado, setFilmeSelecionado] = useState(null);
+  const [buscaFilme, setBuscaFilme] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [fotoPerfil, setFotoPerfil] = useState(null);
 
@@ -165,6 +494,11 @@ export default function Explorar({ onNavigate, userName }) {
 
   const isHorizontalVideo = tipoVisualizacao === 'videos_mensagem' || tipoVisualizacao === 'videos_louvor';
 
+  const filmesFiltrados = LISTA_FILMES_RECOMENDADOS.filter((filme) =>
+    filme.titulo.toLowerCase().includes(buscaFilme.toLowerCase()) ||
+    filme.sinopse.toLowerCase().includes(buscaFilme.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 py-8 flex flex-col items-center relative">
       <div className="w-full max-w-md bg-slate-900/95 border border-slate-800 p-5 rounded-3xl shadow-2xl space-y-5">
@@ -187,8 +521,79 @@ export default function Explorar({ onNavigate, userName }) {
           </div>
         </div>
 
-        {/* FÁBULAS */}
-        {tipoVisualizacao === 'fabulas' ? (
+        {/* FILMES RECOMENDADOS */}
+        {tipoVisualizacao === 'filmes' ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h2 className="text-base font-bold text-amber-400 flex items-center gap-2">🎬 Filmes Recomendados</h2>
+              <button 
+                type="button"
+                onClick={() => { setTipoVisualizacao(null); setFilmeSelecionado(null); setBuscaFilme(''); }}
+                className="text-xs text-slate-300 hover:text-white bg-slate-800 px-3.5 py-2 rounded-xl cursor-pointer transition"
+              >
+                ← Voltar
+              </button>
+            </div>
+
+            {filmeSelecionado ? (
+              <div className="bg-slate-950/80 border border-slate-700 p-5 rounded-2xl space-y-4 shadow-lg text-center">
+                <CapaFilme filme={filmeSelecionado} grande />
+                <h3 className="text-lg font-bold text-white leading-tight">{filmeSelecionado.titulo}</h3>
+                <div className="bg-slate-900/70 border border-slate-800 p-4 rounded-xl text-left">
+                  <p className="text-[10px] uppercase tracking-wider text-amber-400 font-bold mb-1.5">Sinopse</p>
+                  <p className="text-sm text-slate-200 leading-relaxed">
+                    {filmeSelecionado.sinopse}
+                  </p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setFilmeSelecionado(null)}
+                  className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl cursor-pointer transition border border-slate-700"
+                >
+                  Ver Outros Filmes
+                </button>
+              </div>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  value={buscaFilme}
+                  onChange={(e) => setBuscaFilme(e.target.value)}
+                  placeholder="Buscar filme pelo nome ou tema..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+
+                <div className="space-y-3 max-h-[65vh] overflow-y-auto [&-::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pr-1">
+                  {filmesFiltrados.length === 0 ? (
+                    <p className="text-sm text-slate-400 text-center py-8">Nenhum filme encontrado para essa busca.</p>
+                  ) : (
+                    filmesFiltrados.map((filme) => (
+                      <div 
+                        key={filme.id}
+                        onClick={() => setFilmeSelecionado(filme)}
+                        className="group bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer shadow-sm flex items-start gap-3.5"
+                      >
+                        <CapaFilme filme={filme} />
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition break-words leading-snug">
+                              {filme.titulo}
+                            </h3>
+                            <span className="text-amber-500/40 group-hover:text-amber-500 transition shrink-0">›</span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-3">
+                            {filme.sinopse}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        ) : tipoVisualizacao === 'fabulas' ? (
+          /* FÁBULAS */
           <div className="space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800">
               <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">📖 Histórias</h2>
@@ -427,6 +832,17 @@ export default function Explorar({ onNavigate, userName }) {
                     <div>
                       <h3 className="text-xs font-bold text-white">Playlists de Músicas (Áudio)</h3>
                       <p className="text-[10px] text-slate-400">{listaMusicas.length} faixas carregadas</p>
+                    </div>
+                  </div>
+                  <span className="text-slate-500">›</span>
+                </div>
+
+                <div onClick={() => setTipoVisualizacao('filmes')} className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner flex items-center justify-between hover:border-amber-500/40 transition cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <span className="text-amber-400">🎬</span>
+                    <div>
+                      <h3 className="text-xs font-bold text-white">Filmes Recomendados</h3>
+                      <p className="text-[10px] text-slate-400">{LISTA_FILMES_RECOMENDADOS.length} filmes selecionados</p>
                     </div>
                   </div>
                   <span className="text-slate-500">›</span>
