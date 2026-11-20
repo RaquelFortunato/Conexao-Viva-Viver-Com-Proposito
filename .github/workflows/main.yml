@@ -1,4 +1,4 @@
-name: Gerar APK e Publicar
+Name: Gerar APK e Publicar
 
 on:
   push:
@@ -52,10 +52,13 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
 
+      - name: Renomear APK para Conexao-Viva-Viver-Com-Proposito
+        run: mv android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/Conexao-Viva-Viver-Com-Proposito.apk
+
       - name: Publicar APK nos Releases
         uses: softprops/action-gh-release@v1
         with:
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: android/app/build/outputs/apk/debug/Conexao-Viva-Viver-Com-Proposito.apk
           tag_name: v1.0.${{ github.run_number }}
           name: Versão Automática ${{ github.run_number }}
           body: "APK gerado automaticamente pelo GitHub Actions para teste e instalação direta."
