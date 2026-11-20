@@ -158,8 +158,14 @@ export default function Explorar({ onNavigate, userName }) {
 
   const handleCompartilharApp = () => {
     const texto = `🌟 Olá! Conheça o *Conexão Viva - Viver com Propósito*, um aplicativo incrível para fortalecer sua fé, ler a Palavra, acompanhar planos bíblicos, hinos e muito mais! 📖✨\n\nBaixe agora e venha caminhar conosco:\n${LINK_DOWNLOAD_APP}`;
-    const urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
-    window.open(urlWhatsApp, '_blank');
+    const urlApp = `whatsapp://send?text=${encodeURIComponent(texto)}`;
+    const urlWeb = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      window.location.href = urlApp;
+    } else {
+      window.open(urlWeb, '_blank');
+    }
   };
 
   const isFormatoShort = tipoVisualizacao === 'videos_reflexao';
