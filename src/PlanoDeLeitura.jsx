@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './data/supabase';
 import { PLANOS_LEITURA } from './data/PlanosData';
 
-const LINK_DOWNLOAD_APP = 'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.31/Conexao-Viva-Viver-Com-Proposito.apk';
+const LINK_DOWNLOAD_APP = 'https://github.com/RaquelFortunato/Conexao-Viva-Viver-Com-Proposito/releases/download/v1.0.28/app-debug.apk';
 
 export default function PlanoDeLeitura({ onNavigate, userName }) {
   const [abaAtivaPlano, setAbaAtivaPlano] = useState('catalogo'); // 'catalogo', 'detalhe'

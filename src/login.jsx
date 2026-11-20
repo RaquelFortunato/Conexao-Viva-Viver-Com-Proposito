@@ -1,197 +1,353 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './data/supabase';
-import Login from './login';
-import Welcome from './Welcome';
-import Home from './Home';
-import Explorar from './Explorar';
-import Biblia from './Biblia';
-import Configuracao from './Configuracao';
-import PlanoDeLeitura from './PlanoDeLeitura';
-import PainelAdministrativo from './PainelAdministrativo';
-import JejumDaniel from './JejumDaniel';
-import RotinaPrimeiroAmor from './RotinaPrimeiroAmor';
-import DesafioCeleste from './DesafioCeleste';
-import CantorCristao from './CantorCristao';
-import HarpaCrista from './HarpaCrista';
+import { supabase } from './data/supabase.js';
 
-// ⬇️ NOVOS IMPORTS ADICIONADOS PARA AS TELAS DE FÁBULAS E MÚSICA
-import Fabulas from './Fabulas';
-import PlaylistsMusica from './PlaylistsMusica';
+export default function Login({ onLoginSuccess }) {
+  const [isCadastro, setIsCadastro] = useState(true);
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [confirmaSenha, setConfirmaSenha] = useState('');
 
-export default function App() {
-  const [etapaAuth, setEtapaAuth] = useState('carregando');
-  const [paginaAtual, setPaginaAtual] = useState('home');
-  const [userEmail, setUserEmail] = useState('');
-  const [userName, setUserName] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const carregarDadosUsuario = async (session) => {
-    if (!session?.user) {
-      setUserEmail('');
-      setUserName('');
-      setEtapaAuth('login');
+  // Carrega do cache local instantaneamente para evitar qualquer atraso ou flash
+  const [customLogo, setCustomLogo] = useState(() => localStorage.getItem('app_logo_cache') || null);
+  const [customBanner, setCustomBanner] = useState(() => localStorage.getItem('app_banner_cache') || null);
+
+  useEffect(() => {
+    async function fetchBrandAssets() {
+      try {
+        const { data, error } = await supabase
+          .from('app_config')
+          .select('key, value');
+
+        if (!error && data) {
+          const logoObj = data.find(item => item.key === 'app_logo');
+          const bannerObj = data.find(item => item.key === 'app_banner');
+
+          if (logoObj && logoObj.value) {
+            setCustomLogo(logoObj.value);
+            localStorage.setItem('app_logo_cache', logoObj.value);
+          }
+          if (bannerObj && bannerObj.value) {
+            setCustomBanner(bannerObj.value);
+            localStorage.setItem('app_banner_cache', bannerObj.value);
+          }
+        }
+      } catch (err) {
+        console.log('Usando cache local');
+      }
+    }
+    fetchBrandAssets();
+  }, []);
+
+  const handleEsqueciSenha = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      alert('Por favor, digite o seu e-mail no campo acima primeiro.');
       return;
     }
 
-    const emailUsuario = session.user.email || '';
-    let nomeUsuario =
-      session.user.user_metadata?.nome ||
-      session.user.user_metadata?.full_name ||
-      session.user.user_metadata?.name ||
-      '';
-
     try {
-      const { data: perfil } = await supabase
-        .from('perfis_usuario')
-        .select('nome')
-        .eq('id', session.user.id)
-        .single();
+      setLoading(true);
+      setError(null);
 
-      if (perfil?.nome) {
-        nomeUsuario = perfil.nome;
-      }
-    } catch (e) {
-      // Se não encontrar na tabela perfis_usuario, segue com o que já tem
-    }
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: window.location.origin,
+      });
 
-    setUserEmail(emailUsuario);
-    if (nomeUsuario) setUserName(nomeUsuario);
+      if (error) throw error;
 
-    // Se acabou de criar a conta, segura na tela Welcome até clicar em continuar
-    if (localStorage.getItem('mostrar_welcome_novo_cadastro') === 'true') {
-      setEtapaAuth('welcome');
-    } else {
-      setEtapaAuth('app');
+      alert('📧 E-mail de recuperação enviado com sucesso! Verifique sua caixa de entrada.');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao enviar e-mail de recuperação: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    let ativo = true;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!ativo) return;
-      carregarDadosUsuario(session);
-    });
+    try {
+      if (isCadastro) {
+        if (senha !== confirmaSenha) {
+          throw new Error("As senhas não coincidem.");
+        }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!ativo) return;
-      if (session) {
-        carregarDadosUsuario(session);
+        const { data, error: authError } = await supabase.auth.signUp({
+          email,
+          password: senha,
+          options: {
+            data: {
+              full_name: nome,
+            },
+          },
+        });
+
+        if (authError) throw authError;
+
+        if (!data.user) {
+          throw new Error("Não foi possível criar a conta. Tente outro e-mail.");
+        }
+
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
+        if (signInError) throw signInError;
+
+        try {
+          await supabase.from('perfis_usuario').upsert({
+            id: signInData.user.id,
+            nome: nome,
+            email: email,
+            conta_excluida: false,
+            updated_at: new Date().toISOString()
+          });
+        } catch (errProfile) {
+          console.log("Aviso ao criar perfil:", errProfile);
+        }
+
+        const userNameFromDb = signInData.user.user_metadata?.full_name || nome || email.split('@')[0];
+        onLoginSuccess(email, userNameFromDb, true);
+
       } else {
-        setUserEmail('');
-        setUserName('');
-        setEtapaAuth('login');
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
+        if (signInError) throw signInError;
+
+        try {
+          const { data: perfil } = await supabase
+            .from('perfis_usuario')
+            .select('conta_excluida')
+            .eq('id', data.user.id)
+            .maybeSingle();
+
+          if (perfil && perfil.conta_excluida === true) {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            throw new Error("Esta conta foi excluída permanentemente. Crie uma nova conta para acessar.");
+          }
+        } catch (errPerfil) {
+          if (errPerfil.message.includes("excluída permanentemente")) {
+            throw errPerfil;
+          }
+        }
+
+        const userNameFromDb = data.user.user_metadata?.full_name || email.split('@')[0];
+        onLoginSuccess(email, userNameFromDb, false);
       }
-    });
 
-    return () => {
-      ativo = false;
-      subscription.unsubscribe();
-    };
-  }, []);
+    } catch (err) {
+      console.error(err);
+      let message = err.message;
 
-  const handleLoginSuccess = (emailDigitado, nomeDigitado, isCadastro) => {
-    if (emailDigitado) setUserEmail(emailDigitado);
-    if (nomeDigitado) setUserName(nomeDigitado);
+      if (message.includes("Invalid login credentials")) {
+        message = "E-mail ou senha incorretos.";
+      } else if (message.includes("Email not confirmed")) {
+        message = "Verifique seu e-mail para confirmar a conta antes de entrar.";
+      } else if (message.includes("User already registered")) {
+        message = "Este e-mail já possui uma conta. Tente entrar.";
+      }
 
-    if (isCadastro || localStorage.getItem('mostrar_welcome_novo_cadastro') === 'true') {
-      localStorage.setItem('mostrar_welcome_novo_cadastro', 'true');
-      setEtapaAuth('welcome');
-    } else {
-      setEtapaAuth('app');
-      setPaginaAtual('home');
+      setError(message);
+    } finally {
+      setLoading(false);
     }
   };
-
-  const handleWelcomeContinue = () => {
-    localStorage.removeItem('mostrar_welcome_novo_cadastro');
-    setEtapaAuth('app');
-    setPaginaAtual('home');
-  };
-
-  const handleLogout = async () => {
-    localStorage.removeItem('mostrar_welcome_novo_cadastro');
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {}
-    setUserEmail('');
-    setUserName('');
-    setPaginaAtual('home');
-    setEtapaAuth('login');
-  };
-
-  console.log("Etapa Auth:", etapaAuth, "| Página Atual:", paginaAtual, "| Usuário:", userName);
-
-  if (etapaAuth === 'carregando') {
-    return (
-      <div className="w-full min-h-screen bg-slate-950 text-amber-400 font-sans flex justify-center items-center text-sm">
-        Carregando...
-      </div>
-    );
-  }
-
-  if (etapaAuth === 'login') {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
-  }
-
-  if (etapaAuth === 'welcome') {
-    return <Welcome onContinue={handleWelcomeContinue} />;
-  }
 
   return (
-    <div className="w-full min-h-screen bg-slate-950 font-sans flex flex-col justify-center items-center">
-      <div className="w-full flex-1 flex justify-center items-center">
-        {paginaAtual === 'home' && <Home onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+    <div className="min-h-screen bg-[#0E1525] text-white flex flex-col items-center justify-center p-0 sm:p-4 relative overflow-y-auto">
 
-        {/* Repassando o userEmail e userName para o Explorar */}
-        {paginaAtual === 'explorar' && <Explorar onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+      {/* Brilho ambiental sutil */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Repassando o userEmail e userName para a Bíblia */}
-        {paginaAtual === 'biblia' && <Biblia onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+      {/* TELA INTEGRADA DE PONTA A PONTA (ESTILO NATIVO CONTÍNUO) */}
+      <div className="w-full max-w-md min-h-screen sm:min-h-0 bg-[#0E1525] sm:rounded-3xl border-0 sm:border border-slate-800/80 shadow-none sm:shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-md z-10 overflow-hidden my-auto flex flex-col">
 
-        {/* Repassando o userEmail e userName para os Planos de Leitura */}
-        {paginaAtual === 'planos' && <PlanoDeLeitura onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        {/* BANNER DEITADO NO TOPO */}
+        <div className="relative w-full h-36 bg-slate-900 shrink-0">
+          {customBanner && (
+            <img
+              src={customBanner}
+              alt="Banner Conexão Viva"
+              className="w-full h-full object-cover opacity-75"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0E1525] via-transparent to-transparent" />
 
-        {(paginaAtual === 'config' || paginaAtual === 'configuracao') && (
-          <Configuracao
-            onNavigate={setPaginaAtual}
-            userEmail={userEmail}
-            userName={userName}
-            onLogout={handleLogout}
-          />
-        )}
+          {/* Logo da bolinha sobreposta na bordinha do banner */}
+          <div className="absolute -bottom-4 left-6 flex items-end gap-3">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 p-0.5 shadow-xl flex items-center justify-center overflow-hidden border-2 border-[#0E1525]">
+              {customLogo && (
+                <img
+                  src={customLogo}
+                  alt="Logo Conexão Viva"
+                  className="w-full h-full object-cover rounded-2xl"
+                />
+              )}
+            </div>
+          </div>
+        </div>
 
-        {paginaAtual === 'admin' && <PainelAdministrativo onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-        {paginaAtual === 'jejum' && <JejumDaniel onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-        {paginaAtual === 'rotina' && <RotinaPrimeiroAmor onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-        {paginaAtual === 'desafioceleste' && <DesafioCeleste onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
-        {paginaAtual === 'cantor-cristao' && <CantorCristao onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+        <div className="p-6 pt-7 flex-1 flex flex-col justify-between">
+          <div>
+            {/* TÍTULO E SUBTÍTULO */}
+            <div className="mb-5">
+              <h1 className="text-xl font-serif font-semibold text-white">Conexão Viva</h1>
+              <p className="text-amber-400 text-[11px] font-bold tracking-widest uppercase mt-0.5">VIVER COM PROPÓSITO</p>
+            </div>
 
-        {/* ⬇️ ROTAS DA HARPA CRISTÃ (Mantive como estava antes) */}
-        {(paginaAtual === 'HarpaCrista' || paginaAtual === 'harpa') && (
-          <HarpaCrista onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
-        )}
+            {/* ABAS FLUIDAS: ENTRAR / CRIAR CONTA */}
+            <div className="flex bg-[#070B14] p-1.5 rounded-2xl mb-4 border border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => { setIsCadastro(false); setError(null); }}
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                  !isCadastro
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Entrar
+              </button>
 
-        {/* ⬇️ NOVAS ROTAS ADICIONADAS AQUI */}
-        {/* Rota para Fábulas */}
-        {paginaAtual === 'fabulas' && (
-          <Fabulas onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
-        )}
+              <button
+                type="button"
+                onClick={() => { setIsCadastro(true); setError(null); }}
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                  isCadastro
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Criar Conta
+              </button>
+            </div>
 
-        {/* Rota para Playlists de Música */}
-        {paginaAtual === 'player-musica' && (
-          <PlaylistsMusica onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />
-        )}
+            {error && (
+              <div className="mb-4 p-3 bg-red-950/60 border border-red-800 text-red-300 text-xs rounded-xl text-center">
+                ❌ {error}
+              </div>
+            )}
 
-        {/* Lista de todas as páginas válidas para evitar fallback para Home se estiver em uma delas */}
-        {![
-          'home', 'explorar', 'biblia', 'planos', 'config', 'configuracao',
-          'admin', 'jejum', 'rotina', 'desafioceleste', 'cantor-cristao',
-          'HarpaCrista', 'harpa',
-          'fabulas',       // <-- Adicionado aqui
-          'player-musica'  // <-- Adicionado aqui
-        ].includes(paginaAtual) && <Home onNavigate={setPaginaAtual} userEmail={userEmail} userName={userName} />}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              {isCadastro && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Nome Completo</label>
+                  <input
+                    type="text"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    placeholder="Seu nome completo"
+                    required={isCadastro}
+                    disabled={loading}
+                    className="w-full bg-[#070B14] border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/80"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">E-mail</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                  disabled={loading}
+                  className="w-full bg-[#070B14] border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/80"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-medium text-slate-300">
+                    {isCadastro ? 'Criar Senha' : 'Senha'}
+                  </label>
+                  {!isCadastro && (
+                    <button
+                      type="button"
+                      onClick={handleEsqueciSenha}
+                      className="text-xs text-amber-400 hover:underline bg-transparent border-0 cursor-pointer p-0"
+                    >
+                      Esqueci minha senha
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    type={mostrarSenha ? "text" : "password"}
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    disabled={loading}
+                    className="w-full bg-[#070B14] border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/80 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarSenha(!mostrarSenha)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 cursor-pointer text-xs"
+                  >
+                    {mostrarSenha ? '🙈' : '👁️'}
+                  </button>
+                </div>
+              </div>
+
+              {isCadastro && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Confirmar Senha</label>
+                  <input
+                    type="text"
+                    value={confirmaSenha}
+                    onChange={(e) => setConfirmaSenha(e.target.value)}
+                    placeholder="Repita a senha"
+                    required={isCadastro}
+                    minLength={6}
+                    disabled={loading}
+                    className="w-full bg-[#070B14] border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/80"
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-3.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-300 hover:from-amber-400 hover:to-amber-200 text-slate-950 font-bold py-3 px-4 rounded-xl transition-all shadow-[0_5px_20px_rgba(245,158,11,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loading ? 'Processando...' : (isCadastro ? 'Criar Conta e Continuar' : 'Entrar na Conta')}
+              </button>
+            </form>
+          </div>
+
+          {/* RODAPÉ DO CONTEÚDO */}
+          <div className="mt-6 pt-4 border-t border-slate-800/80 text-center">
+            <p className="font-serif italic text-slate-300 text-xs leading-relaxed">
+              “Acheguem-se a Deus, e Ele se achegará a vocês.”
+            </p>
+            <p className="text-[10px] font-bold tracking-[0.2em] text-amber-400 uppercase mt-1">
+              TIAGO 4:8
+            </p>
+            <div className="mt-3">
+              <p className="text-[10px] text-slate-500">
+                🔒 Ambiente seguro e criptografado • Supabase
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
