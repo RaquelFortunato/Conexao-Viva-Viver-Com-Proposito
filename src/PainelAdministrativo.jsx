@@ -196,7 +196,7 @@ export default function Admin({ onNavigate }) {
         const fileName = `reflexao_${Date.now()}_${nomeLimpo}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('vídeos')
+          .from('videos')
           .upload(fileName, videoReflexaoArquivo, {
             contentType: videoReflexaoArquivo.type || `video/${extensao}`,
             upsert: false
@@ -204,7 +204,7 @@ export default function Admin({ onNavigate }) {
         if (uploadError) throw uploadError;
 
         const { data: publicUrlData } = supabase.storage
-          .from('vídeos')
+          .from('videos')
           .getPublicUrl(fileName);
 
         const videoUrl = publicUrlData?.publicUrl;
