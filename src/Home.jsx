@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './data/supabase'; 
+import { supabase } from './data/supabase';
 
 function getYouTubeEmbedUrl(url) {
   if (!url) return '';
@@ -88,15 +88,18 @@ export default function Home({ onNavigate, userName }) {
     carregarDadosHome();
   }, []);
 
+  const reflexaoEhUpload = reflexaoHoje?.tipo_video === 'upload';
+  const reflexaoEmbedUrl = !reflexaoEhUpload ? getYouTubeEmbedUrl(reflexaoHoje?.link) : '';
+
   return (
     <div className="min-h-screen bg-[#070B14] text-white p-4 py-8 flex flex-col items-center relative overflow-y-auto">
-      
+
       {/* Brilho ambiental sutil ao fundo */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* TELA PRINCIPAL ARREDONDADA E UNIFICADA (ESTILO GOOGLE SITES) */}
       <div className="w-full max-w-md bg-[#0E1525] border border-slate-800/80 p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-md space-y-6 z-10 my-auto">
-        
+
         {/* TOPO: PERFIL E SAUDAÇÃO */}
         <div className="flex items-center justify-between bg-[#070B14] border border-slate-800/60 p-4 rounded-2xl shadow-inner">
           <div>
@@ -148,9 +151,17 @@ export default function Home({ onNavigate, userName }) {
           <h3 className="text-xs font-bold text-amber-400 tracking-wider px-1">REFLEXÃO DO DIA</h3>
           <div className="flex justify-center">
             <div className="w-56 h-96 rounded-2xl overflow-hidden bg-black shadow-xl flex items-center justify-center border border-slate-800/60">
-              {reflexaoHoje && getYouTubeEmbedUrl(reflexaoHoje.link) ? (
+              {reflexaoHoje && reflexaoEhUpload && reflexaoHoje.link ? (
+                <video
+                  src={reflexaoHoje.link}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-contain bg-black"
+                />
+              ) : reflexaoHoje && reflexaoEmbedUrl ? (
                 <iframe
-                  src={getYouTubeEmbedUrl(reflexaoHoje.link)}
+                  src={reflexaoEmbedUrl}
                   title="Reflexão do Dia"
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

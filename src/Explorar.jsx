@@ -727,14 +727,25 @@ export default function Explorar({ onNavigate, userName }) {
                           }
                           className="rounded-2xl overflow-hidden border border-slate-800 bg-black shadow-lg max-w-full"
                         >
-                          <iframe
-                            style={{ width: '100%', height: '100%' }}
-                            className="border-0 block"
-                            src={getYouTubeEmbedUrl(item.link)}
-                            title="Vídeo"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          ></iframe>
+                          {tipoVisualizacao === 'videos_reflexao' && item.tipo_video === 'upload' ? (
+                            <video
+                              src={item.link}
+                              controls
+                              playsInline
+                              preload="metadata"
+                              style={{ width: '100%', height: '100%' }}
+                              className="object-contain bg-black block"
+                            />
+                          ) : (
+                            <iframe
+                              style={{ width: '100%', height: '100%' }}
+                              className="border-0 block"
+                              src={getYouTubeEmbedUrl(item.link)}
+                              title="Vídeo"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          )}
                         </div>
                       </div>
                     )}
