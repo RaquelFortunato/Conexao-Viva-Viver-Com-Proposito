@@ -6,13 +6,17 @@ export default function Admin({ onNavigate }) {
   const [fabula, setFabula] = useState('');
   const [filtroMensagens, setFiltroMensagens] = useState('nao_lidas');
 
-  // Estados para armazenar as URLs do YouTube dos vídeos diários
+  // Estados para armazenar as URLs do YouTube e arquivos de galeria dos vídeos diários
   const [videoReflexao, setVideoReflexao] = useState('');
   const [videoReflexaoArquivo, setVideoReflexaoArquivo] = useState(null);
   const [enviandoReflexao, setEnviandoReflexao] = useState(false);
 
   const [videoMensagem, setVideoMensagem] = useState('');
+
   const [videoOracao, setVideoOracao] = useState('');
+  const [videoOracaoArquivo, setVideoOracaoArquivo] = useState(null);
+  const [enviandoOracao, setEnviandoOracao] = useState(false);
+
   const [videoLouvor, setVideoLouvor] = useState('');
 
   const [audioPlaylist, setAudioPlaylist] = useState(null);
@@ -170,7 +174,7 @@ export default function Admin({ onNavigate }) {
     }
     try {
       const linkFormatado = urlVideo.trim();
-      const payload = tabelaDia === 'reflexao_dia'
+      const payload = (tabelaDia === 'reflexao_dia' || tabelaDia === 'oracao_dia')
         ? { link: linkFormatado, tipo_video: 'youtube', created_at: new Date().toISOString() }
         : { link: linkFormatado, created_at: new Date().toISOString() };
 
@@ -185,44 +189,54 @@ export default function Admin({ onNavigate }) {
     }
   };
 
+  const enviarArquivoVideoParaTabela = async (arquivo, tabelaDia, prefixoArquivo, mensagemSucesso, mensagemErro) => {
+    const extensao = arquivo.name && arquivo.name.includes('.')
+      ? arquivo.name.split('.').pop().toLowerCase()
+      : 'mp4';
+    const nomeLimpo = (arquivo.name || prefixoArquivo).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fileName = `${prefixoArquivo}_${Date.now()}_${nomeLimpo}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('videos')
+      .upload(fileName, arquivo, {
+        contentType: arquivo.type || `video/${extensao}`,
+        upsert: false
+      });
+    if (uploadError) throw uploadError;
+
+    const { data: publicUrlData } = supabase.storage
+      .from('videos')
+      .getPublicUrl(fileName);
+
+    const videoUrl = publicUrlData?.publicUrl;
+    if (!videoUrl) throw new Error('Não foi possível obter o link público do vídeo.');
+
+    const { error: dbError } = await supabase.from(tabelaDia).insert([
+      {
+        link: videoUrl,
+        tipo_video: 'upload',
+        created_at: new Date().toISOString()
+      }
+    ]);
+    if (dbError) throw dbError;
+
+    alert(mensagemSucesso);
+    await carregarAcervosAdmin();
+  };
+
   const handlePublicarReflexao = async () => {
     if (videoReflexaoArquivo) {
       setEnviandoReflexao(true);
       try {
-        const extensao = videoReflexaoArquivo.name && videoReflexaoArquivo.name.includes('.')
-          ? videoReflexaoArquivo.name.split('.').pop().toLowerCase()
-          : 'mp4';
-        const nomeLimpo = (videoReflexaoArquivo.name || 'reflexao').replace(/[^a-zA-Z0-9._-]/g, '_');
-        const fileName = `reflexao_${Date.now()}_${nomeLimpo}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('videos')
-          .upload(fileName, videoReflexaoArquivo, {
-            contentType: videoReflexaoArquivo.type || `video/${extensao}`,
-            upsert: false
-          });
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabase.storage
-          .from('videos')
-          .getPublicUrl(fileName);
-
-        const videoUrl = publicUrlData?.publicUrl;
-        if (!videoUrl) throw new Error('Não foi possível obter o link público do vídeo.');
-
-        const { error: dbError } = await supabase.from('reflexao_dia').insert([
-          {
-            link: videoUrl,
-            tipo_video: 'upload',
-            created_at: new Date().toISOString()
-          }
-        ]);
-        if (dbError) throw dbError;
-
-        alert('Vídeo de reflexão enviado da galeria e publicado com sucesso!');
+        await enviarArquivoVideoParaTabela(
+          videoReflexaoArquivo,
+          'reflexao_dia',
+          'reflexao',
+          'Vídeo de reflexão enviado da galeria e publicado com sucesso!',
+          'Erro ao enviar vídeo de reflexão: '
+        );
         setVideoReflexaoArquivo(null);
         setVideoReflexao('');
-        carregarAcervosAdmin();
       } catch (err) {
         console.error(err);
         alert('Erro ao enviar vídeo de reflexão: ' + err.message);
@@ -242,6 +256,27 @@ export default function Admin({ onNavigate }) {
   };
 
   const handlePublicarOracao = async () => {
+    if (videoOracaoArquivo) {
+      setEnviandoOracao(true);
+      try {
+        await enviarArquivoVideoParaTabela(
+          videoOracaoArquivo,
+          'oracao_dia',
+          'oracao',
+          'Vídeo de oração enviado da galeria e publicado com sucesso!',
+          'Erro ao enviar vídeo de oração: '
+        );
+        setVideoOracaoArquivo(null);
+        setVideoOracao('');
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao enviar vídeo de oração: ' + err.message);
+      } finally {
+        setEnviandoOracao(false);
+      }
+      return;
+    }
+
     await handlePublicarVideoGenerico(videoOracao, 'oracao_dia');
     setVideoOracao('');
   };
@@ -396,9 +431,9 @@ export default function Admin({ onNavigate }) {
           <div className="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl shadow-inner space-y-2 min-w-0">
             <div className="flex justify-between items-center gap-2 min-w-0">
               <h3 className="text-xs font-bold text-white flex items-center gap-1.5 min-w-0 truncate"><span>🙏 Oração do Dia</span></h3>
-              <span className="text-[10px] text-amber-400 font-medium shrink-0">Link do YouTube</span>
+              <span className="text-[10px] text-amber-400 font-medium shrink-0">YouTube ou Galeria</span>
             </div>
-            <p className="text-[10px] text-slate-400">Cole o link do vídeo do YouTube</p>
+            <p className="text-[10px] text-slate-400">Cole o link do YouTube ou escolha um vídeo da galeria</p>
             <input
               type="url"
               value={videoOracao}
@@ -406,12 +441,34 @@ export default function Admin({ onNavigate }) {
               placeholder="https://www.youtube.com/watch?v=..."
               className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
             />
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-amber-400/60 rounded-xl p-2.5 bg-slate-900/50 cursor-pointer transition text-center min-w-0">
+              <span className="text-amber-400 text-sm mb-0.5">🎬</span>
+              <span className="text-[11px] font-semibold text-white break-all line-clamp-2">
+                {videoOracaoArquivo ? videoOracaoArquivo.name : 'Ou toque para escolher vídeo da galeria'}
+              </span>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => setVideoOracaoArquivo(e.target.files?.[0] || null)}
+                className="hidden"
+              />
+            </label>
+            {videoOracaoArquivo && (
+              <button
+                type="button"
+                onClick={() => setVideoOracaoArquivo(null)}
+                className="w-full py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl font-bold text-[10px] transition cursor-pointer"
+              >
+                Remover vídeo selecionado
+              </button>
+            )}
             <button
               type="button"
+              disabled={enviandoOracao}
               onClick={handlePublicarOracao}
-              className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
+              className="w-full py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-60 text-slate-950 rounded-xl font-bold text-xs transition cursor-pointer shadow"
             >
-              Publicar Oração
+              {enviandoOracao ? 'Enviando Oração...' : 'Publicar Oração'}
             </button>
           </div>
 
@@ -562,7 +619,9 @@ export default function Admin({ onNavigate }) {
               ) : (
                 listaOracoes.map((item) => (
                   <div key={item.id} className="flex items-center justify-between gap-2 bg-slate-900 p-2 rounded-xl text-[10px] min-w-0">
-                    <span className="truncate flex-1 min-w-0 text-slate-300">{item.link || 'Sem link'}</span>
+                    <span className="truncate flex-1 min-w-0 text-slate-300">
+                      [{item.tipo_video === 'upload' ? 'Upload' : 'YouTube'}] {item.link || 'Sem link'}
+                    </span>
                     <button
                       type="button"
                       onClick={() => handleExcluirItem('oracao_dia', item.id)}

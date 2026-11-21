@@ -91,6 +91,9 @@ export default function Home({ onNavigate, userName }) {
   const reflexaoEhUpload = reflexaoHoje?.tipo_video === 'upload';
   const reflexaoEmbedUrl = !reflexaoEhUpload ? getYouTubeEmbedUrl(reflexaoHoje?.link) : '';
 
+  const oracaoEhUpload = oracaoHoje?.tipo_video === 'upload';
+  const oracaoEmbedUrl = !oracaoEhUpload ? getYouTubeEmbedUrl(oracaoHoje?.link) : '';
+
   return (
     <div className="min-h-screen bg-[#070B14] text-white p-4 py-8 flex flex-col items-center relative overflow-y-auto">
 
@@ -183,9 +186,17 @@ export default function Home({ onNavigate, userName }) {
           <h3 className="text-xs font-bold text-amber-400 tracking-wider px-1">ORAÇÃO DO DIA</h3>
           <div className="flex justify-center">
             <div className="w-56 h-96 rounded-2xl overflow-hidden bg-black shadow-xl flex items-center justify-center border border-slate-800/60">
-              {oracaoHoje && getYouTubeEmbedUrl(oracaoHoje.link) ? (
+              {oracaoHoje && oracaoEhUpload && oracaoHoje.link ? (
+                <video
+                  src={oracaoHoje.link}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-contain bg-black"
+                />
+              ) : oracaoHoje && oracaoEmbedUrl ? (
                 <iframe
-                  src={getYouTubeEmbedUrl(oracaoHoje.link)}
+                  src={oracaoEmbedUrl}
                   title="Oração do Dia"
                   className="w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
